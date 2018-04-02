@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--指定点层-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/mLocationX"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="指定点X坐标"
+            android:text="0.59" />
+
+        <EditText
+            android:id="@+id/mLocationY"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="指定点Y坐标"
+            android:text="-0.92" />
+
+        <EditText
+            android:id="@+id/mLocationZ"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="指定点Z坐标"
+            android:text="0.0" />
+    </LinearLayout>
+
+    <!--角度值-->
+    <EditText
+        android:id="@+id/mLocationYaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="指定点角度值"
+        android:text="0.3" />
+
+    <!--连接机器人-->
+    <Button
+        android:id="@+id/mConnectBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="点我连接机器人" />
+
+    <!--行走至指定点-->
+    <Button
+        android:id="@+id/mGo2LocationBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="点我行走至指定点" />
+    <!--分割线-->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="下面展示机器人状态--->" />
+    <!--机器人连接状态-->
+    <TextView
+        android:id="@+id/mRobotStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center" />
+
+</LinearLayout>
