@@ -199,7 +199,7 @@ public final class IBenMoveSDK {
     /**
      * 回充电桩
      */
-/*    public void goHome(MoveCallBack callBack) {
+    public void goHome(MoveCallBack callBack) {
         if (mRobotPlatform != null) {
             // 停止当前所有动作
             cancelAllActions();
@@ -209,14 +209,14 @@ public final class IBenMoveSDK {
                 // 让机器人回充电桩
                 mLocationAction = mRobotPlatform.goHome();
                 // 创建回桩状态定时器
-                startLocationTimer(callBack);
+                startLocationTimer(-99,callBack);
             } catch (Throwable throwable) {
                 onRequestError();
             }
         } else {
             onRequestError();
         }
-    }*/
+    }
 
     /**
      * 请求失败
@@ -1134,9 +1134,12 @@ public final class IBenMoveSDK {
             if (currentStatus.equals(ActionStatus.FINISHED)
                     || currentStatus.equals(ActionStatus.STOPPED)
                     || currentStatus.equals(ActionStatus.ERROR)) {
-                // 回调状态值
-                //callBack.onStateChange(currentStatus);
-                rotateto(yaw,callBack);
+                if(yaw == -99){
+                    // 回调状态值
+                    callBack.onStateChange(currentStatus);
+                }else{
+                    rotateto(yaw,callBack);
+                }
                 // 停止定位计时器
                 cancelLocationTimer();
             }
