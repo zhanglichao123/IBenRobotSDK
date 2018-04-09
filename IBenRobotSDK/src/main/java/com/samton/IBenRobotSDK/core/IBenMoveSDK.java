@@ -753,8 +753,10 @@ public final class IBenMoveSDK {
                             }
                             MoveOption option = new MoveOption();
                             option.setSpeed(0.4);
-                            option.setWithYaw(true);
-                            option.setYaw(yaw);
+/*                            option.setWithYaw(true);
+                            option.setYaw(yaw);*/
+                            option.setPrecise(true);
+                            option.setMilestone(true);
                             // 执行行走指令
                             mLocationAction = mRobotPlatform.moveTo(location, option);
                             e.onNext(true);
