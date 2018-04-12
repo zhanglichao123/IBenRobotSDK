@@ -3,6 +3,7 @@ package com.samton.IBenRobotSDK.core;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
@@ -14,6 +15,14 @@ import com.slamtec.slamware.action.ActionStatus;
 import com.slamtec.slamware.action.IAction;
 import com.slamtec.slamware.action.IMoveAction;
 import com.slamtec.slamware.action.MoveDirection;
+import com.slamtec.slamware.exceptions.ConnectionFailException;
+import com.slamtec.slamware.exceptions.ConnectionTimeOutException;
+import com.slamtec.slamware.exceptions.InvalidArgumentException;
+import com.slamtec.slamware.exceptions.OperationFailException;
+import com.slamtec.slamware.exceptions.ParseInvalidException;
+import com.slamtec.slamware.exceptions.RequestFailException;
+import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
+import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.geometry.Size;
 import com.slamtec.slamware.robot.HealthInfo;
@@ -664,7 +673,7 @@ public final class IBenMoveSDK {
      * @param yaw      角度
      * @param callBack 回调
      */
-/*    public void go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
+    public void old_go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
         if (mRobotPlatform != null) {
             // 首先停止所有动作
             cancelAllActions();
@@ -682,11 +691,10 @@ public final class IBenMoveSDK {
                                 SystemClock.sleep(500);
                             }
                             MoveOption option = new MoveOption();
-                            option.setSpeed(0.4);
+                            option.setSpeedRatio(0.4);
                             option.setWithYaw(true);
-                            option.setYaw(yaw);
                             // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option);
+                            mLocationAction = mRobotPlatform.moveTo(location, option,yaw);
                             e.onNext(true);
                         }
                     } catch (Throwable throwable) {
@@ -708,7 +716,7 @@ public final class IBenMoveSDK {
                                 onRequestError();
                             } else {
                                 // 创建定点回调计时器
-                                startLocationTimer(callBack);
+                                startLocationTimer(yaw,callBack);
                             }
                         }
 
@@ -725,7 +733,7 @@ public final class IBenMoveSDK {
         } else {
             onRequestError();
         }
-    }*/
+    }
 
     /**
      * 行走到指定点
@@ -752,17 +760,20 @@ public final class IBenMoveSDK {
                                 SystemClock.sleep(500);
                             }
                             MoveOption option = new MoveOption();
-                            option.setSpeed(0.4);
+                            option.setSpeedRatio(0.4);
+                            option.setWithYaw(false);
 /*                            option.setWithYaw(true);
                             option.setYaw(yaw);*/
                             option.setPrecise(true);
                             option.setMilestone(true);
                             // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option);
+                            mLocationAction = mRobotPlatform.moveTo(location, option,yaw);
+                            Log.i("123456789","go2Location");
                             e.onNext(true);
                         }
                     } catch (Throwable throwable) {
                         e.onNext(false);
+                        Log.i("123456789","throwable:" + throwable.getMessage());
                     }
                 }
             })
@@ -776,6 +787,7 @@ public final class IBenMoveSDK {
 
                         @Override
                         public void onNext(@NonNull Boolean aBoolean) {
+                            Log.i("123456789","onNext:" + aBoolean);
                             if (!aBoolean) {
                                 onRequestError();
                             } else {
@@ -876,9 +888,13 @@ public final class IBenMoveSDK {
     public boolean isHome() {
         boolean isHome = false;
         if (mRobotPlatform != null) {
-            boolean isCharging = mRobotPlatform.getPowerStatus().isCharging();
-            boolean isDcConnect = mRobotPlatform.getPowerStatus().isDCConnected();
-            isHome = isCharging && !isDcConnect;
+            try {
+                boolean isCharging = mRobotPlatform.getPowerStatus().isCharging();
+                boolean isDcConnect = mRobotPlatform.getPowerStatus().isDCConnected();
+                isHome = isCharging && !isDcConnect;
+            }  catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             onRequestError();
         }
@@ -918,6 +934,7 @@ public final class IBenMoveSDK {
                         oos.writeLong(map.getTimestamp());
                         // 写入真实地图对象
                         oos.writeObject(map.getData());
+                       // oos.write(map.getData());
                         // 关闭流并且刷新操作
                         oos.close();
                         // 生成缩略图
@@ -1132,13 +1149,26 @@ public final class IBenMoveSDK {
      */
     private void checkStatus(final float yaw, final MoveCallBack callBack) {
         if (mLocationAction != null) {
-            ActionStatus currentStatus = mLocationAction.getStatus();
-            if (currentStatus.equals(ActionStatus.FINISHED)
-                    || currentStatus.equals(ActionStatus.STOPPED)
-                    || currentStatus.equals(ActionStatus.ERROR)) {
+            try {
+                ActionStatus currentStatus = mLocationAction.getStatus();
+                Log.i("123456789","checkStatus:" + currentStatus + ":" + yaw);
+                if (currentStatus.equals(ActionStatus.FINISHED)
+                        || currentStatus.equals(ActionStatus.STOPPED)
+                        || currentStatus.equals(ActionStatus.ERROR)) {
+                    if(yaw == -99){
+                        // 回调状态值
+                        callBack.onStateChange(currentStatus);
+                    }else{
+                        rotateto(yaw,callBack);
+                    }
+                    // 停止定位计时器
+                    cancelLocationTimer();
+                }
+            }  catch (Exception e) {
+                e.printStackTrace();
                 if(yaw == -99){
                     // 回调状态值
-                    callBack.onStateChange(currentStatus);
+                    callBack.onStateChange(ActionStatus.ERROR);
                 }else{
                     rotateto(yaw,callBack);
                 }
@@ -1157,12 +1187,14 @@ public final class IBenMoveSDK {
      */
     public void rotateto(float yaw,final MoveCallBack callBack) {
         final Rotation rotation = new Rotation(yaw);
+        Log.i("123456789","rotateto:"  + yaw);
         if (mRobotPlatform != null) {
             Observable.create(new ObservableOnSubscribe<Boolean>() {
                 @Override
                 public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
                     try {
                         moveAction =  mRobotPlatform.rotateTo(rotation);
+                        Log.i("123456789","rotateto:end");
                         try {
                             Thread.sleep(4000);
                         } catch (InterruptedException e1) {
@@ -1176,19 +1208,21 @@ public final class IBenMoveSDK {
             }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
                 @Override
                 public void accept(@NonNull Boolean aBoolean) throws Exception {
+                    Log.i("123456789","rotateto:accept:" + aBoolean);
                     if (!aBoolean) {
                         onRequestError();
                     }else{
                         while (true) {
                             if (moveAction != null) {
                                 ActionStatus status = moveAction.getStatus();
+                                Log.i("987654321","rotateto:moveAction :" + status);
                                 if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
                                         || status.equals(ActionStatus.ERROR)) {
                                     callBack.onStateChange(status);
                                     break;
                                 }
-                                break;
                             } else {
+                                Log.i("123456789","rotateto:moveAction is null");
                                 break;
                             }
                         }
@@ -1198,10 +1232,12 @@ public final class IBenMoveSDK {
                 @Override
                 public void accept(@NonNull Throwable throwable) throws Exception {
                     onRequestError();
+                    Log.i("123456789","Consumer:error");
                 }
             });
         } else {
             onRequestError();
+            Log.i("123456789","rotateto:error");
         }
     }
     /**
@@ -1221,7 +1257,25 @@ public final class IBenMoveSDK {
             mMoveTask = new TimerTask() {
                 @Override
                 public void run() {
-                    mRobotPlatform.moveBy(direction);
+                    try {
+                        mRobotPlatform.moveBy(direction);
+                    } catch (RequestFailException e) {
+                        e.printStackTrace();
+                    } catch (ConnectionFailException e) {
+                        e.printStackTrace();
+                    } catch (ConnectionTimeOutException e) {
+                        e.printStackTrace();
+                    } catch (UnauthorizedRequestException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedCommandException e) {
+                        e.printStackTrace();
+                    } catch (ParseInvalidException e) {
+                        e.printStackTrace();
+                    } catch (InvalidArgumentException e) {
+                        e.printStackTrace();
+                    } catch (OperationFailException e) {
+                        e.printStackTrace();
+                    }
                 }
             };
         }
