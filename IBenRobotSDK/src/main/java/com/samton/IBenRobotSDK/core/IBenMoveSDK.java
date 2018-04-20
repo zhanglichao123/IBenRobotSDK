@@ -234,7 +234,9 @@ public final class IBenMoveSDK {
         if (isConnected) {
             cancelAllActions();
         }
-        mCallBack.onConnectFailed();
+        if(null != mCallBack){
+            mCallBack.onConnectFailed();
+        }
     }
 
     /**

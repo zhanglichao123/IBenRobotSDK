@@ -7,7 +7,11 @@ import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
 import com.samton.IBenRobotSDK.net.HttpRequest;
 import com.samton.IBenRobotSDK.net.HttpUtil;
+import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.SPUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -109,6 +113,9 @@ public final class IBenChatSDK {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         callBack.onFailed(mTag, throwable.getMessage());
+                        LogUtils.d("sdk sendMessage:"  + throwable.getMessage());
+                        throwable.printStackTrace();
+                        callBack.onSuccess(mTag,getDefaultMessageBean());
                     }
                 });
     }
@@ -142,6 +149,9 @@ public final class IBenChatSDK {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         callBack.onFailed(mTag, throwable.getMessage());
+                        LogUtils.d("sdk tag sendMessage:"  + throwable.getMessage());
+                        throwable.printStackTrace();
+                        callBack.onSuccess(mTag,getDefaultMessageBean());
                     }
                 });
     }
@@ -186,7 +196,28 @@ public final class IBenChatSDK {
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         // 失败回调
                         callBack.onFailed(mTag, throwable.getMessage());
+                        LogUtils.d("sdk send2IBen:"  + throwable.getMessage());
+                        throwable.printStackTrace();
+                        callBack.onSuccess(mTag,getDefaultMessageBean());
                     }
                 });
+    }
+
+    /**
+     *  构建 默认的发送消息 请求失败的消息
+     * @return
+     */
+    public MessageBean getDefaultMessageBean(){
+        MessageBean messageBean = new MessageBean();
+        MessageBean.DataBean dataBean = new MessageBean.DataBean();
+        MessageBean.DataBean.AppMessageBean appMessageBean = new MessageBean.DataBean.AppMessageBean();
+        appMessageBean.setAnswerType(0);
+        appMessageBean.setMessage("聪明的小笨没有找到答案，您可以问问别的问题呦");
+        appMessageBean.setIsAnswer(true);
+        List<MessageBean.DataBean.AppMessageBean> list = new ArrayList<>();
+        list.add(appMessageBean);
+        dataBean.setAppMessage(list);
+        messageBean.setData(dataBean);
+        return messageBean;
     }
 }
