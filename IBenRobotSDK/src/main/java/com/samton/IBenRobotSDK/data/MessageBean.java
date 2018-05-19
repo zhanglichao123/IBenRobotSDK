@@ -86,6 +86,23 @@ public final class MessageBean {
             private InformationJsonBean informationJson;
             private boolean isAnswer;
             private String message;
+            private int flowFlag;
+
+            public boolean isAnswer() {
+                return isAnswer;
+            }
+
+            public void setAnswer(boolean answer) {
+                isAnswer = answer;
+            }
+
+            public int getFlowFlag() {
+                return flowFlag;
+            }
+
+            public void setFlowFlag(int flowFlag) {
+                this.flowFlag = flowFlag;
+            }
 
             public int getAnswerType() {
                 return answerType;
