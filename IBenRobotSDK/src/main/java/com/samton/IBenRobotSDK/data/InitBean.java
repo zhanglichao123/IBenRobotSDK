@@ -44,6 +44,25 @@ public final class InitBean {
     private WorkAttendanceBean workAttendance;
     private String voiceTag;
     private List<MapsBean> maps;
+    private String broadcastImg;
+    private String preachImg;
+    private int carouselGroupId;
+
+    public String getBroadcastImg() {
+        return broadcastImg == null ? "" : broadcastImg;
+    }
+
+    public void setBroadcastImg(String broadcastImg) {
+        this.broadcastImg = broadcastImg;
+    }
+
+    public String getPreachImg() {
+        return preachImg == null ? "" : preachImg;
+    }
+
+    public void setPreachImg(String preachImg) {
+        this.preachImg = preachImg;
+    }
 
     public int getCarouselGroupId() {
         return carouselGroupId;
@@ -52,8 +71,6 @@ public final class InitBean {
     public void setCarouselGroupId(int carouselGroupId) {
         this.carouselGroupId = carouselGroupId;
     }
-
-    private int carouselGroupId;
 
     public int getRs() {
         return rs;
@@ -69,27 +86,6 @@ public final class InitBean {
 
     public void setData(DataBean data) {
         this.data = data;
-    }
-
-    public class DataBean {
-        private String errorCode;
-        private String errorMsg;
-
-        public String getErrorCode() {
-            return errorCode;
-        }
-
-        public void setErrorCode(String errorCode) {
-            this.errorCode = errorCode;
-        }
-
-        public String getErrorMsg() {
-            return errorMsg;
-        }
-
-        public void setErrorMsg(String errorMsg) {
-            this.errorMsg = errorMsg;
-        }
     }
 
     public SetBean getSet() {
@@ -1178,6 +1174,27 @@ public final class InitBean {
             public void setBroadcast(String broadcast) {
                 this.broadcast = broadcast;
             }
+        }
+    }
+
+    public class DataBean {
+        private String errorCode;
+        private String errorMsg;
+
+        public String getErrorCode() {
+            return errorCode;
+        }
+
+        public void setErrorCode(String errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public String getErrorMsg() {
+            return errorMsg;
+        }
+
+        public void setErrorMsg(String errorMsg) {
+            this.errorMsg = errorMsg;
         }
     }
 }
