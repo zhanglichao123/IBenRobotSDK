@@ -244,6 +244,24 @@ public final class InitBean {
         private String describe;
         private int state;
         private String mainImg;
+        private int robModelNum;
+        private int flag;
+
+        public int getRobModelNum() {
+            return robModelNum;
+        }
+
+        public void setRobModelNum(int robModelNum) {
+            this.robModelNum = robModelNum;
+        }
+
+        public int getFlag() {
+            return flag;
+        }
+
+        public void setFlag(int flag) {
+            this.flag = flag;
+        }
 
         public int getBroadcastId() {
             return broadcastId;
