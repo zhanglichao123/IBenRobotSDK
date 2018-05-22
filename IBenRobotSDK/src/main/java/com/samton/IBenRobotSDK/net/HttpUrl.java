@@ -14,7 +14,7 @@ public final class HttpUrl {
     /**
      * 是否为测试环境
      */
-    private static final boolean isTest = true;
+    private static final boolean isTest = false;
     /**
      * 服务器地址
      * 正式地址 http://114.55.111.3/
@@ -51,5 +51,5 @@ public final class HttpUrl {
      * 正式地址 resources/views/show.html?content=
      * 测试地址 XiaoBenManager/resources/views/show.html?content=
      */
-    public final static String RICH_HEADER = isTest ?"resources/views/show.html?content=":"resources/views/show.html?content=";
+    public final static String RICH_HEADER = BASE_URL + (isTest ?"resources/views/show.html?content=":"resources/views/show.html?content=");
 }

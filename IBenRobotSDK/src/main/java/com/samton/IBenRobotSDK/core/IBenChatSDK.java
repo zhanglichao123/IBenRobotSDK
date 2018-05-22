@@ -212,7 +212,7 @@ public final class IBenChatSDK {
         MessageBean.DataBean dataBean = new MessageBean.DataBean();
         MessageBean.DataBean.AppMessageBean appMessageBean = new MessageBean.DataBean.AppMessageBean();
         appMessageBean.setAnswerType(0);
-        appMessageBean.setMessage("聪明的小笨没有找到答案，您可以问问别的问题呦");
+        appMessageBean.setMessage("我没有找到答案，您可以问问别的问题呦");
         appMessageBean.setIsAnswer(true);
         List<MessageBean.DataBean.AppMessageBean> list = new ArrayList<>();
         list.add(appMessageBean);

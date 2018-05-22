@@ -25,6 +25,7 @@ import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
 import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.geometry.Size;
+import com.slamtec.slamware.robot.DockingStatus;
 import com.slamtec.slamware.robot.HealthInfo;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Map;
@@ -32,6 +33,7 @@ import com.slamtec.slamware.robot.MapKind;
 import com.slamtec.slamware.robot.MapType;
 import com.slamtec.slamware.robot.MoveOption;
 import com.slamtec.slamware.robot.Pose;
+import com.slamtec.slamware.robot.PowerStatus;
 import com.slamtec.slamware.robot.Rotation;
 
 import org.json.JSONObject;
@@ -887,7 +889,7 @@ public final class IBenMoveSDK {
      *
      * @return 是否在无线充电状态
      */
-    public boolean isHome() {
+/*    public boolean isHome() {
         boolean isHome = false;
         if (mRobotPlatform != null) {
             try {
@@ -901,8 +903,18 @@ public final class IBenMoveSDK {
             onRequestError();
         }
         return isHome;
+    }*/
+    public boolean isHome() {
+        boolean dockingStatusValue = false;
+        try {
+            PowerStatus status = mRobotPlatform.getPowerStatus();
+            DockingStatus dockingStatus = status.getDockingStatus();
+            dockingStatusValue = dockingStatus == DockingStatus.OnDock;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dockingStatusValue;
     }
-
     /**
      * 保存地图
      *
@@ -1154,26 +1166,30 @@ public final class IBenMoveSDK {
             try {
                 ActionStatus currentStatus = mLocationAction.getStatus();
                 Log.i("123456789","checkStatus:" + currentStatus + ":" + yaw);
-                if (currentStatus.equals(ActionStatus.FINISHED)
-                        || currentStatus.equals(ActionStatus.STOPPED)
+                if (currentStatus.equals(ActionStatus.FINISHED) || currentStatus.equals(ActionStatus.STOPPED)
                         || currentStatus.equals(ActionStatus.ERROR)) {
                     if(yaw == -99){
                         // 回调状态值
                         callBack.onStateChange(currentStatus);
                     }else{
-                        rotateto(yaw,callBack);
+                        if(currentStatus.equals(ActionStatus.FINISHED)){
+                            rotateto(yaw,callBack);
+                        }else{
+                            callBack.onStateChange(currentStatus);
+                        }
                     }
                     // 停止定位计时器
                     cancelLocationTimer();
                 }
             }  catch (Exception e) {
                 e.printStackTrace();
-                if(yaw == -99){
+/*                if(yaw == -99){
                     // 回调状态值
                     callBack.onStateChange(ActionStatus.ERROR);
                 }else{
                     rotateto(yaw,callBack);
-                }
+                }*/
+                 callBack.onStateChange(ActionStatus.ERROR);
                 // 停止定位计时器
                 cancelLocationTimer();
             }

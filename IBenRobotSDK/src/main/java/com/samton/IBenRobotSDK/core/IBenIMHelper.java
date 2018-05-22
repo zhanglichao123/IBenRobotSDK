@@ -2,6 +2,7 @@ package com.samton.IBenRobotSDK.core;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.samton.IBenRobotSDK.data.MessageBean;
@@ -172,7 +173,9 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener {
                 if (type == ECMessage.Type.TXT) {
                     // 在这里处理文本消息
                     ECTextMessageBody textMessageBody = (ECTextMessageBody) msg.getBody();
-                    mCallBack.onSuccess(mTag, new Gson().fromJson(textMessageBody.getMessage(), MessageBean.class));
+                    String result = textMessageBody.getMessage();
+                    Log.i("OnReceivedMessage","result:" + result);
+                    mCallBack.onSuccess(mTag, new Gson().fromJson(result, MessageBean.class));
                 }
             }
 
