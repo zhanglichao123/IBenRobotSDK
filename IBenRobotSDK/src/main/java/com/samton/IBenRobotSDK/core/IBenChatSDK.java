@@ -166,7 +166,7 @@ public final class IBenChatSDK {
         // 回调状态QA为false
         callBack.onStateChange(mTag, false);
         // 发送给人工的消息
-        IBenIMHelper.getInstance().sendTxtMsg(account, msg);
+        IBenIMHelper.getInstance().sendTxtMsg(mTag,account, msg);
     }
 
     /**
