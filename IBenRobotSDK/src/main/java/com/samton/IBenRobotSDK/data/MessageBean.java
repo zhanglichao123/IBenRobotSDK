@@ -87,6 +87,15 @@ public final class MessageBean {
             private boolean isAnswer;
             private String message;
             private int flowFlag;
+            private int categoryId = -1;
+
+            public int getCategoryId() {
+                return categoryId;
+            }
+
+            public void setCategoryId(int categoryId) {
+                this.categoryId = categoryId;
+            }
 
             public boolean isAnswer() {
                 return isAnswer;
