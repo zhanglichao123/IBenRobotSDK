@@ -115,6 +115,17 @@ public final class TTSManager {
     }
 
     /**
+     * 暂停说话
+     */
+    public void pauseSpeaking() {
+        mTts.pauseSpeaking();
+    }
+
+    public void resumeSpeaking() {
+        mTts.resumeSpeaking();
+    }
+
+    /**
      * 停止说话
      */
     public void stopSpeaking() {

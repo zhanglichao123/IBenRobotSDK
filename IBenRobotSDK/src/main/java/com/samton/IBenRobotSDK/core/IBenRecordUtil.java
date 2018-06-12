@@ -37,6 +37,10 @@ public final class IBenRecordUtil {
      */
     private static IBenRecordUtil instance;
     /**
+     * String构造对象
+     */
+    private static StringBuilder mStringBuilder = null;
+    /**
      * Map对象用来保存识别数据
      */
     private HashMap<String, String> map = null;
@@ -49,34 +53,75 @@ public final class IBenRecordUtil {
      */
     private IBenRecordCallBack mCallBack = null;
     /**
-     * String构造对象
-     */
-    private static StringBuilder mStringBuilder = null;
-    /**
      * 标识
      */
     private int mTag = -1;
-
     /**
-     * 设置语音回调接口
+     * 科大讯飞识别监听
      */
-    public void setCallBack(IBenRecordCallBack mCallBack) {
-        this.mCallBack = mCallBack;
-    }
+    private RecognizerListener mRecognizerListener = new RecognizerListener() {
+        @Override
+        public void onVolumeChanged(int i, byte[] bytes) {
+            // 当前正在说话 i = 音量大小
+            mCallBack.onVolumeChanged(mTag, i, bytes);
+        }
+
+        @Override
+        public void onBeginOfSpeech() {
+            // 开始说话
+            mCallBack.onBeginOfSpeech(mTag);
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+            // 结束说话
+            mCallBack.onEndOfSpeech(mTag);
+        }
+
+        @Override
+        public void onResult(RecognizerResult recognizerResult, boolean isLast) {
+            // 回调识别到文字
+            mCallBack.onRecognizing();
+            // 解析识别结果
+            doResult(recognizerResult);
+            // 最终识别结果
+            if (isLast) {
+                String result;
+                if (mStringBuilder != null) {
+                    result = mStringBuilder.toString().trim();
+                    if (TextUtils.isEmpty(result)) {
+                        mCallBack.onError(mTag, "识别结果为空");
+                    } else {
+                        if (!"。".equals(result)) {
+                            mCallBack.onResult(mTag, result);
+                        } else {
+                            mCallBack.onError(mTag, "识别结果为空");
+                        }
+                    }
+                    mStringBuilder.delete(0, mStringBuilder.length());
+                }
+
+            }
+        }
+
+        @Override
+        public void onError(SpeechError speechError) {
+            mCallBack.onError(mTag, speechError.getPlainDescription(true));
+//            // 错误码为10118代表没有说话20002代表网络超时
+//            if (speechError.getErrorCode() == 10118 || speechError.getErrorCode() == 20002) {
+//                mCallBack.onConnectFailed(speechError.getMessage());
+//            }
+        }
+
+        @Override
+        public void onEvent(int i, int i1, int i2, Bundle bundle) {
+        }
+    };
 
     /**
      * 私有构造
      */
     private IBenRecordUtil() {
-    }
-
-    /**
-     * 初始化
-     */
-    public void init(Context mContext) {
-        if (mRecordManager == null) {
-            mRecordManager = new RecordManager(mContext);
-        }
     }
 
     /**
@@ -91,6 +136,22 @@ public final class IBenRecordUtil {
             }
         }
         return instance;
+    }
+
+    /**
+     * 设置语音回调接口
+     */
+    public void setCallBack(IBenRecordCallBack mCallBack) {
+        this.mCallBack = mCallBack;
+    }
+
+    /**
+     * 初始化
+     */
+    public void init(Context mContext) {
+        if (mRecordManager == null) {
+            mRecordManager = new RecordManager(mContext);
+        }
     }
 
     /**
@@ -188,65 +249,6 @@ public final class IBenRecordUtil {
             mStringBuilder.append(map.get(key));
         }
     }
-
-    /**
-     * 科大讯飞识别监听
-     */
-    private RecognizerListener mRecognizerListener = new RecognizerListener() {
-        @Override
-        public void onBeginOfSpeech() {
-            // 开始说话
-            mCallBack.onBeginOfSpeech(mTag);
-        }
-
-        @Override
-        public void onVolumeChanged(int i, byte[] bytes) {
-            // 当前正在说话 i = 音量大小
-            mCallBack.onVolumeChanged(mTag, i, bytes);
-        }
-
-        @Override
-        public void onEndOfSpeech() {
-            // 结束说话
-            mCallBack.onEndOfSpeech(mTag);
-        }
-
-        @Override
-        public void onResult(RecognizerResult recognizerResult, boolean isLast) {
-            doResult(recognizerResult);
-            if (isLast) {
-                // 最终识别结果
-                String result;
-                if (mStringBuilder != null) {
-                    result = mStringBuilder.toString().trim();
-                    if (TextUtils.isEmpty(result)) {
-                        mCallBack.onError(mTag, "识别结果为空");
-                    } else {
-                        if (!"。".equals(result)) {
-                            mCallBack.onResult(mTag, result);
-                        } else {
-                            mCallBack.onError(mTag, "识别结果为空");
-                        }
-                    }
-                    mStringBuilder.delete(0, mStringBuilder.length());
-                }
-
-            }
-        }
-
-        @Override
-        public void onError(SpeechError speechError) {
-            mCallBack.onError(mTag, speechError.getErrorDescription());
-//            // 错误码为10118代表没有说话20002代表网络超时
-//            if (speechError.g¬etErrorCode() == 10118 || speechError.getErrorCode() == 20002) {
-//                mCallBack.onConnectFailed(speechError.getMessage());
-//            }
-        }
-
-        @Override
-        public void onEvent(int i, int i1, int i2, Bundle bundle) {
-        }
-    };
 
     /**
      * 解析科大讯飞识别结果

@@ -43,6 +43,11 @@ public interface IBenRecordCallBack {
     void onResult(int tag, String result);
 
     /**
+     * 识别到问题
+     */
+    void onRecognizing();
+
+    /**
      * 错误回调
      *
      * @param tag      标识

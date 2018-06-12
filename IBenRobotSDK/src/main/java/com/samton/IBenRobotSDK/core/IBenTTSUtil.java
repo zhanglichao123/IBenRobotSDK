@@ -35,20 +35,57 @@ public final class IBenTTSUtil {
      * 标识
      */
     private int mTag = -1;
+    /**
+     * 合成回调监听。
+     */
+    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+
+        @Override
+        public void onSpeakBegin() {
+            // showTip("开始播放");
+            callBack.onSpeakBegin(mTag);
+        }
+
+        @Override
+        public void onBufferProgress(int percent, int beginPos, int endPos, String info) {
+            // 合成进度
+        }
+
+        @Override
+        public void onSpeakPaused() {
+            //  showTip("暂停播放");
+        }
+
+        @Override
+        public void onSpeakResumed() {
+            // showTip("继续播放");
+        }
+
+        @Override
+        public void onSpeakProgress(int percent, int beginPos, int endPos) {
+            // 播放进度
+        }
+
+        @Override
+        public void onCompleted(SpeechError error) {
+            callBack.onCompleted(mTag, error);
+        }
+
+        @Override
+        public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+            // 以下代码用于获取与云端的会话id，当业务出错时将会话id提供给技术支持人员，可用于查询会话日志，定位出错原因
+            // 若使用本地能力，会话id为null
+            //	if (SpeechEvent.EVENT_SESSION_ID == eventType) {
+            //		String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
+            //		Log.d(TAG, "session id =" + sid);
+            //	}
+        }
+    };
 
     /**
      * 私有构造
      */
     private IBenTTSUtil() {
-    }
-
-    /**
-     * 初始化
-     */
-    public void init(Context mContext) {
-        if (mTTSManager == null) {
-            mTTSManager = new TTSManager(mContext);
-        }
     }
 
     /**
@@ -65,6 +102,14 @@ public final class IBenTTSUtil {
         return instance;
     }
 
+    /**
+     * 初始化
+     */
+    public void init(Context mContext) {
+        if (mTTSManager == null) {
+            mTTSManager = new TTSManager(mContext);
+        }
+    }
 
     /**
      * 开始合成语音
@@ -105,6 +150,24 @@ public final class IBenTTSUtil {
     }
 
     /**
+     * 暂停播放
+     */
+    public void pauseSpeaking() {
+        if (mTTSManager != null) {
+            mTTSManager.pauseSpeaking();
+        }
+    }
+
+    /**
+     * 继续播放
+     */
+    public void resumeSpeaking() {
+        if (mTTSManager != null) {
+            mTTSManager.resumeSpeaking();
+        }
+    }
+
+    /**
      * 停止合成
      */
     public void stopSpeaking() {
@@ -127,51 +190,4 @@ public final class IBenTTSUtil {
             callBack = null;
         }
     }
-
-    /**
-     * 合成回调监听。
-     */
-    private SynthesizerListener mTtsListener = new SynthesizerListener() {
-
-        @Override
-        public void onSpeakBegin() {
-            // showTip("开始播放");
-            callBack.onSpeakBegin(mTag);
-        }
-
-        @Override
-        public void onSpeakPaused() {
-            //  showTip("暂停播放");
-        }
-
-        @Override
-        public void onSpeakResumed() {
-            // showTip("继续播放");
-        }
-
-        @Override
-        public void onBufferProgress(int percent, int beginPos, int endPos, String info) {
-            // 合成进度
-        }
-
-        @Override
-        public void onSpeakProgress(int percent, int beginPos, int endPos) {
-            // 播放进度
-        }
-
-        @Override
-        public void onCompleted(SpeechError error) {
-            callBack.onCompleted(mTag, error);
-        }
-
-        @Override
-        public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
-            // 以下代码用于获取与云端的会话id，当业务出错时将会话id提供给技术支持人员，可用于查询会话日志，定位出错原因
-            // 若使用本地能力，会话id为null
-            //	if (SpeechEvent.EVENT_SESSION_ID == eventType) {
-            //		String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
-            //		Log.d(TAG, "session id =" + sid);
-            //	}
-        }
-    };
 }
