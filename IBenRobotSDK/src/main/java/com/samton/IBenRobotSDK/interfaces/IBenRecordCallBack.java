@@ -43,15 +43,10 @@ public interface IBenRecordCallBack {
     void onResult(int tag, String result);
 
     /**
-     * 识别到问题
-     */
-    void onRecognizing();
-
-    /**
      * 错误回调
      *
      * @param tag      标识
-     * @param errorMsg 错误信息
+     * @param errorMsg (科大讯飞)错误信息
      */
-    void onError(int tag, String errorMsg);
+    void onError(int tag,String errorMsg);
 }

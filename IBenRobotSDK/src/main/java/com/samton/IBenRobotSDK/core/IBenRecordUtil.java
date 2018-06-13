@@ -80,8 +80,6 @@ public final class IBenRecordUtil {
 
         @Override
         public void onResult(RecognizerResult recognizerResult, boolean isLast) {
-            // 回调识别到文字
-            mCallBack.onRecognizing();
             // 解析识别结果
             doResult(recognizerResult);
             // 最终识别结果
@@ -106,7 +104,7 @@ public final class IBenRecordUtil {
 
         @Override
         public void onError(SpeechError speechError) {
-            mCallBack.onError(mTag, speechError.getPlainDescription(true));
+            mCallBack.onError(mTag, speechError.getErrorCode() + "");
 //            // 错误码为10118代表没有说话20002代表网络超时
 //            if (speechError.getErrorCode() == 10118 || speechError.getErrorCode() == 20002) {
 //                mCallBack.onConnectFailed(speechError.getMessage());
