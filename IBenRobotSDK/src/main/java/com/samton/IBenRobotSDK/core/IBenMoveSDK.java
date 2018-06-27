@@ -26,7 +26,6 @@ import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.geometry.Size;
 import com.slamtec.slamware.robot.DockingStatus;
-import com.slamtec.slamware.robot.HealthInfo;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Map;
 import com.slamtec.slamware.robot.MapKind;
@@ -125,62 +124,11 @@ public final class IBenMoveSDK {
     private IMoveAction moveAction;
 
     /**
-     * 机器人连接回调
+     * 私有构造
      */
-    public interface ConnectCallBack {
-        /**
-         * 连接成功
-         */
-        void onConnectSuccess();
-
-        /**
-         * 连接失败
-         */
-        void onConnectFailed();
-    }
-
-    /**
-     * 保存地图回调
-     */
-    public interface MapCallBack {
-        /**
-         * 保存成功
-         */
-        void onSuccess();
-
-        /**
-         * 保存失败
-         */
-        void onFailed();
-    }
-
-    /**
-     * 动作回调
-     */
-    public interface MoveCallBack {
-        /**
-         * 机器人状态变更
-         *
-         * @param status 状态值(思岚ActionStatus枚举)
-         */
-        void onStateChange(ActionStatus status);
-    }
-
-    /**
-     * 电量信息回调
-     */
-    public interface GetBatteryCallBack {
-        /**
-         * 获取电量成功
-         *
-         * @param msg 电量信息
-         */
-        void onSuccess(String msg);
-
-        /**
-         * 获取电量失败
-         */
-        void onFailed();
+    private IBenMoveSDK() {
+        // 初始化线程池
+        mThreadPool = Executors.newFixedThreadPool(10);
     }
 
     /**
@@ -200,14 +148,6 @@ public final class IBenMoveSDK {
     }
 
     /**
-     * 私有构造
-     */
-    private IBenMoveSDK() {
-        // 初始化线程池
-        mThreadPool = Executors.newFixedThreadPool(10);
-    }
-
-    /**
      * 回充电桩
      */
     public void goHome(MoveCallBack callBack) {
@@ -220,7 +160,7 @@ public final class IBenMoveSDK {
                 // 让机器人回充电桩
                 mLocationAction = mRobotPlatform.goHome();
                 // 创建回桩状态定时器
-                startLocationTimer(-99,callBack);
+                startLocationTimer(-99, callBack);
             } catch (Throwable throwable) {
                 onRequestError();
             }
@@ -236,7 +176,7 @@ public final class IBenMoveSDK {
         if (isConnected) {
             cancelAllActions();
         }
-        if(null != mCallBack){
+        if (null != mCallBack) {
             mCallBack.onConnectFailed();
         }
     }
@@ -671,6 +611,43 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 设置机器人的姿态
+     *
+     * @param pose 当前姿态
+     */
+    private void setPose(final Pose pose) {
+        if (pose != null) {
+            if (mRobotPlatform != null) {
+                Observable.create(new ObservableOnSubscribe<Boolean>() {
+                    @Override
+                    public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
+                        try {
+                            mRobotPlatform.setPose(pose);
+                            e.onNext(true);
+                        } catch (Throwable throwable) {
+                            e.onNext(false);
+                        }
+                    }
+                }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(@NonNull Boolean aBoolean) throws Exception {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        onRequestError();
+                    }
+                });
+            } else {
+                onRequestError();
+            }
+        }
+    }
+
+    /**
      * 行走到指定点
      *
      * @param location 定点对象
@@ -698,7 +675,7 @@ public final class IBenMoveSDK {
                             option.setSpeedRatio(0.4);
                             option.setWithYaw(true);
                             // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option,yaw);
+                            mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
                             e.onNext(true);
                         }
                     } catch (Throwable throwable) {
@@ -720,7 +697,7 @@ public final class IBenMoveSDK {
                                 onRequestError();
                             } else {
                                 // 创建定点回调计时器
-                                startLocationTimer(yaw,callBack);
+                                startLocationTimer(yaw, callBack);
                             }
                         }
 
@@ -771,13 +748,13 @@ public final class IBenMoveSDK {
                             option.setPrecise(true);
                             option.setMilestone(true);
                             // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option,yaw);
-                            Log.i("123456789","go2Location");
+                            mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
+                            Log.i("123456789", "go2Location");
                             e.onNext(true);
                         }
                     } catch (Throwable throwable) {
                         e.onNext(false);
-                        Log.i("123456789","throwable:" + throwable.getMessage());
+                        Log.i("123456789", "throwable:" + throwable.getMessage());
                     }
                 }
             })
@@ -791,12 +768,12 @@ public final class IBenMoveSDK {
 
                         @Override
                         public void onNext(@NonNull Boolean aBoolean) {
-                            Log.i("123456789","onNext:" + aBoolean);
+                            Log.i("123456789", "onNext:" + aBoolean);
                             if (!aBoolean) {
                                 onRequestError();
                             } else {
                                 // 创建定点回调计时器
-                                startLocationTimer(yaw,callBack);
+                                startLocationTimer(yaw, callBack);
                             }
                         }
 
@@ -812,42 +789,6 @@ public final class IBenMoveSDK {
                     });
         } else {
             onRequestError();
-        }
-    }
-    /**
-     * 设置机器人的姿态
-     *
-     * @param pose 当前姿态
-     */
-    private void setPose(final Pose pose) {
-        if (pose != null) {
-            if (mRobotPlatform != null) {
-                Observable.create(new ObservableOnSubscribe<Boolean>() {
-                    @Override
-                    public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                        try {
-                            mRobotPlatform.setPose(pose);
-                            e.onNext(true);
-                        } catch (Throwable throwable) {
-                            e.onNext(false);
-                        }
-                    }
-                }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                    @Override
-                    public void accept(@NonNull Boolean aBoolean) throws Exception {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        onRequestError();
-                    }
-                });
-            } else {
-                onRequestError();
-            }
         }
     }
 
@@ -915,6 +856,7 @@ public final class IBenMoveSDK {
         }
         return dockingStatusValue;
     }
+
     /**
      * 保存地图
      *
@@ -948,7 +890,7 @@ public final class IBenMoveSDK {
                         oos.writeLong(map.getTimestamp());
                         // 写入真实地图对象
                         oos.writeObject(map.getData());
-                       // oos.write(map.getData());
+                        // oos.write(map.getData());
                         // 关闭流并且刷新操作
                         oos.close();
                         // 生成缩略图
@@ -1134,7 +1076,7 @@ public final class IBenMoveSDK {
             mLocationTask = new TimerTask() {
                 @Override
                 public void run() {
-                    checkStatus(yaw,callBack);
+                    checkStatus(yaw, callBack);
                 }
             };
         }
@@ -1165,23 +1107,23 @@ public final class IBenMoveSDK {
         if (mLocationAction != null) {
             try {
                 ActionStatus currentStatus = mLocationAction.getStatus();
-                Log.i("123456789","checkStatus:" + currentStatus + ":" + yaw);
+                Log.i("123456789", "checkStatus:" + currentStatus + ":" + yaw);
                 if (currentStatus.equals(ActionStatus.FINISHED) || currentStatus.equals(ActionStatus.STOPPED)
                         || currentStatus.equals(ActionStatus.ERROR)) {
-                    if(yaw == -99){
+                    if (yaw == -99) {
                         // 回调状态值
                         callBack.onStateChange(currentStatus);
-                    }else{
-                        if(currentStatus.equals(ActionStatus.FINISHED)){
-                            rotateto(yaw,callBack);
-                        }else{
+                    } else {
+                        if (currentStatus.equals(ActionStatus.FINISHED)) {
+                            rotateto(yaw, callBack);
+                        } else {
                             callBack.onStateChange(currentStatus);
                         }
                     }
                     // 停止定位计时器
                     cancelLocationTimer();
                 }
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
 /*                if(yaw == -99){
                     // 回调状态值
@@ -1189,7 +1131,7 @@ public final class IBenMoveSDK {
                 }else{
                     rotateto(yaw,callBack);
                 }*/
-                 callBack.onStateChange(ActionStatus.ERROR);
+                callBack.onStateChange(ActionStatus.ERROR);
                 // 停止定位计时器
                 cancelLocationTimer();
             }
@@ -1198,21 +1140,22 @@ public final class IBenMoveSDK {
             cancelLocationTimer();
         }
     }
+
     /**
      * 根据偏移量转动角度
      *
      * @param yaw 偏移量
      */
-    public void rotateto(float yaw,final MoveCallBack callBack) {
+    public void rotateto(float yaw, final MoveCallBack callBack) {
         final Rotation rotation = new Rotation(yaw);
-        Log.i("123456789","rotateto:"  + yaw);
+        Log.i("123456789", "rotateto:" + yaw);
         if (mRobotPlatform != null) {
             Observable.create(new ObservableOnSubscribe<Boolean>() {
                 @Override
                 public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
                     try {
-                        moveAction =  mRobotPlatform.rotateTo(rotation);
-                        Log.i("123456789","rotateto:end");
+                        moveAction = mRobotPlatform.rotateTo(rotation);
+                        Log.i("123456789", "rotateto:end");
                         try {
                             Thread.sleep(4000);
                         } catch (InterruptedException e1) {
@@ -1226,21 +1169,21 @@ public final class IBenMoveSDK {
             }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
                 @Override
                 public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    Log.i("123456789","rotateto:accept:" + aBoolean);
+                    Log.i("123456789", "rotateto:accept:" + aBoolean);
                     if (!aBoolean) {
                         onRequestError();
-                    }else{
+                    } else {
                         while (true) {
                             if (moveAction != null) {
                                 ActionStatus status = moveAction.getStatus();
-                                Log.i("987654321","rotateto:moveAction :" + status);
+                                Log.i("987654321", "rotateto:moveAction :" + status);
                                 if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
                                         || status.equals(ActionStatus.ERROR)) {
                                     callBack.onStateChange(status);
                                     break;
                                 }
                             } else {
-                                Log.i("123456789","rotateto:moveAction is null");
+                                Log.i("123456789", "rotateto:moveAction is null");
                                 break;
                             }
                         }
@@ -1250,14 +1193,15 @@ public final class IBenMoveSDK {
                 @Override
                 public void accept(@NonNull Throwable throwable) throws Exception {
                     onRequestError();
-                    Log.i("123456789","Consumer:error");
+                    Log.i("123456789", "Consumer:error");
                 }
             });
         } else {
             onRequestError();
-            Log.i("123456789","rotateto:error");
+            Log.i("123456789", "rotateto:error");
         }
     }
+
     /**
      * 开启移动定时器
      *
@@ -1349,6 +1293,65 @@ public final class IBenMoveSDK {
             mReconnectTask.cancel();
             mReconnectTask = null;
         }
+    }
+
+    /**
+     * 机器人连接回调
+     */
+    public interface ConnectCallBack {
+        /**
+         * 连接成功
+         */
+        void onConnectSuccess();
+
+        /**
+         * 连接失败
+         */
+        void onConnectFailed();
+    }
+
+    /**
+     * 保存地图回调
+     */
+    public interface MapCallBack {
+        /**
+         * 保存成功
+         */
+        void onSuccess();
+
+        /**
+         * 保存失败
+         */
+        void onFailed();
+    }
+
+    /**
+     * 动作回调
+     */
+    public interface MoveCallBack {
+        /**
+         * 机器人状态变更
+         *
+         * @param status 状态值(思岚ActionStatus枚举)
+         */
+        void onStateChange(ActionStatus status);
+    }
+
+    /**
+     * 电量信息回调
+     */
+    public interface GetBatteryCallBack {
+        /**
+         * 获取电量成功
+         *
+         * @param msg 电量信息
+         */
+        void onSuccess(String msg);
+
+        /**
+         * 获取电量失败
+         */
+        void onFailed();
     }
 
 }

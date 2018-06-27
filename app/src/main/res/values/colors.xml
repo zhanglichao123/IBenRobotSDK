@@ -3,4 +3,6 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <!--地图颜色值-->
+    <color name="MapViewBackground">#7f7f7f</color>
 </resources>
