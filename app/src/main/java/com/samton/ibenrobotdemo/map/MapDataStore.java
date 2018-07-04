@@ -15,7 +15,6 @@ package com.samton.ibenrobotdemo.map;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Log;
 
 import java.util.Arrays;
 
@@ -47,13 +46,6 @@ public class MapDataStore {
         }
     }
 
-    public synchronized void fetch(Rect area, byte[] buffer) {
-        Arrays.fill(buffer, (byte) 0);
-        copyBuffer(buffer, area, mapData, this.area, new Point(0, 0),
-                new Point(area.left - this.area.left, area.top - this.area.top),
-                new Point(area.width(), area.height()));
-    }
-
     public void expandArea(Rect area) {
         if (mapData != null) {
             area.union(this.area);
@@ -68,29 +60,6 @@ public class MapDataStore {
                 new Point(0, 0), new Point(this.area.width(), this.area.height()));
         this.area = area;
         this.mapData = newBuffer;
-    }
-
-    public void clear() {
-        this.area = new Rect(0, 0, 0, 0);
-        if (mapData != null) {
-            mapData = null;
-        }
-    }
-
-    public boolean isEmpty() {
-        return this.mapData == null;
-    }
-
-    public byte get(int x, int y) {
-        if (x < area.left || y < area.top || x >= area.right || y >= area.bottom) {
-            return 0;
-        }
-
-        return mapData[(y - area.top) * area.width() + (x - area.left)];
-    }
-
-    public Rect getArea() {
-        return this.area;
     }
 
     private static void copyBuffer(byte[] dest, Rect destSize, byte[] src,
@@ -160,7 +129,37 @@ public class MapDataStore {
                 srcIndex += srcSize.width();
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.e(TAG, "copy buffer array index out of bounds");
+            e.getStackTrace();
         }
+    }
+
+    public synchronized void fetch(Rect area, byte[] buffer) {
+        Arrays.fill(buffer, (byte) 0);
+        copyBuffer(buffer, area, mapData, this.area, new Point(0, 0),
+                new Point(area.left - this.area.left, area.top - this.area.top),
+                new Point(area.width(), area.height()));
+    }
+
+    public void clear() {
+        this.area = new Rect(0, 0, 0, 0);
+        if (mapData != null) {
+            mapData = null;
+        }
+    }
+
+    public boolean isEmpty() {
+        return this.mapData == null;
+    }
+
+    public byte get(int x, int y) {
+        if (x < area.left || y < area.top || x >= area.right || y >= area.bottom) {
+            return 0;
+        }
+
+        return mapData[(y - area.top) * area.width() + (x - area.left)];
+    }
+
+    public Rect getArea() {
+        return this.area;
     }
 }

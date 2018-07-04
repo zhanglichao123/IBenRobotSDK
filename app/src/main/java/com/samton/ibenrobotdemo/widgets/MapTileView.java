@@ -125,7 +125,7 @@ public class MapTileView extends View {
     public void updateArea(Rect area) {
         // 取交汇值
         if (area.intersect(mArea)) {
-            LogUtils.e("没有相交点,地图区域未被更改");
+            LogUtils.d("没有相交点,地图区域未被更改");
         }
         // 如果要更新的区域是空的,直接返回
         if (area.isEmpty()) {

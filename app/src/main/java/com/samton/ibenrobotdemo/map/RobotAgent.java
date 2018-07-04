@@ -652,6 +652,28 @@ public final class RobotAgent {
         pushJob(mJobUpdateMoveAction);
     }
 
+    private void test() {
+//        Timer testTimer = new Timer();
+//        TimerTask testTimerTask = new TimerTask() {
+//            @Override
+//            public void run() {
+//                try {
+//                    // 打印定位质量
+//                    LogUtils.e("定位质量--->" + mRobotPlatform.getLocalizationQuality());
+//                    // 错误信息
+//                    ArrayList<HealthInfo.BaseError> errors = mRobotPlatform.getRobotHealth().getErrors();
+//                    // 循环
+//                    for (HealthInfo.BaseError error : errors) {
+//                        LogUtils.e("错误ID--->" + error.getComponentErrorCode());
+//                    }
+//                } catch (Throwable throwable) {
+//                    throwable.printStackTrace();
+//                }
+//            }
+//        };
+//        testTimer.schedule(testTimerTask, 0, 5000);
+    }
+
     /**
      * 内部静态类
      */
@@ -715,6 +737,8 @@ public final class RobotAgent {
                 knownArea.intersect(clipArea);
                 // 更新地图
                 updateMap(knownArea);
+                // 测试
+                test();
             } catch (Throwable throwable) {
                 onRequestError();
             }
@@ -1079,8 +1103,11 @@ public final class RobotAgent {
                     knownArea.intersect(clipArea);
                     // 更新地图
                     updateMap(knownArea);
+                    // 回调加载地图成功
+                    EventBus.getDefault().post(new MapOperationEvent(MapOperationEvent.TYPE_LOAD_MAP));
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 onRequestError();
             }
         }

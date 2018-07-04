@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.samton.IBenRobotSDK.data.Constants;
+import com.samton.IBenRobotSDK.utils.BaseIoSubscriber;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
 import com.samton.IBenRobotSDK.utils.FileUtils;
 import com.samton.IBenRobotSDK.utils.ImageUtils;
@@ -25,15 +26,19 @@ import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
 import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.geometry.Size;
+import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.DockingStatus;
+import com.slamtec.slamware.robot.GridMap;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Map;
 import com.slamtec.slamware.robot.MapKind;
+import com.slamtec.slamware.robot.MapLayer;
 import com.slamtec.slamware.robot.MapType;
 import com.slamtec.slamware.robot.MoveOption;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.robot.PowerStatus;
 import com.slamtec.slamware.robot.Rotation;
+import com.slamtec.slamware.sdp.CompositeMapHelper;
 
 import org.json.JSONObject;
 
@@ -117,7 +122,7 @@ public final class IBenMoveSDK {
     /**
      * 线程池
      */
-    private ExecutorService mThreadPool = null;
+    private ExecutorService mThreadPool;
     /**
      * 动作接口
      */
@@ -743,18 +748,14 @@ public final class IBenMoveSDK {
                             MoveOption option = new MoveOption();
                             option.setSpeedRatio(0.4);
                             option.setWithYaw(false);
-/*                            option.setWithYaw(true);
-                            option.setYaw(yaw);*/
                             option.setPrecise(true);
                             option.setMilestone(true);
                             // 执行行走指令
                             mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
-                            Log.i("123456789", "go2Location");
                             e.onNext(true);
                         }
                     } catch (Throwable throwable) {
                         e.onNext(false);
-                        Log.i("123456789", "throwable:" + throwable.getMessage());
                     }
                 }
             })
@@ -768,7 +769,6 @@ public final class IBenMoveSDK {
 
                         @Override
                         public void onNext(@NonNull Boolean aBoolean) {
-                            Log.i("123456789", "onNext:" + aBoolean);
                             if (!aBoolean) {
                                 onRequestError();
                             } else {
@@ -911,21 +911,101 @@ public final class IBenMoveSDK {
                     e.onNext(false);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).subscribe(new Consumer<Boolean>() {
+        }).subscribe(new BaseIoSubscriber<Boolean>() {
             @Override
-            public void accept(@NonNull Boolean aBoolean) throws Exception {
+            public void onSuccess(Boolean aBoolean) {
                 if (aBoolean) {
                     callBack.onSuccess();
                 } else {
                     callBack.onFailed();
                 }
             }
-        }, new Consumer<Throwable>() {
+
             @Override
-            public void accept(@NonNull Throwable throwable) throws Exception {
+            public void onFailed(Throwable e) {
                 callBack.onFailed();
             }
         });
+    }
+
+    /**
+     * 保存地图
+     *
+     * @param mapName  要保存的地图名字
+     * @param isNewMap 是否为新地图
+     * @param callBack 回调函数
+     */
+    public void saveMap(final String mapName, boolean isNewMap, final MapCallBack callBack) {
+        Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(ObservableEmitter<Boolean> e) {
+                try {
+                    // 生成保存路径
+                    String path = Constants.MAP_PATH + "/" + mapName;
+                    // 获取完全版地图并保存到指定路径中
+                    CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
+                    CompositeMapHelper mapHelper = new CompositeMapHelper();
+                    mapHelper.saveFile(path, compositeMap);
+                    // 生成缩略图
+                    FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+                    // 写入BMP图像
+                    for (MapLayer layer : compositeMap.getMaps()) {
+                        if (layer instanceof GridMap) {
+                            GridMap map = ((GridMap) layer);
+                            int width = map.getDimension().getWidth();
+                            int height = map.getDimension().getHeight();
+                            Bitmap bitmap = createImage(map.getMapData(), width, height);
+                            byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
+                            FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
+                                    Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
+                        }
+                    }
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
+                }
+            }
+        }).subscribe(new BaseIoSubscriber<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                if (aBoolean) {
+                    callBack.onSuccess();
+                } else {
+                    callBack.onFailed();
+                }
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                callBack.onFailed();
+            }
+        });
+    }
+
+    /**
+     * 创建bitmap对象
+     *
+     * @param buffer 数据流
+     * @param width  宽
+     * @param height 高
+     * @return 创建好的BitMap对象
+     */
+    @SuppressWarnings("NumericOverflow")
+    private Bitmap createImage(byte[] buffer, int width, int height) {
+        int[] rawData = new int[buffer.length];
+        for (int i = 0; i < buffer.length; i++) {
+            int temp = 0x7f + buffer[i];
+            rawData[i] = Color.rgb(temp, temp, temp);
+        }
+//        Bitmap result = Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
+//        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(result);
+//        Bitmap temp = ImageUtils.getBitmap(android.R.mipmap.sym_def_app_icon);
+//        canvas.drawBitmap(temp, 0, 0, null);
+//        canvas.save();
+//        canvas.restore();
+//        return result;
+        return Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
     }
 
     /**
@@ -994,6 +1074,18 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 根据地图名字加载地图
+     *
+     * @param mapNamePath 地图文件路径
+     * @param isNewMap    是否为新格式的地图
+     * @param callBack    回调函数
+     */
+    public void loadMap(final String mapNamePath, final boolean isNewMap, final MapCallBack callBack) {
+
+    }
+
+
+    /**
      * 获取地图
      *
      * @return 返回地图
@@ -1032,32 +1124,6 @@ public final class IBenMoveSDK {
         } else {
             onRequestError();
         }
-    }
-
-    /**
-     * 创建bitmap对象
-     *
-     * @param buffer 数据流
-     * @param width  宽
-     * @param height 高
-     * @return 创建好的BitMap对象
-     */
-    @SuppressWarnings("NumericOverflow")
-    private Bitmap createImage(byte[] buffer, int width, int height) {
-        int[] rawData = new int[buffer.length];
-        for (int i = 0; i < buffer.length; i++) {
-            int temp = 0x7f + buffer[i];
-            rawData[i] = Color.rgb(temp, temp, temp);
-        }
-//        Bitmap result = Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
-//        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(result);
-//        Bitmap temp = ImageUtils.getBitmap(android.R.mipmap.sym_def_app_icon);
-//        canvas.drawBitmap(temp, 0, 0, null);
-//        canvas.save();
-//        canvas.restore();
-//        return result;
-        return Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
     }
 
     /**

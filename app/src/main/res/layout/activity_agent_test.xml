@@ -60,6 +60,14 @@
         android:layout_above="@id/mSaveBtn"
         android:layout_alignParentEnd="true"
         android:text="点我加载地图"/>
+    <!--清除地图-->
+    <Button
+        android:id="@+id/mClearBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/mLoadBtn"
+        android:layout_alignParentEnd="true"
+        android:text="点我清除地图"/>
     <!--添加虚拟墙-->
     <RelativeLayout
         android:layout_width="wrap_content"

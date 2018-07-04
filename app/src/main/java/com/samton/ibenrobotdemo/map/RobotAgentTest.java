@@ -34,6 +34,7 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.samton.ibenrobotdemo.events.MapOperationEvent.TYPE_LOAD_MAP;
 import static com.samton.ibenrobotdemo.events.MapOperationEvent.TYPE_SAVE_MAP;
 
 /**
@@ -208,6 +209,7 @@ public class RobotAgentTest extends AppCompatActivity
         findViewById(R.id.mGoHomeBtn).setOnClickListener(this);
         findViewById(R.id.mSaveBtn).setOnClickListener(this);
         findViewById(R.id.mLoadBtn).setOnClickListener(this);
+        findViewById(R.id.mClearBtn).setOnClickListener(this);
     }
 
     /**
@@ -388,6 +390,9 @@ public class RobotAgentTest extends AppCompatActivity
     public void onEventMainThread(MapOperationEvent event) {
         if (event.getOperationType() == TYPE_SAVE_MAP) {
             ToastUtils.showShort("保存地图成功");
+        } else if (event.getOperationType() == TYPE_LOAD_MAP) {
+            // 开启计时器更新地图显示
+            startUpdateTimer();
         }
     }
 
@@ -438,7 +443,12 @@ public class RobotAgentTest extends AppCompatActivity
                 break;
             // 加载地图按钮
             case R.id.mLoadBtn:
+                stopUpdateTimer();
                 mRobotAgent.loadMap(Environment.getExternalStorageDirectory().getAbsoluteFile() + "/map");
+                break;
+            // 清空地图
+            case R.id.mClearBtn:
+                mRobotAgent.clearMap();
                 break;
         }
     }
