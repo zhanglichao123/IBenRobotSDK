@@ -15,6 +15,7 @@ import com.samton.ibenrobotdemo.R;
 import com.samton.ibenrobotdemo.events.BatteryEvent;
 import com.samton.ibenrobotdemo.events.ConnectedEvent;
 import com.samton.ibenrobotdemo.events.ConnectionLostEvent;
+import com.samton.ibenrobotdemo.events.LocationEvent;
 import com.samton.ibenrobotdemo.events.MapOperationEvent;
 import com.samton.ibenrobotdemo.events.MapUpdateEvent;
 import com.samton.ibenrobotdemo.events.MoveActionUpdateEvent;
@@ -23,6 +24,7 @@ import com.samton.ibenrobotdemo.events.WallUpdateEvent;
 import com.samton.ibenrobotdemo.widgets.MapView;
 import com.slamtec.slamware.action.MoveDirection;
 import com.slamtec.slamware.geometry.PointF;
+import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,6 +33,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -160,6 +164,10 @@ public class RobotAgentTest extends AppCompatActivity
             mMapView.setMapRotation(factor);
         }
     };
+    /**
+     * 添加的点信息
+     */
+    private List<Location> mLocations = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -210,6 +218,7 @@ public class RobotAgentTest extends AppCompatActivity
         findViewById(R.id.mSaveBtn).setOnClickListener(this);
         findViewById(R.id.mLoadBtn).setOnClickListener(this);
         findViewById(R.id.mClearBtn).setOnClickListener(this);
+        findViewById(R.id.mAddLocation).setOnClickListener(this);
     }
 
     /**
@@ -396,6 +405,19 @@ public class RobotAgentTest extends AppCompatActivity
         }
     }
 
+    /**
+     * 获取定位事件
+     *
+     * @param event 事假
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(LocationEvent event) {
+        // 添加点信息
+        mLocations.add(event.getLocation());
+        // 通知地图更新
+        mMapView.updateMarker(mLocations);
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -449,6 +471,10 @@ public class RobotAgentTest extends AppCompatActivity
             // 清空地图
             case R.id.mClearBtn:
                 mRobotAgent.clearMap();
+                break;
+            // 添加定点按钮
+            case R.id.mAddLocation:
+                mRobotAgent.getLocation();
                 break;
         }
     }

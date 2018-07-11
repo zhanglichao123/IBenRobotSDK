@@ -16,8 +16,10 @@ import com.samton.ibenrobotdemo.map.RobotAgent;
 import com.slamtec.slamware.action.Path;
 import com.slamtec.slamware.geometry.Line;
 import com.slamtec.slamware.geometry.PointF;
+import com.slamtec.slamware.robot.Location;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -161,7 +163,7 @@ public class MapView extends FrameLayout {
         // 虚拟墙
         mVirtualWallView = new VirtualWallView(getContext(), mRobotAgent);
         // 行动轨迹
-        mMoveActionView = new MoveActionView(getContext(),mRobotAgent);
+        mMoveActionView = new MoveActionView(getContext(), mRobotAgent);
         // 把各种控件都放入地图中
         addView(mScrollMapView, params);
         addView(mVirtualWallView, params);
@@ -295,6 +297,7 @@ public class MapView extends FrameLayout {
         mRobotIndicatorView.setY(mRobotIndicatorView.getY() + mapTransition.y);
         // 设置瓦片地图变换值
         mScrollMapView.setTransition(mapTransition);
+        mScrollMapView.refreshMarkerAfterTransition();
         // 设置虚拟墙变换值
         mVirtualWallView.setTransition(mapTransition);
         // 设置行动轨迹
@@ -349,6 +352,16 @@ public class MapView extends FrameLayout {
         float degree = (float) (rotation * 180 / Math.PI);
         // 设置机器人图片旋转点
         mRobotIndicatorView.setRotation(degree);
+    }
+
+    /**
+     * 更新地图标注点信息
+     *
+     * @param locations 标注点集合
+     */
+    public void updateMarker(List<Location> locations) {
+        // mMarkerView.updateMarker(locations);
+        mScrollMapView.updateMarker(locations);
     }
 
     /**
@@ -433,6 +446,7 @@ public class MapView extends FrameLayout {
 
     /**
      * 行走至指定点
+     *
      * @param rawPoint 指定点
      */
     public void moveTo(Point rawPoint) {
@@ -441,8 +455,9 @@ public class MapView extends FrameLayout {
 
     /**
      * 更新要行走的点
+     *
      * @param remainingMilestones 行走的点
-     * @param remainingPath 行走的路线
+     * @param remainingPath       行走的路线
      */
     public void updateRemainingMilestones(Path remainingMilestones, Path remainingPath) {
         mMoveActionView.updateRemainingMilestones(remainingMilestones, remainingPath);

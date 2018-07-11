@@ -68,6 +68,14 @@
         android:layout_above="@id/mLoadBtn"
         android:layout_alignParentEnd="true"
         android:text="点我清除地图"/>
+    <!--添加点-->
+    <Button
+        android:id="@+id/mAddLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/mClearBtn"
+        android:layout_alignParentEnd="true"
+        android:text="点我添加点"/>
     <!--添加虚拟墙-->
     <RelativeLayout
         android:layout_width="wrap_content"

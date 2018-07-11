@@ -20,11 +20,13 @@ import com.slamtec.slamware.action.MoveDirection;
 import com.slamtec.slamware.action.Path;
 import com.slamtec.slamware.geometry.Line;
 import com.slamtec.slamware.robot.CompositeMap;
+import com.slamtec.slamware.robot.GridMap;
 import com.slamtec.slamware.robot.HealthInfo;
 import com.slamtec.slamware.robot.LaserScan;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Map;
 import com.slamtec.slamware.robot.MapKind;
+import com.slamtec.slamware.robot.MapLayer;
 import com.slamtec.slamware.robot.MapType;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.robot.Rotation;
@@ -565,6 +567,33 @@ public final class RobotAgent {
     }
 
     /**
+     * 获取充电桩点位信息
+     */
+    public Location getOrigin() {
+        try {
+            if (mRobotPlatform != null) {
+//                // 获取当前机器人地图
+//                List<MapType> mapTypes = mRobotPlatform.getAvailableMaps();
+//                MapType mapType = mapTypes.get(0);
+//                RectF knownArea = mRobotPlatform.getKnownArea(mapType);
+//                Map map2 = mRobotPlatform.getMap(MapType.BITMAP_8BIT,
+//                        MapKind.EXPLORE_MAP,knownArea);
+//                return map2.getOrigin();
+                CompositeMap map = mRobotPlatform.getCompositeMap();
+                List<MapLayer> mapLayers = map.getMaps();
+                for (MapLayer mapLayer : mapLayers) {
+                    if (mapLayer instanceof GridMap) {
+                        return ((GridMap) mapLayer).getOrigin();
+                    }
+                }
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * 根据机器人的可见区域更新地图
      *
      * @param area 可见区域
@@ -652,28 +681,6 @@ public final class RobotAgent {
         pushJob(mJobUpdateMoveAction);
     }
 
-    private void test() {
-//        Timer testTimer = new Timer();
-//        TimerTask testTimerTask = new TimerTask() {
-//            @Override
-//            public void run() {
-//                try {
-//                    // 打印定位质量
-//                    LogUtils.e("定位质量--->" + mRobotPlatform.getLocalizationQuality());
-//                    // 错误信息
-//                    ArrayList<HealthInfo.BaseError> errors = mRobotPlatform.getRobotHealth().getErrors();
-//                    // 循环
-//                    for (HealthInfo.BaseError error : errors) {
-//                        LogUtils.e("错误ID--->" + error.getComponentErrorCode());
-//                    }
-//                } catch (Throwable throwable) {
-//                    throwable.printStackTrace();
-//                }
-//            }
-//        };
-//        testTimer.schedule(testTimerTask, 0, 5000);
-    }
-
     /**
      * 内部静态类
      */
@@ -737,8 +744,6 @@ public final class RobotAgent {
                 knownArea.intersect(clipArea);
                 // 更新地图
                 updateMap(knownArea);
-                // 测试
-                test();
             } catch (Throwable throwable) {
                 onRequestError();
             }

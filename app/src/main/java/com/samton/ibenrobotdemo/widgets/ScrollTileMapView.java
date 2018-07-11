@@ -1,17 +1,23 @@
 package com.samton.ibenrobotdemo.widgets;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.widget.ImageView;
 
+import com.samton.ibenrobotdemo.R;
 import com.samton.ibenrobotdemo.map.RobotAgent;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.robot.Location;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * <pre>
@@ -31,6 +37,30 @@ public class ScrollTileMapView extends SlamBaseView {
      * 瓦片集合
      */
     private ArrayList<MapTileView> mTiles;
+    /**
+     * 点位集合
+     */
+    private Vector<ImageView> mMarkerImages;
+    /**
+     * 定位集合
+     */
+    private List<Location> mLocations;
+    /**
+     * 标注点位图片
+     */
+    private Bitmap mMarkerImage;
+    /**
+     * 充电桩图片
+     */
+    private Bitmap mHomeImage;
+    /**
+     * 点位图片偏移量X
+     */
+    private int mMarkerOffsetX;
+    /**
+     * 点位图片偏移量Y
+     */
+    private int mMarkerOffsetY;
 
     /**
      * 默认构造函数
@@ -49,8 +79,94 @@ public class ScrollTileMapView extends SlamBaseView {
         super(context, sdk);
         // 瓦片集合
         mTiles = new ArrayList<>();
+        // 初始化点位集合
+        mMarkerImages = new Vector<>();
+        // 初始化点位集合
+        mLocations = new ArrayList<>();
+        // 解析充电桩图片
+        mHomeImage = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_marker_home);
+        // 解析点位图片
+        mMarkerImage = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_marker_point);
+        // X偏移量
+        mMarkerOffsetX = mHomeImage.getWidth() / 2;
+        // Y偏移量
+        mMarkerOffsetY = mHomeImage.getHeight() / 2;
         // 背景色透明
         setBackgroundColor(Color.TRANSPARENT);
+    }
+
+    /**
+     * 更新Marker
+     */
+    public void updateMarker(List<Location> locations) {
+        // 清空本地数据
+        mLocations.clear();
+        // 充电桩位置
+        Location origin = moveSdk.get().getOrigin();
+        // 添加充电桩位置
+        mLocations.add(origin);
+        // 将其他的数据放入到集合中
+        mLocations.addAll(locations);
+        // 刷新Marker
+        refreshMarker();
+    }
+
+    /**
+     * 刷新Marker
+     */
+    private void refreshMarker() {
+        // 移除之前的所有点位信息
+        removeImageView();
+        // 偏移量
+        Point offset = getLayoutOffset();
+        // 遍历点位,画标注
+        for (int i = 0; i < mLocations.size(); i++) {
+            // 定位信息
+            Location location = mLocations.get(i);
+            // 充电桩位置
+            if (i == 0) {
+                // 充电桩约束
+                PointF originCoordinate = new PointF(location.getX(), location.getY());
+                // 中心点
+                Point originCenter = layoutRotatedCoordinateForPhysicalCoordinate(
+                        originCoordinate, offset);
+                // 先把充电桩画到地图上
+                ImageView originView = new ImageView(getContext());
+                originView.setImageBitmap(mHomeImage);
+                // 添加到布局中
+                addView(originView);
+                // 手动测量位置
+                originView.layout(originCenter.x - mMarkerOffsetX, originCenter.y - mMarkerOffsetY,
+                        originCenter.x + mMarkerOffsetX, originCenter.y + mMarkerOffsetY);
+                // 将充电桩点位加入到数组中
+                mMarkerImages.add(originView);
+            } else {
+                // 约束
+                PointF coordinate = new PointF(location.getX(), location.getY());
+                // 中心点
+                Point center = layoutRotatedCoordinateForPhysicalCoordinate(coordinate, offset);
+                // 要绘制的图片
+                ImageView markerView = new ImageView(getContext());
+                markerView.setImageBitmap(mMarkerImage);
+                // 添加到布局中
+                addView(markerView);
+                // 手动测量位置
+                markerView.layout(center.x - mMarkerOffsetX, center.y - mMarkerOffsetY,
+                        center.x + mMarkerOffsetX, center.y + mMarkerOffsetY);
+                // 将点位加入到数组中
+                mMarkerImages.add(markerView);
+            }
+        }
+    }
+
+    /**
+     * 移除之前的所有点位信息
+     */
+    private void removeImageView() {
+        for (ImageView markerImage : mMarkerImages) {
+            removeView(markerImage);
+        }
+        mMarkerImages.clear();
     }
 
     @Override
@@ -210,5 +326,12 @@ public class ScrollTileMapView extends SlamBaseView {
         // 调用SDK方法行走至指定点
         moveSdk.get().goToLocation(new Location(physicalLocation.getX(),
                 physicalLocation.getY(), 0));
+    }
+
+    /**
+     * 地图变化之后更新Marker
+     */
+    public void refreshMarkerAfterTransition() {
+        refreshMarker();
     }
 }
