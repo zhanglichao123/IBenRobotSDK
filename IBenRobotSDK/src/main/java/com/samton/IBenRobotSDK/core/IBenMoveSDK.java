@@ -1079,7 +1079,6 @@ public final class IBenMoveSDK {
                             e.onNext(true);
                         }
                     }
-                    e.onNext(true);
                 } catch (Throwable throwable) {
                     e.onNext(false);
                 }
