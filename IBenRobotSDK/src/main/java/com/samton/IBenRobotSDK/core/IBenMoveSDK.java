@@ -1015,62 +1015,7 @@ public final class IBenMoveSDK {
      * @param callBack    回调函数
      */
     public void loadMap(final String mapNamePath, final MapCallBack callBack) {
-        Observable.create(new ObservableOnSubscribe<Boolean>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                try {
-                    // 获取地图文件
-                    File file = new File(mapNamePath);
-                    // 地图文件不存在直接返回
-                    if (!FileUtils.isFileExists(file)) {
-                        e.onNext(false);
-                    }
-                    // 地图文件存在才继续做事情
-                    else {
-                        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file.getAbsolutePath()));
-                        // 生成Origin对象
-                        float ox = ois.readFloat();
-                        float oy = ois.readFloat();
-                        PointF origin = new PointF(ox, oy);
-                        // 生成Dimension对象
-                        int width = ois.readInt();
-                        int height = ois.readInt();
-                        Size size = new Size(width, height);
-                        // 生成Resolution对象
-                        float rx = ois.readFloat();
-                        float ry = ois.readFloat();
-                        PointF resolution = new PointF(rx, ry);
-                        // 赋值时间戳
-                        long timeStamp = ois.readLong();
-                        // 生成二进制数组
-                        byte[] data = (byte[]) ois.readObject();
-                        // 生成地图对象
-                        Map map = new Map(origin, size, resolution, timeStamp, data);
-                        // 设置地图
-                        setMap(map);
-                        // 关闭流
-                        ois.close();
-                        e.onNext(true);
-                    }
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).subscribe(new Consumer<Boolean>() {
-            @Override
-            public void accept(@NonNull Boolean aBoolean) throws Exception {
-                if (aBoolean) {
-                    callBack.onSuccess();
-                } else {
-                    callBack.onFailed();
-                }
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(@NonNull Throwable throwable) throws Exception {
-                callBack.onFailed();
-            }
-        });
+        loadMap(mapNamePath, false, callBack);
     }
 
     /**
@@ -1081,7 +1026,75 @@ public final class IBenMoveSDK {
      * @param callBack    回调函数
      */
     public void loadMap(final String mapNamePath, final boolean isNewMap, final MapCallBack callBack) {
+        Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+                try {
+                    // 新地图加载逻辑
+                    if (isNewMap) {
+                        // 地图加载帮助对象
+                        CompositeMapHelper helper = new CompositeMapHelper();
+                        CompositeMap map = helper.loadFile(mapNamePath);
+                        // 地图不为空的话加载地图
+                        if (mRobotPlatform != null && map != null) {
+                            mRobotPlatform.setCompositeMap(map, new Pose());
+                            e.onNext(true);
+                        } else {
+                            e.onNext(false);
+                        }
+                    }
+                    // 旧地图加载逻辑
+                    else {
+                        // 获取地图文件
+                        File file = new File(mapNamePath);
+                        // 地图文件不存在直接返回
+                        if (!FileUtils.isFileExists(file)) {
+                            e.onNext(false);
+                        }
+                        // 地图文件存在才继续做事情
+                        else {
+                            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file.getAbsolutePath()));
+                            // 生成Origin对象
+                            float ox = ois.readFloat();
+                            float oy = ois.readFloat();
+                            PointF origin = new PointF(ox, oy);
+                            // 生成Dimension对象
+                            int width = ois.readInt();
+                            int height = ois.readInt();
+                            Size size = new Size(width, height);
+                            // 生成Resolution对象
+                            float rx = ois.readFloat();
+                            float ry = ois.readFloat();
+                            PointF resolution = new PointF(rx, ry);
+                            // 赋值时间戳
+                            long timeStamp = ois.readLong();
+                            // 生成二进制数组
+                            byte[] data = (byte[]) ois.readObject();
+                            // 生成地图对象
+                            Map map = new Map(origin, size, resolution, timeStamp, data);
+                            // 设置地图
+                            setMap(map);
+                            // 关闭流
+                            ois.close();
+                            e.onNext(true);
+                        }
+                    }
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
+                }
+            }
+        }).subscribe(new BaseIoSubscriber<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                callBack.onSuccess();
+            }
 
+            @Override
+            public void onFailed(Throwable e) {
+                callBack.onFailed();
+            }
+        });
     }
 
 
