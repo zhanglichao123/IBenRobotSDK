@@ -20,13 +20,11 @@ import com.slamtec.slamware.action.MoveDirection;
 import com.slamtec.slamware.action.Path;
 import com.slamtec.slamware.geometry.Line;
 import com.slamtec.slamware.robot.CompositeMap;
-import com.slamtec.slamware.robot.GridMap;
 import com.slamtec.slamware.robot.HealthInfo;
 import com.slamtec.slamware.robot.LaserScan;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Map;
 import com.slamtec.slamware.robot.MapKind;
-import com.slamtec.slamware.robot.MapLayer;
 import com.slamtec.slamware.robot.MapType;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.robot.Rotation;
@@ -129,6 +127,10 @@ public final class RobotAgent {
      * 更新动作任务
      */
     private static JobUpdateMoveAction mJobUpdateMoveAction;
+    /**
+     * 移除所有虚拟墙
+     */
+    private static JobRemoveWalls mJobRemoveWalls;
     /**
      * 工作线程
      */
@@ -280,6 +282,8 @@ public final class RobotAgent {
         mJobUpdateWalls = new JobUpdateWalls();
         // 初始化根据ID移除虚拟墙任务
         mJobRemoveWallById = new JobRemoveWallById();
+        // 初始化移除所有虚拟墙任务
+        mJobRemoveWalls = new JobRemoveWalls();
         // 初始化更新动作任务
         mJobUpdateMoveAction = new JobUpdateMoveAction();
     }
@@ -572,20 +576,24 @@ public final class RobotAgent {
     public Location getOrigin() {
         try {
             if (mRobotPlatform != null) {
-//                // 获取当前机器人地图
+                // 获取当前机器人地图
+                if (mRobotPlatform.getHomePose() != null) {
+                    return mRobotPlatform.getHomePose().getLocation();
+                }
 //                List<MapType> mapTypes = mRobotPlatform.getAvailableMaps();
 //                MapType mapType = mapTypes.get(0);
 //                RectF knownArea = mRobotPlatform.getKnownArea(mapType);
-//                Map map2 = mRobotPlatform.getMap(MapType.BITMAP_8BIT,
-//                        MapKind.EXPLORE_MAP,knownArea);
-//                return map2.getOrigin();
-                CompositeMap map = mRobotPlatform.getCompositeMap();
-                List<MapLayer> mapLayers = map.getMaps();
-                for (MapLayer mapLayer : mapLayers) {
-                    if (mapLayer instanceof GridMap) {
-                        return ((GridMap) mapLayer).getOrigin();
-                    }
-                }
+//                Map map = mRobotPlatform.getMap(MapType.BITMAP_8BIT,
+//                        MapKind.EXPLORE_MAP, knownArea);
+//                com.slamtec.slamware.geometry.PointF origin = map.getOrigin();
+//                return new Location(origin.getX(), origin.getY(), 0);
+//                CompositeMap map = mRobotPlatform.getCompositeMap();
+//                List<MapLayer> mapLayers = map.getMaps();
+//                for (MapLayer mapLayer : mapLayers) {
+//                    if (mapLayer instanceof GridMap) {
+//                        return ((GridMap) mapLayer).getOrigin();
+//                    }
+//                }
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -652,6 +660,13 @@ public final class RobotAgent {
             mWallId = wallId;
         }
         pushJob(mJobRemoveWallById);
+    }
+
+    /**
+     * 移除所有虚拟墙
+     */
+    public void removeWalls() {
+        pushJob(mJobRemoveWalls);
     }
 
     /**
@@ -1378,6 +1393,28 @@ public final class RobotAgent {
             isUpdatingMoveAction = false;
             // 回调动作更新事件
             EventBus.getDefault().post(new MoveActionUpdateEvent(remainingMilestones, remainingPath));
+        }
+    }
+
+    /**
+     * 移除所有虚拟墙
+     */
+    private class JobRemoveWalls implements Runnable {
+        @Override
+        public void run() {
+            SlamwareCorePlatform platform;
+            synchronized (this) {
+                platform = mRobotPlatform;
+                if (platform == null)
+                    return;
+            }
+            try {
+                platform.clearWalls();
+            } catch (Exception e) {
+                onRequestError();
+            }
+            // 更新虚拟墙
+            updateWalls();
         }
     }
 }

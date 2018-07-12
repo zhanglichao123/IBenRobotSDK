@@ -76,18 +76,9 @@
         android:layout_above="@id/mClearBtn"
         android:layout_alignParentEnd="true"
         android:text="点我添加点"/>
-    <!--添加虚拟墙-->
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/mGoHomeBtn"
-        android:layout_alignParentEnd="true">
-
-        <!--添加虚拟墙-->
-        <!--移除虚拟墙-->
-    </RelativeLayout>
     <!--控制器布局-->
     <RelativeLayout
+        android:id="@+id/mControllerLay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -132,4 +123,37 @@
             android:layout_below="@id/mStopBtn"
             android:text="后退"/>
     </RelativeLayout>
+    <!--添加虚拟墙-->
+    <RadioGroup
+        android:id="@+id/mWallGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/mControllerLay">
+        <!--没有虚拟墙操作-->
+        <RadioButton
+            android:id="@+id/mNoneBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="不操作虚拟墙"/>
+        <!--添加虚拟墙操作-->
+        <RadioButton
+            android:id="@+id/mAddWallBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加虚拟墙"/>
+        <!--移除虚拟墙操作-->
+        <RadioButton
+            android:id="@+id/mRemoveWallBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="移除最后一个虚拟墙"/>
+        <!--移除虚拟墙操作-->
+        <RadioButton
+            android:id="@+id/mRemoveAllBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="移除所有虚拟墙"/>
+    </RadioGroup>
+
 </RelativeLayout>

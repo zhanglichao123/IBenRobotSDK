@@ -123,39 +123,25 @@ public class ScrollTileMapView extends SlamBaseView {
         for (int i = 0; i < mLocations.size(); i++) {
             // 定位信息
             Location location = mLocations.get(i);
+            // 约束
+            PointF coordinate = new PointF(location.getX(), location.getY());
+            // 中心点
+            Point center = layoutRotatedCoordinateForPhysicalCoordinate(coordinate, offset);
+            // 要绘制的图片
+            ImageView markerView = new ImageView(getContext());
             // 充电桩位置
             if (i == 0) {
-                // 充电桩约束
-                PointF originCoordinate = new PointF(location.getX(), location.getY());
-                // 中心点
-                Point originCenter = layoutRotatedCoordinateForPhysicalCoordinate(
-                        originCoordinate, offset);
-                // 先把充电桩画到地图上
-                ImageView originView = new ImageView(getContext());
-                originView.setImageBitmap(mHomeImage);
-                // 添加到布局中
-                addView(originView);
-                // 手动测量位置
-                originView.layout(originCenter.x - mMarkerOffsetX, originCenter.y - mMarkerOffsetY,
-                        originCenter.x + mMarkerOffsetX, originCenter.y + mMarkerOffsetY);
-                // 将充电桩点位加入到数组中
-                mMarkerImages.add(originView);
+                markerView.setImageBitmap(mHomeImage);
             } else {
-                // 约束
-                PointF coordinate = new PointF(location.getX(), location.getY());
-                // 中心点
-                Point center = layoutRotatedCoordinateForPhysicalCoordinate(coordinate, offset);
-                // 要绘制的图片
-                ImageView markerView = new ImageView(getContext());
                 markerView.setImageBitmap(mMarkerImage);
-                // 添加到布局中
-                addView(markerView);
-                // 手动测量位置
-                markerView.layout(center.x - mMarkerOffsetX, center.y - mMarkerOffsetY,
-                        center.x + mMarkerOffsetX, center.y + mMarkerOffsetY);
-                // 将点位加入到数组中
-                mMarkerImages.add(markerView);
             }
+            // 添加到布局中
+            addView(markerView);
+            // 手动测量位置
+            markerView.layout(center.x - mMarkerOffsetX, center.y - mMarkerOffsetY,
+                    center.x + mMarkerOffsetX, center.y + mMarkerOffsetY);
+            // 将点位加入到数组中
+            mMarkerImages.add(markerView);
         }
     }
 

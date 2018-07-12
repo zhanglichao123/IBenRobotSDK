@@ -2,12 +2,14 @@ package com.samton.ibenrobotdemo.widgets;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.drawable.GradientDrawable;
 import android.widget.ImageView;
 
+import com.samton.IBenRobotSDK.utils.ImageUtils;
 import com.samton.ibenrobotdemo.R;
 import com.samton.ibenrobotdemo.map.RobotAgent;
 import com.slamtec.slamware.geometry.Line;
@@ -30,6 +32,10 @@ public class VirtualWallView extends SlamBaseView {
     private final static int Slope = 5;
     private static int indicatorOffsetX = 0;
     private static int indicatorOffsetY = 0;
+    /**
+     * 虚拟墙颜色
+     */
+    private static int mWallColor = Color.rgb(188, 37, 38);
     private ImageView wallIndicator_;
     private Vector<Line> walls_;
     private Point startPoint_;
@@ -44,10 +50,13 @@ public class VirtualWallView extends SlamBaseView {
         if (walls_ == null) {
             walls_ = new Vector<>();
         }
+        // 默认从起点开始
         isSetStart_ = false;
-
+        // 画笔抗锯齿
         paint.setAntiAlias(true);
-        paint.setColor(getResources().getColor(android.R.color.holo_orange_light));
+        // 虚拟墙颜色
+        paint.setColor(mWallColor);
+        // 虚拟墙宽度
         paint.setStrokeWidth(4);
         // 允许ViewGroup回调onDraw方法
         setWillNotDraw(false);
@@ -74,10 +83,14 @@ public class VirtualWallView extends SlamBaseView {
         if (isSetStart_) {
             if (wallIndicator_ == null) {
                 wallIndicator_ = new ImageView(getContext());
-                Bitmap indicator = BitmapFactory.decodeResource(getResources(), R.mipmap.virtual_wall_point);
+                GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.shape_start_point);
+                Bitmap indicator = ImageUtils.drawable2Bitmap(drawable);
+//                Bitmap indicator = BitmapFactory.decodeResource(getResources(), R.mipmap.virtual_wall_point);
                 wallIndicator_.setImageBitmap(indicator);
                 indicatorOffsetX = indicator.getWidth() / 2;
                 indicatorOffsetY = indicator.getHeight() / 2;
+//                wallIndicator_.setImageResource(R.drawable.shape_start_point);
+//                wallIndicator_.setImageDrawable(getResources().getDrawable(R.drawable.shape_start_point));
                 addView(wallIndicator_);
             }
             wallIndicator_.layout(startPoint_.x - indicatorOffsetX, startPoint_.y - indicatorOffsetX,

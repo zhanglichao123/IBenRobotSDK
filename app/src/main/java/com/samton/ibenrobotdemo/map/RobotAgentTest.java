@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.samton.IBenRobotSDK.utils.ToastUtils;
@@ -51,7 +52,7 @@ import static com.samton.ibenrobotdemo.events.MapOperationEvent.TYPE_SAVE_MAP;
  * </pre>
  */
 public class RobotAgentTest extends AppCompatActivity
-        implements View.OnClickListener {
+        implements View.OnClickListener, RadioGroup.OnCheckedChangeListener {
     /**
      * 持续运动间隔
      */
@@ -77,9 +78,21 @@ public class RobotAgentTest extends AppCompatActivity
      */
     private final static int MODE_WALL_REMOVE = 2;
     /**
+     * 虚拟墙编辑状态 - 移除
+     */
+    private final static int MODE_WALL_REMOVE_LAST = 3;
+    /**
      * 状态栏高度
      */
     private static int mStatusBarHeight = 0;
+    /**
+     * 是否在虚拟墙编辑模式
+     */
+    private boolean isWallEditMode = false;
+    /**
+     * 虚拟墙编辑模式
+     */
+    private int mWallEditMode = MODE_WALL_NONE;
     /**
      * 地图缩放
      */
@@ -129,17 +142,21 @@ public class RobotAgentTest extends AppCompatActivity
             int x = Math.round(event.getX());
             int y = Math.round(event.getY()) - mStatusBarHeight;
             Point rawPoint = new Point(x, y);
-//            if (isWallEditMode) {
-//                if (wallEditMode == MODE_WALL_ADD) {
-//                    mapView.setVirtualWallIndicator(rawPoint);
-//                } else if (wallEditMode == MODE_WALL_REMOVE) {
-//                    mapView.removeWall(rawPoint);
-//                    wallEditMode = MODE_WALL_NONE;
-//                }
-//            } else {
-//                mMapView.moveTo(rawPoint);
-//            }
-            mMapView.moveTo(rawPoint);
+            // 如果在虚拟墙编辑状态
+            if (isWallEditMode) {
+                // 添加虚拟墙
+                if (mWallEditMode == MODE_WALL_ADD) {
+                    mMapView.setVirtualWallIndicator(rawPoint);
+                }
+                // 移除虚拟墙
+                else if (mWallEditMode == MODE_WALL_REMOVE) {
+                    mMapView.removeWall(rawPoint);
+                    mWallEditMode = MODE_WALL_NONE;
+                }
+            } else {
+                // 不在虚拟墙编辑状态--->行走至点位
+                mMapView.moveTo(rawPoint);
+            }
         }
 
         @Override
@@ -219,6 +236,7 @@ public class RobotAgentTest extends AppCompatActivity
         findViewById(R.id.mLoadBtn).setOnClickListener(this);
         findViewById(R.id.mClearBtn).setOnClickListener(this);
         findViewById(R.id.mAddLocation).setOnClickListener(this);
+        ((RadioGroup) findViewById(R.id.mWallGroup)).setOnCheckedChangeListener(this);
     }
 
     /**
@@ -388,6 +406,8 @@ public class RobotAgentTest extends AppCompatActivity
     public void onEventMainThread(MoveActionUpdateEvent event) {
         mMapView.updateRemainingMilestones(event.getRemainingMilestones(),
                 event.getRemainingPath());
+        // 更新地图
+        mMapView.updateMarker(mLocations);
     }
 
     /**
@@ -495,5 +515,33 @@ public class RobotAgentTest extends AppCompatActivity
         }
         mGestureDetector.onTouchEvent(event);
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        switch (checkedId) {
+            // 没有操作虚拟墙
+            case R.id.mNoneBtn:
+                mWallEditMode = MODE_WALL_NONE;
+                isWallEditMode = false;
+                break;
+            // 添加虚拟墙
+            case R.id.mAddWallBtn:
+                mWallEditMode = MODE_WALL_ADD;
+                isWallEditMode = true;
+                break;
+            // 移除最后一个虚拟墙
+            case R.id.mRemoveWallBtn:
+                mWallEditMode = MODE_WALL_REMOVE_LAST;
+                isWallEditMode = true;
+                break;
+            // 移除所有虚拟墙
+            case R.id.mRemoveAllBtn:
+                mWallEditMode = MODE_WALL_REMOVE;
+                isWallEditMode = true;
+                // 移除所有虚拟墙
+                mRobotAgent.removeWalls();
+                break;
+        }
     }
 }
