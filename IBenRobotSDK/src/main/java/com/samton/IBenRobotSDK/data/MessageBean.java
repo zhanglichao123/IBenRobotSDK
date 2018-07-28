@@ -88,6 +88,15 @@ public final class MessageBean {
             private String message;
             private int flowFlag;
             private int categoryId = -1;
+            private String imgDesc;//图片的描述
+
+            public String getImgDesc() {
+                return imgDesc;
+            }
+
+            public void setImgDesc(String imgDesc) {
+                this.imgDesc = imgDesc;
+            }
 
             public int getCategoryId() {
                 return categoryId;
