@@ -54,7 +54,8 @@ public final class IBenSerialUtil {
         // 打开串口
         try {
             // 设置串口号、波特率，
-            mSerialUtil = new SerialUtil("/dev/ttyS0");
+//            mSerialUtil = new SerialUtil("/dev/ttyS0");// 旧板子
+//            mSerialUtil = new SerialUtil("/dev/ttyS1");//新开发版
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
