@@ -513,9 +513,7 @@ public final class IBenMoveSDK {
                 @Override
                 public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
                     try {
-                        IMoveAction rotate = mRobotPlatform.rotate(rotation);
-                        ActionStatus status = rotate.waitUntilDone();
-                        Log.i("123456789", "checkStatus:" + status + ":" + yaw);
+                        mRobotPlatform.rotate(rotation);
                         e.onNext(true);
                     } catch (Throwable throwable) {
                         e.onNext(false);
