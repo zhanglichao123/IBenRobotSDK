@@ -505,7 +505,7 @@ public final class IBenMoveSDK {
      *
      * @param yaw 偏移量
      */
-    public void rotate(float yaw) {
+    public void rotate(final float yaw) {
         cancelAllActions();
         final Rotation rotation = new Rotation(yaw);
         if (mRobotPlatform != null) {
@@ -513,7 +513,9 @@ public final class IBenMoveSDK {
                 @Override
                 public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
                     try {
-                        mRobotPlatform.rotate(rotation);
+                        IMoveAction rotate = mRobotPlatform.rotate(rotation);
+                        ActionStatus status = rotate.waitUntilDone();
+                        Log.i("123456789", "checkStatus:" + status + ":" + yaw);
                         e.onNext(true);
                     } catch (Throwable throwable) {
                         e.onNext(false);
@@ -534,6 +536,36 @@ public final class IBenMoveSDK {
             });
         } else {
             onRequestError();
+        }
+    }
+
+    public IMoveAction rotate2(float yaw){
+        Rotation rotation = new Rotation(yaw);
+        IMoveAction action = null;
+        if(mRobotPlatform!=null){
+            try {
+                action = mRobotPlatform.rotate(rotation);
+            } catch (RequestFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionTimeOutException e) {
+                e.printStackTrace();
+            } catch (UnauthorizedRequestException e) {
+                e.printStackTrace();
+            } catch (UnsupportedCommandException e) {
+                e.printStackTrace();
+            } catch (ParseInvalidException e) {
+                e.printStackTrace();
+            } catch (InvalidArgumentException e) {
+                e.printStackTrace();
+            } catch (OperationFailException e) {
+                e.printStackTrace();
+            }
+
+            return action;
+        }else{
+            return action;
         }
     }
 

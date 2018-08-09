@@ -14,7 +14,7 @@ public final class HttpUrl {
     /**
      * 是否为测试环境
      */
-    private static final boolean isTest = true;
+    private static final boolean isTest = false;
     /**
      * 服务器地址
      * 正式地址 http://114.55.111.3/
