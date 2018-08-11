@@ -1045,7 +1045,7 @@ public final class IBenMoveSDK {
      * @param callBack    回调函数
      */
     public void loadMap(final String mapNamePath, final MapCallBack callBack) {
-        loadMap(mapNamePath, true, callBack);
+        loadMap(mapNamePath, false, callBack);
     }
 
     /**

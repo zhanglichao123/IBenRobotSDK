@@ -70,21 +70,29 @@ public final class RecordManager {
             mIat.setParameter(SpeechConstant.ACCENT, lag);
         }
         // 采样率为16000单声道音频
-        mIat.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
+//        mIat.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
         // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
-        mIat.setParameter(SpeechConstant.VAD_BOS, "2700");
+        mIat.setParameter(SpeechConstant.VAD_BOS, "5000");
         // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-        mIat.setParameter(SpeechConstant.VAD_EOS, "1200");
+        mIat.setParameter(SpeechConstant.VAD_EOS, "1800");
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
         mIat.setParameter(SpeechConstant.ASR_PTT, "0");
-        // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
-//        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath());
-        // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
-//        mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
         // 网络连接超时时间
         mIat.setParameter(SpeechConstant.NET_TIMEOUT, "4500");
         // 说话的最长时间
         mIat.setParameter(SpeechConstant.KEY_SPEECH_TIMEOUT, "30000");
+        // 录音文件名
+//        String mFileName = System.currentTimeMillis() + "-" + UUID.randomUUID().toString() + ".wav";
+//        File file = new File(Environment.getExternalStorageDirectory() + "/IBenService/voice_recorder_audios");
+//        // 如果文件夹不存在则创建
+//        if (!file.exists() && file.isDirectory()) {
+//            file.mkdir();
+//        }
+//        String path = file.getPath() + "/" + mFileName;
+//        // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
+//        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, path);
+//        // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
+//        mIat.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
     }
 
     /**
