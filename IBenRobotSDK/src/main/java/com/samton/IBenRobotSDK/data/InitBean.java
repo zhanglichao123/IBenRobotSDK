@@ -43,10 +43,19 @@ public final class InitBean {
     private PrintGroupBean printGroup;
     private WorkAttendanceBean workAttendance;
     private String voiceTag;
+    private String preachWord;
     private List<MapsBean> maps;
     private String broadcastImg;
     private String preachImg;
     private int carouselGroupId;
+
+    public String getPreachWord() {
+        return preachWord;
+    }
+
+    public void setPreachWord(String preachWord) {
+        this.preachWord = preachWord;
+    }
 
     public String getBroadcastImg() {
         return broadcastImg == null ? "" : broadcastImg;
