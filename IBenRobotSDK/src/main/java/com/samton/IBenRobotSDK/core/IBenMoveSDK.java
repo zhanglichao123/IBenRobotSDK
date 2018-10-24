@@ -104,6 +104,10 @@ public final class IBenMoveSDK {
      */
     private boolean isConnected = false;
     /**
+     * 是否正在连接机器人
+     */
+    private volatile boolean isConnecting = false;
+    /**
      * 电池电量信息
      */
     private String mBatteryInfo = null;
@@ -127,6 +131,7 @@ public final class IBenMoveSDK {
      * 动作接口
      */
     private IMoveAction moveAction;
+
 
     /**
      * 私有构造
@@ -203,6 +208,7 @@ public final class IBenMoveSDK {
      * @param callBack 连接回调
      */
     public void connectRobot(final String ip, final int port, @NonNull final ConnectCallBack callBack) {
+        isConnecting = true;
         mCallBack = callBack;
         mIp = ip;
         mPort = port;
@@ -229,6 +235,7 @@ public final class IBenMoveSDK {
             }).subscribeOn(Schedulers.single()).observeOn(Schedulers.single()).subscribe(new Consumer<Boolean>() {
                 @Override
                 public void accept(@NonNull Boolean aBoolean) throws Exception {
+                    isConnecting = false;
                     if (aBoolean) {
                         // 如果存在重连的话取消
                         cancelReconnectTimer();
@@ -246,6 +253,7 @@ public final class IBenMoveSDK {
             }, new Consumer<Throwable>() {
                 @Override
                 public void accept(@NonNull Throwable throwable) throws Exception {
+                    isConnecting = false;
                     onRequestError();
                 }
             });
@@ -257,7 +265,9 @@ public final class IBenMoveSDK {
      * 重连机器人
      */
     public void reconnect() {
-        startReconnectTimer();
+        if (!isConnecting) {
+            startReconnectTimer();
+        }
     }
 
     /**
@@ -537,10 +547,10 @@ public final class IBenMoveSDK {
         }
     }
 
-    public IMoveAction rotate2(float yaw){
+    public IMoveAction rotate2(float yaw) {
         Rotation rotation = new Rotation(yaw);
         IMoveAction action = null;
-        if(mRobotPlatform!=null){
+        if (mRobotPlatform != null) {
             try {
                 action = mRobotPlatform.rotate(rotation);
             } catch (RequestFailException e) {
