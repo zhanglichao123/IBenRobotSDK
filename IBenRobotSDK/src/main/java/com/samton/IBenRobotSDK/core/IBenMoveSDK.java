@@ -559,10 +559,10 @@ public final class IBenMoveSDK {
                 e.printStackTrace();
             } catch (OperationFailException e) {
                 e.printStackTrace();
+            } finally {
+                return action;
             }
-
-            return action;
-        }else{
+        } else {
             return action;
         }
     }

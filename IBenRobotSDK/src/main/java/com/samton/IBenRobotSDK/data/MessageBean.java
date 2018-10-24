@@ -89,6 +89,15 @@ public final class MessageBean {
             private int flowFlag;
             private int categoryId = -1;
             private String imgDesc;//图片的描述
+            private Pointlist pointlist;
+
+            public Pointlist getPointlist() {
+                return pointlist;
+            }
+
+            public void setPointlist(Pointlist pointlist) {
+                this.pointlist = pointlist;
+            }
 
             public String getImgDesc() {
                 return imgDesc;
@@ -471,6 +480,90 @@ public final class MessageBean {
                             this.windpower = windpower;
                         }
                     }
+                }
+            }
+
+            public static class Pointlist{
+                private String sceneName;
+                private String slocLocation;
+                private String slocName;
+                private String pointContent;
+                private int sceneId;
+                private String failureContent;
+                private int slocId;
+                private String robUuid;
+                private String wayContent;
+
+                public String getSceneName() {
+                    return sceneName;
+                }
+
+                public void setSceneName(String sceneName) {
+                    this.sceneName = sceneName;
+                }
+
+                public String getSlocLocation() {
+                    return slocLocation;
+                }
+
+                public void setSlocLocation(String slocLocation) {
+                    this.slocLocation = slocLocation;
+                }
+
+                public String getSlocName() {
+                    return slocName;
+                }
+
+                public void setSlocName(String slocName) {
+                    this.slocName = slocName;
+                }
+
+                public String getPointContent() {
+                    return pointContent;
+                }
+
+                public void setPointContent(String pointContent) {
+                    this.pointContent = pointContent;
+                }
+
+                public int getSceneId() {
+                    return sceneId;
+                }
+
+                public void setSceneId(int sceneId) {
+                    this.sceneId = sceneId;
+                }
+
+                public String getFailureContent() {
+                    return failureContent;
+                }
+
+                public void setFailureContent(String failureContent) {
+                    this.failureContent = failureContent;
+                }
+
+                public int getSlocId() {
+                    return slocId;
+                }
+
+                public void setSlocId(int slocId) {
+                    this.slocId = slocId;
+                }
+
+                public String getRobUuid() {
+                    return robUuid;
+                }
+
+                public void setRobUuid(String robUuid) {
+                    this.robUuid = robUuid;
+                }
+
+                public String getWayContent() {
+                    return wayContent;
+                }
+
+                public void setWayContent(String wayContent) {
+                    this.wayContent = wayContent;
                 }
             }
         }
