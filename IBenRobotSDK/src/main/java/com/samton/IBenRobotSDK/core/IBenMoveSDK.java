@@ -1396,7 +1396,6 @@ public final class IBenMoveSDK {
             };
         }
         // 开启计时器
-        mReconnectTimer.cancel();
         mReconnectTimer.schedule(mReconnectTask, 0, 3000);
     }
 
