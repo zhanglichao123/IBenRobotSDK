@@ -93,5 +93,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="这里显示小笨的回话" />
+
+        <TextView
+            android:id="@+id/mSersor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="这里显示 传感器数据" />
     </LinearLayout>
 </ScrollView>
