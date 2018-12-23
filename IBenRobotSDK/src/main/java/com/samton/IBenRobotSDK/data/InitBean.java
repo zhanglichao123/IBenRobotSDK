@@ -29,6 +29,9 @@ public final class InitBean {
      * workAttendance : {"workAttendanceId":69,"companyName":"慧闻科技","startTime":3600000,"endTime":5400000,"state":1}
      * voiceTag : xiaoyan
      */
+    // 存储是否需要低电量播报状态
+    private boolean isSpeakPower30 = true;
+    private boolean isSpeakPower15 = true;
 
     private int rs;
     private DataBean data;
@@ -200,11 +203,30 @@ public final class InitBean {
          * logoImg : http://121.41.40.145:7080/img/deault/company_logo.png
          * questionTip : ["回充电桩","宣讲模式","今天天气怎么样","打印个名片","跳个舞吧","看看我颜值多少分","讲个笑话吧","北京的景区"]
          */
-
         private String leftHeadImg;
         private String rightHeadImg;
         private String logoImg;
         private List<String> questionTip;
+
+        /**
+         * fristMsg : 首次进去欢迎语
+         * contentReply : 首次进去欢迎语
+         * anthomaniacPwd : ["花痴"]
+         * happyPwd : ["高兴"]
+         * sadPwd : ["难过"]
+         * levelPwd : ["双手持平"]
+         * movePwd : ["双手举高"]
+         * rightHandPwd : ["右手举高"]
+         */
+
+        private String fristMsg;
+        private String contentReply;
+        private List<String> anthomaniacPwd;
+        private List<String> happyPwd;
+        private List<String> sadPwd;
+        private List<String> levelPwd;
+        private List<String> movePwd;
+        private List<String> rightHandPwd;
 
         public String getLeftHeadImg() {
             return leftHeadImg;
@@ -236,6 +258,70 @@ public final class InitBean {
 
         public void setQuestionTip(List<String> questionTip) {
             this.questionTip = questionTip;
+        }
+
+        public String getFristMsg() {
+            return fristMsg;
+        }
+
+        public void setFristMsg(String fristMsg) {
+            this.fristMsg = fristMsg;
+        }
+
+        public String getContentReply() {
+            return contentReply;
+        }
+
+        public void setContentReply(String contentReply) {
+            this.contentReply = contentReply;
+        }
+
+        public List<String> getAnthomaniacPwd() {
+            return anthomaniacPwd;
+        }
+
+        public void setAnthomaniacPwd(List<String> anthomaniacPwd) {
+            this.anthomaniacPwd = anthomaniacPwd;
+        }
+
+        public List<String> getHappyPwd() {
+            return happyPwd;
+        }
+
+        public void setHappyPwd(List<String> happyPwd) {
+            this.happyPwd = happyPwd;
+        }
+
+        public List<String> getSadPwd() {
+            return sadPwd;
+        }
+
+        public void setSadPwd(List<String> sadPwd) {
+            this.sadPwd = sadPwd;
+        }
+
+        public List<String> getLevelPwd() {
+            return levelPwd;
+        }
+
+        public void setLevelPwd(List<String> levelPwd) {
+            this.levelPwd = levelPwd;
+        }
+
+        public List<String> getMovePwd() {
+            return movePwd;
+        }
+
+        public void setMovePwd(List<String> movePwd) {
+            this.movePwd = movePwd;
+        }
+
+        public List<String> getRightHandPwd() {
+            return rightHandPwd;
+        }
+
+        public void setRightHandPwd(List<String> rightHandPwd) {
+            this.rightHandPwd = rightHandPwd;
         }
     }
 
@@ -1223,5 +1309,169 @@ public final class InitBean {
         public void setErrorMsg(String errorMsg) {
             this.errorMsg = errorMsg;
         }
+    }
+
+
+    /**
+     * ============================以下是v4.0添加================================
+     */
+    private List<String> sounds;
+    private List<CarouselItemsBean> carouselItems;
+    private List<String> functionManages;
+    private List<String> statusBars;
+    private RobotInfoBean robotInfo;
+
+    public List<String> getSounds() {
+        return sounds;
+    }
+
+    public void setSounds(List<String> sounds) {
+        this.sounds = sounds;
+    }
+
+    public List<CarouselItemsBean> getCarouselItems() {
+        return carouselItems;
+    }
+
+    public void setCarouselItems(List<CarouselItemsBean> carouselItems) {
+        this.carouselItems = carouselItems;
+    }
+
+    public List<String> getFunctionManages() {
+        return functionManages;
+    }
+
+    public void setFunctionManages(List<String> functionManages) {
+        this.functionManages = functionManages;
+    }
+
+    public static class CarouselItemsBean {
+        private String url;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
+
+    public List<String> getStatusBars() {
+        return statusBars;
+    }
+
+    public void setStatusBars(List<String> statusBars) {
+        this.statusBars = statusBars;
+    }
+
+    public RobotInfoBean getRobotInfo() {
+        return robotInfo;
+    }
+
+    public void setRobotInfo(RobotInfoBean robotInfo) {
+        this.robotInfo = robotInfo;
+    }
+
+    public static class RobotInfoBean {
+        /**
+         * robName : 第四版本
+         * timbreId : 1
+         * moveMsg : 移动播报语
+         * thirtyDownMsg : 低于百分之三十
+         * fifteenDownMsg : 低于百分之十五
+         * spotVip : 1
+         * arousalWords : 唤醒词
+         * wakeFlag : 1
+         */
+
+        private String robName;
+        private int timbreId;
+        private String moveMsg;
+        private String thirtyDownMsg;
+        private String fifteenDownMsg;
+        private int spotVip;
+        private String arousalWords;
+        private int wakeFlag;
+
+        public String getRobName() {
+            return robName;
+        }
+
+        public void setRobName(String robName) {
+            this.robName = robName;
+        }
+
+        public int getTimbreId() {
+            return timbreId;
+        }
+
+        public void setTimbreId(int timbreId) {
+            this.timbreId = timbreId;
+        }
+
+        public String getMoveMsg() {
+            return moveMsg;
+        }
+
+        public void setMoveMsg(String moveMsg) {
+            this.moveMsg = moveMsg;
+        }
+
+        public String getThirtyDownMsg() {
+            return thirtyDownMsg;
+        }
+
+        public void setThirtyDownMsg(String thirtyDownMsg) {
+            this.thirtyDownMsg = thirtyDownMsg;
+        }
+
+        public String getFifteenDownMsg() {
+            return fifteenDownMsg;
+        }
+
+        public void setFifteenDownMsg(String fifteenDownMsg) {
+            this.fifteenDownMsg = fifteenDownMsg;
+        }
+
+        public int getSpotVip() {
+            return spotVip;
+        }
+
+        public void setSpotVip(int spotVip) {
+            this.spotVip = spotVip;
+        }
+
+        public String getArousalWords() {
+            return arousalWords;
+        }
+
+        public void setArousalWords(String arousalWords) {
+            this.arousalWords = arousalWords;
+        }
+
+        public int getWakeFlag() {
+            return wakeFlag;
+        }
+
+        public void setWakeFlag(int wakeFlag) {
+            this.wakeFlag = wakeFlag;
+        }
+    }
+
+    public boolean isSpeakPower30() {
+        return isSpeakPower30;
+    }
+
+    public void setSpeakPower30(boolean speakPower30) {
+        isSpeakPower30 = speakPower30;
+    }
+
+    public boolean isSpeakPower15() {
+        return isSpeakPower15;
+    }
+
+    public void setSpeakPower15(boolean speakPower15) {
+        isSpeakPower15 = speakPower15;
     }
 }

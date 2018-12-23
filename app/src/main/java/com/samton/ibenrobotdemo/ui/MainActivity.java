@@ -3,22 +3,19 @@ package com.samton.ibenrobotdemo.ui;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.samton.IBenRobotSDK.core.IBenRecordUtil;
-import com.samton.IBenRobotSDK.core.IBenSerialUtil;
 import com.samton.IBenRobotSDK.core.IBenSensorUtil;
+import com.samton.IBenRobotSDK.core.IBenSerialUtil;
 import com.samton.IBenRobotSDK.core.IBenTTSUtil;
 import com.samton.IBenRobotSDK.data.SensorData;
 import com.samton.IBenRobotSDK.interfaces.ISensorCallBack;
-import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
 import com.samton.IBenRobotSDK.utils.ToastUtils;
 import com.samton.ibenrobotdemo.R;
 import com.samton.ibenrobotdemo.data.SerialMsgHelper;
-import com.samton.ibenrobotdemo.utils.SerialPortFinder;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
