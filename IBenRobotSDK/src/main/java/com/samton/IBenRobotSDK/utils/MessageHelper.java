@@ -153,4 +153,29 @@ public final class MessageHelper {
         }
         return result;
     }
+
+    /**
+     * 通用获取给控制器诙谐消息
+     *
+     * @param command 消息所属种类
+     * @param code    类型>>>0失败，1>>>成功
+     * @param type    消息类型
+     * @param content 要回写的信息
+     * @return 回写信息
+     */
+    public static String getUniteMessage(String command, int code, String type, String content) {
+        String result;
+        try {
+            JSONObject object = new JSONObject();
+            object.put("command", command);
+            object.put("type", type);
+            object.put("code", code);
+            object.put("content", content);
+            result = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            result = "";
+        }
+        return result;
+    }
 }

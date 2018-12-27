@@ -406,11 +406,19 @@ public final class InitBean {
          * positionPoints : [{"name":"\b办公区","location":"00","broadcast":""},{"name":"\b办公区2","location":"00","broadcast":""},{"name":"\b办公区3","location":"00","broadcast":""},{"name":"\b办公区4","location":"00","broadcast":""},{"name":"\b办公区5","location":"00","broadcast":""},{"name":"\b饮水间","location":"01","broadcast":""}]
          * file : http://121.41.40.145:7080/img/mapFile/2018-01-09_623bf7
          */
-
+        private int mapId;
         private String mapName;
         private String imgUrl;
         private String file;
         private List<PositionPointsBean> positionPoints;
+
+        public int getMapId() {
+            return mapId;
+        }
+
+        public void setMapId(int mapId) {
+            this.mapId = mapId;
+        }
 
         public String getMapName() {
             return mapName;
@@ -1210,16 +1218,26 @@ public final class InitBean {
 
     public static class MapsBean {
         /**
+         * mapId : 148
          * mapName : 小笨总部
          * imgUrl : http://121.41.40.145:7080/img/mapImgFile/2018-01-09_592cbe.jpg
          * file : http://121.41.40.145:7080/img/mapFile/2018-01-09_592cbe
          * positionPoints : [{"name":"\b办公区","location":"00","broadcast":""},{"name":"\b饮水间","location":"01","broadcast":""}]
          */
 
+        private String mapId;
         private String mapName;
         private String imgUrl;
         private String file;
         private List<PositionPointsBeanX> positionPoints;
+
+        public String getMapId() {
+            return mapId;
+        }
+
+        public void setMapId(String mapId) {
+            this.mapId = mapId;
+        }
 
         public String getMapName() {
             return mapName;
