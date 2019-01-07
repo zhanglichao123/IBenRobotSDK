@@ -149,6 +149,16 @@ public class RobotTestActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void isOnEmergencyStop(boolean isOn) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mRobotStatus.setText("机器人已开启急停按钮");
+            }
+        });
+    }
+
+    @Override
     public void onStateChange(final ActionStatus status) {
         runOnUiThread(new Runnable() {
             @Override

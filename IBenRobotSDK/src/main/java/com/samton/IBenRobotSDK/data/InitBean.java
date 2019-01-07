@@ -1338,6 +1338,15 @@ public final class InitBean {
     private List<String> functionManages;
     private List<String> statusBars;
     private RobotInfoBean robotInfo;
+    private int expressionGroupId;
+
+    public int getExpressionGroupId() {
+        return expressionGroupId;
+    }
+
+    public void setExpressionGroupId(int expressionGroupId) {
+        this.expressionGroupId = expressionGroupId;
+    }
 
     public List<String> getSounds() {
         return sounds;

@@ -21,7 +21,7 @@ public final class HttpUrl {
      * 测试地址 http://47.96.137.231:7080/
      */
     final static String BASE_URL =
-            isTest ? "http://47.96.137.231:7080/" : "http://kf.ibenrobot.com/";
+            isTest ? "http://43.240.248.100:7080/" : "http://kf.ibenrobot.com/";
     /**
      * 与小笨聊天的地址接口
      * 正式地址 iben_qa/RobotQADispatcher

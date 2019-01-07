@@ -113,9 +113,8 @@ public final class IBenChatSDK {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk sendMessage:"  + throwable.getMessage());
-                        throwable.printStackTrace();
-                        callBack.onSuccess(mTag,getDefaultMessageBean());
+                        LogUtils.d("sdk sendMessage:" + throwable.toString());
+                        callBack.onSuccess(mTag, getDefaultMessageBean());
                     }
                 });
     }
@@ -149,9 +148,8 @@ public final class IBenChatSDK {
                     @Override
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk tag sendMessage:"  + throwable.getMessage());
-                        throwable.printStackTrace();
-                        callBack.onSuccess(mTag,getDefaultMessageBean());
+                        LogUtils.d("sdk tag sendMessage:" + throwable.toString());
+                        callBack.onSuccess(mTag, getDefaultMessageBean());
                     }
                 });
     }
@@ -166,7 +164,7 @@ public final class IBenChatSDK {
         // 回调状态QA为false
         callBack.onStateChange(mTag, false);
         // 发送给人工的消息
-        IBenIMHelper.getInstance().sendTxtMsg(mTag,account, msg);
+        IBenIMHelper.getInstance().sendTxtMsg(mTag, account, msg);
     }
 
     /**
@@ -196,18 +194,18 @@ public final class IBenChatSDK {
                     public void accept(@NonNull Throwable throwable) throws Exception {
                         // 失败回调
                         callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk send2IBen:"  + throwable.getMessage());
-                        throwable.printStackTrace();
-                        callBack.onSuccess(mTag,getDefaultMessageBean());
+                        LogUtils.d("sdk send2IBen:" + throwable.toString());
+                        callBack.onSuccess(mTag, getDefaultMessageBean());
                     }
                 });
     }
 
     /**
-     *  构建 默认的发送消息 请求失败的消息
+     * 构建 默认的发送消息 请求失败的消息
+     *
      * @return
      */
-    public MessageBean getDefaultMessageBean(){
+    public MessageBean getDefaultMessageBean() {
         MessageBean messageBean = new MessageBean();
         MessageBean.DataBean dataBean = new MessageBean.DataBean();
         MessageBean.DataBean.AppMessageBean appMessageBean = new MessageBean.DataBean.AppMessageBean();

@@ -161,6 +161,10 @@ public final class IBenMoveSDK {
      * 回充电桩
      */
     public void goHome(MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         if (mRobotPlatform != null) {
             // 停止当前所有动作
             cancelAllActions();
@@ -700,6 +704,10 @@ public final class IBenMoveSDK {
      * @param callBack 回调
      */
     public void old_go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         if (mRobotPlatform != null) {
             // 首先停止所有动作
             cancelAllActions();
@@ -769,6 +777,10 @@ public final class IBenMoveSDK {
      * @param callBack 回调
      */
     public void go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         if (mRobotPlatform != null) {
             // 首先停止所有动作
             cancelAllActions();
@@ -1184,6 +1196,10 @@ public final class IBenMoveSDK {
      * @param callBack 回调
      */
     private void startLocationTimer(final float yaw, final MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         // 首先停止之前的定时任务
         cancelLocationTimer();
         // 非空判断
@@ -1222,6 +1238,10 @@ public final class IBenMoveSDK {
      * @param callBack 回调
      */
     private void checkStatus(final float yaw, final MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         if (mLocationAction != null) {
             try {
                 ActionStatus currentStatus = mLocationAction.getStatus();
@@ -1265,6 +1285,10 @@ public final class IBenMoveSDK {
      * @param yaw 偏移量
      */
     public void rotateto(float yaw, final MoveCallBack callBack) {
+        if (hasSystemEmergencyStop()) {
+            callBack.isOnEmergencyStop(true);
+            return;
+        }
         final Rotation rotation = new Rotation(yaw);
         Log.i("123456789", "rotateto:" + yaw);
         if (mRobotPlatform != null) {
@@ -1339,21 +1363,14 @@ public final class IBenMoveSDK {
                 public void run() {
                     try {
                         mRobotPlatform.moveBy(direction);
-                    } catch (RequestFailException e) {
-                        e.printStackTrace();
-                    } catch (ConnectionFailException e) {
-                        e.printStackTrace();
-                    } catch (ConnectionTimeOutException e) {
-                        e.printStackTrace();
-                    } catch (UnauthorizedRequestException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedCommandException e) {
-                        e.printStackTrace();
-                    } catch (ParseInvalidException e) {
-                        e.printStackTrace();
-                    } catch (InvalidArgumentException e) {
-                        e.printStackTrace();
-                    } catch (OperationFailException e) {
+                    } catch (RequestFailException
+                            | ConnectionFailException
+                            | ConnectionTimeOutException
+                            | UnauthorizedRequestException
+                            | ParseInvalidException
+                            | InvalidArgumentException
+                            | OperationFailException
+                            | UnsupportedCommandException e) {
                         e.printStackTrace();
                     }
                 }
@@ -1414,6 +1431,28 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 判断底盘急停按钮是否开启
+     */
+    private boolean hasSystemEmergencyStop() {
+        if (mRobotPlatform == null) {
+            onRequestError();
+            return true;
+        }
+        try {
+            return mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
+        } catch (RequestFailException
+                | ConnectionFailException
+                | UnauthorizedRequestException
+                | ConnectionTimeOutException
+                | InvalidArgumentException
+                | UnsupportedCommandException
+                | ParseInvalidException e) {
+            LogUtils.e("判断底盘急停按钮是否开启：" + e.toString());
+            return true;
+        }
+    }
+
+    /**
      * 机器人连接回调
      */
     public interface ConnectCallBack {
@@ -1448,6 +1487,11 @@ public final class IBenMoveSDK {
      */
     public interface MoveCallBack {
         /**
+         * 急停按钮状态回调
+         */
+        void isOnEmergencyStop(boolean isOn);
+
+        /**
          * 机器人状态变更
          *
          * @param status 状态值(思岚ActionStatus枚举)
@@ -1471,5 +1515,4 @@ public final class IBenMoveSDK {
          */
         void onFailed();
     }
-
 }
