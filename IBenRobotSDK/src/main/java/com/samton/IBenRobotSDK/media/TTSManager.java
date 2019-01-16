@@ -9,7 +9,6 @@ import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.iflytek.cloud.util.ResourceUtil;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 
 /**
  * <pre>
@@ -30,6 +29,22 @@ public final class TTSManager {
      * 语音合成对象
      */
     private SpeechSynthesizer mTts;
+    /**
+     * 音色，默认发音人为小燕
+     */
+    private String ttsName = "xiaoyan";
+    /**
+     * 语速
+     */
+    private String ttsSpeed = "50";
+    /**
+     * 音调
+     */
+    private String ttsPitch = "50";
+    /**
+     * 音量
+     */
+    private String ttsVolume = "100";
 
     /**
      * 构造函数
@@ -66,19 +81,17 @@ public final class TTSManager {
         }
         // 设置离线发音人
         else {
-            // 默认发音人为小燕
-            String voiceName = SPUtils.getInstance().getString("voiceSpeaker", "xiaoyan");
             // 设置发音人
-            mTts.setParameter(SpeechConstant.VOICE_NAME, voiceName);
+            mTts.setParameter(SpeechConstant.VOICE_NAME, ttsName);
             // 设置发音人资源路径
-            mTts.setParameter(ResourceUtil.TTS_RES_PATH, getResourcePath(voiceName));
+            mTts.setParameter(ResourceUtil.TTS_RES_PATH, getResourcePath(ttsName));
         }
         // 设置合成语速
-        mTts.setParameter(SpeechConstant.SPEED, "50");
+        mTts.setParameter(SpeechConstant.SPEED, ttsSpeed);
         // 设置合成音调
-        mTts.setParameter(SpeechConstant.PITCH, "50");
+        mTts.setParameter(SpeechConstant.PITCH, ttsPitch);
         // 设置合成音量
-        mTts.setParameter(SpeechConstant.VOLUME, "100");
+        mTts.setParameter(SpeechConstant.VOLUME, ttsVolume);
         // 设置播放器音频流类型
         mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
         // 设置播放合成音频打断音乐播放，默认为true
@@ -144,5 +157,37 @@ public final class TTSManager {
      */
     public boolean isSpeaking() {
         return mTts.isSpeaking();
+    }
+
+    public String getTtsName() {
+        return ttsName;
+    }
+
+    public void setTtsName(String ttsName) {
+        this.ttsName = ttsName;
+    }
+
+    public String getTtsSpeed() {
+        return ttsSpeed;
+    }
+
+    public void setTtsSpeed(String ttsSpeed) {
+        this.ttsSpeed = ttsSpeed;
+    }
+
+    public String getTtsPitch() {
+        return ttsPitch;
+    }
+
+    public void setTtsPitch(String ttsPitch) {
+        this.ttsPitch = ttsPitch;
+    }
+
+    public String getTtsVolume() {
+        return ttsVolume;
+    }
+
+    public void setTtsVolume(String ttsVolume) {
+        this.ttsVolume = ttsVolume;
     }
 }

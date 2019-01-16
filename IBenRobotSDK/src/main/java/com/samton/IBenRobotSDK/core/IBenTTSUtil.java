@@ -2,6 +2,7 @@ package com.samton.IBenRobotSDK.core;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SynthesizerListener;
@@ -188,6 +189,32 @@ public final class IBenTTSUtil {
             mTTSManager.destroy();
             // 清空回调函数
             callBack = null;
+        }
+    }
+
+    /**
+     * 配置语音合成参数
+     *
+     * @param ttsName   音色对应名字
+     * @param ttsSpeed  语速
+     * @param ttsPitch  音调
+     * @param ttsVolume 音量
+     */
+    public void setTTSParam(String ttsName, String ttsSpeed, String ttsPitch, String ttsVolume) {
+        if (mTTSManager != null) {
+            return;
+        }
+        if (!TextUtils.isEmpty(ttsName)) {
+            mTTSManager.setTtsName(ttsName);
+        }
+        if (!TextUtils.isEmpty(ttsSpeed)) {
+            mTTSManager.setTtsSpeed(ttsSpeed);
+        }
+        if (!TextUtils.isEmpty(ttsPitch)) {
+            mTTSManager.setTtsPitch(ttsPitch);
+        }
+        if (!TextUtils.isEmpty(ttsVolume)) {
+            mTTSManager.setTtsVolume(ttsVolume);
         }
     }
 }
