@@ -50,6 +50,8 @@ public final class MainSDK {
         readMetaDataFromApplication(app);
         // 初始化有道在线翻译功能
         YouDaoApplication.init(app, YOU_DAO_APP_ID);
+        // 初始化深度摄像头
+        // OpenNI.initialize();
     }
 
     /**

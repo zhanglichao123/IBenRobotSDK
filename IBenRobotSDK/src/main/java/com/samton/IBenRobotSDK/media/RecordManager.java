@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.LexiconListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechRecognizer;
@@ -129,5 +130,19 @@ public final class RecordManager {
      */
     public boolean isListening() {
         return mIat != null && mIat.isListening();
+    }
+
+    /**
+     * 开放接口更新热词
+     *
+     * @param name
+     * @param content
+     * @param listener
+     */
+    public int updateLexicon(String name, String content, LexiconListener listener) {
+        if (mIat == null) {
+            return ErrorCode.MSP_ERROR_FAIL;
+        }
+        return mIat.updateLexicon(name, content, listener);
     }
 }

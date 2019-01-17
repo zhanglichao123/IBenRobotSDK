@@ -160,9 +160,9 @@ public final class IBenMoveSDK {
     /**
      * 回充电桩
      */
-    public void goHome(MoveCallBack callBack) {
+    public void goHome(MoveCallBack callBack, StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         if (mRobotPlatform != null) {
@@ -174,7 +174,7 @@ public final class IBenMoveSDK {
                 // 让机器人回充电桩
                 mLocationAction = mRobotPlatform.goHome();
                 // 创建回桩状态定时器
-                startLocationTimer(-99, callBack);
+                startLocationTimer(-99, callBack, btnState);
             } catch (Throwable throwable) {
                 onRequestError();
             }
@@ -262,7 +262,6 @@ public final class IBenMoveSDK {
                 }
             });
         }
-
     }
 
     /**
@@ -391,7 +390,11 @@ public final class IBenMoveSDK {
      *
      * @param direction 方向
      */
-    public void moveByDirection(MoveDirection direction) {
+    public void moveByDirection(MoveDirection direction, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         cancelAllActions();
         final MoveDirection moveDirection = direction;
         if (moveDirection != null && mRobotPlatform != null) {
@@ -430,7 +433,11 @@ public final class IBenMoveSDK {
      * @param direction 方向
      * @param period    间隔
      */
-    public void moveByDirection(MoveDirection direction, long period) {
+    public void moveByDirection(MoveDirection direction, long period, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         cancelAllActions();
         if (direction != null && mRobotPlatform != null) {
             // 开启运动计时器，定时移动
@@ -445,7 +452,11 @@ public final class IBenMoveSDK {
      *
      * @param angle 需要旋转的角度
      */
-    public void rotate(double angle) {
+    public void rotate(double angle, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         cancelAllActions();
         float tempAngle = (float) (angle / 180 * Math.PI);
         final Rotation rotation = new Rotation(tempAngle);
@@ -483,7 +494,11 @@ public final class IBenMoveSDK {
      *
      * @param rotation 角度
      */
-    public void rotate(final Rotation rotation) {
+    public void rotate(final Rotation rotation, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         cancelAllActions();
         if (mRobotPlatform != null) {
             Observable.create(new ObservableOnSubscribe<Boolean>() {
@@ -519,7 +534,11 @@ public final class IBenMoveSDK {
      *
      * @param yaw 偏移量
      */
-    public void rotate(final float yaw) {
+    public void rotate(final float yaw, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         cancelAllActions();
         final Rotation rotation = new Rotation(yaw);
         if (mRobotPlatform != null) {
@@ -551,7 +570,11 @@ public final class IBenMoveSDK {
         }
     }
 
-    public IMoveAction rotate2(float yaw) {
+    public IMoveAction rotate2(float yaw, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return null;
+        }
         Rotation rotation = new Rotation(yaw);
         IMoveAction action = null;
         if (mRobotPlatform != null) {
@@ -637,7 +660,6 @@ public final class IBenMoveSDK {
             onRequestError();
             return null;
         }
-
     }
 
     /**
@@ -664,7 +686,11 @@ public final class IBenMoveSDK {
      *
      * @param pose 当前姿态
      */
-    private void setPose(final Pose pose) {
+    private void setPose(final Pose pose, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
         if (pose != null) {
             if (mRobotPlatform != null) {
                 Observable.create(new ObservableOnSubscribe<Boolean>() {
@@ -703,9 +729,10 @@ public final class IBenMoveSDK {
      * @param yaw      角度
      * @param callBack 回调
      */
-    public void old_go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
+    public void old_go2Location(final Location location, final float yaw,
+                                final MoveCallBack callBack, final StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         if (mRobotPlatform != null) {
@@ -719,7 +746,7 @@ public final class IBenMoveSDK {
                         if (location != null) {
                             // 脱桩操作
                             if (isHome()) {
-                                moveByDirection(MoveDirection.FORWARD, 300);
+                                moveByDirection(MoveDirection.FORWARD, 300, btnState);
                                 SystemClock.sleep(1000);
                                 cancelAllActions();
                                 SystemClock.sleep(500);
@@ -750,7 +777,7 @@ public final class IBenMoveSDK {
                                 onRequestError();
                             } else {
                                 // 创建定点回调计时器
-                                startLocationTimer(yaw, callBack);
+                                startLocationTimer(yaw, callBack, btnState);
                             }
                         }
 
@@ -776,9 +803,10 @@ public final class IBenMoveSDK {
      * @param yaw      角度
      * @param callBack 回调
      */
-    public void go2Location(final Location location, final float yaw, final MoveCallBack callBack) {
+    public void go2Location(final Location location, final float yaw,
+                            final MoveCallBack callBack, final StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         if (mRobotPlatform != null) {
@@ -792,7 +820,7 @@ public final class IBenMoveSDK {
                         if (location != null) {
                             // 脱桩操作
                             if (isHome()) {
-                                moveByDirection(MoveDirection.FORWARD, 300);
+                                moveByDirection(MoveDirection.FORWARD, 300, btnState);
                                 SystemClock.sleep(1000);
                                 cancelAllActions();
                                 SystemClock.sleep(500);
@@ -825,7 +853,7 @@ public final class IBenMoveSDK {
                                 onRequestError();
                             } else {
                                 // 创建定点回调计时器
-                                startLocationTimer(yaw, callBack);
+                                startLocationTimer(yaw, callBack, btnState);
                             }
                         }
 
@@ -1195,9 +1223,11 @@ public final class IBenMoveSDK {
      *
      * @param callBack 回调
      */
-    private void startLocationTimer(final float yaw, final MoveCallBack callBack) {
+    private void startLocationTimer(final float yaw,
+                                    final MoveCallBack callBack,
+                                    final StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         // 首先停止之前的定时任务
@@ -1210,7 +1240,7 @@ public final class IBenMoveSDK {
             mLocationTask = new TimerTask() {
                 @Override
                 public void run() {
-                    checkStatus(yaw, callBack);
+                    checkStatus(yaw, callBack, btnState);
                 }
             };
         }
@@ -1237,9 +1267,11 @@ public final class IBenMoveSDK {
      *
      * @param callBack 回调
      */
-    private void checkStatus(final float yaw, final MoveCallBack callBack) {
+    private void checkStatus(final float yaw,
+                             final MoveCallBack callBack,
+                             final StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         if (mLocationAction != null) {
@@ -1253,7 +1285,7 @@ public final class IBenMoveSDK {
                         callBack.onStateChange(currentStatus);
                     } else {
                         if (currentStatus.equals(ActionStatus.FINISHED)) {
-                            rotateto(yaw, callBack);
+                            rotateto(yaw, callBack, btnState);
                         } else {
                             callBack.onStateChange(currentStatus);
                         }
@@ -1284,9 +1316,9 @@ public final class IBenMoveSDK {
      *
      * @param yaw 偏移量
      */
-    public void rotateto(float yaw, final MoveCallBack callBack) {
+    public void rotateto(float yaw, final MoveCallBack callBack, StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
-            callBack.isOnEmergencyStop(true);
+            btnState.isOnEmergencyStop(true);
             return;
         }
         final Rotation rotation = new Rotation(yaw);
@@ -1483,14 +1515,21 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 急停按钮状态回调
+     */
+    public interface StopBtnState {
+        /**
+         * 按钮状态回调
+         *
+         * @param isOn 是否开启
+         */
+        void isOnEmergencyStop(boolean isOn);
+    }
+
+    /**
      * 动作回调
      */
     public interface MoveCallBack {
-        /**
-         * 急停按钮状态回调
-         */
-        void isOnEmergencyStop(boolean isOn);
-
         /**
          * 机器人状态变更
          *

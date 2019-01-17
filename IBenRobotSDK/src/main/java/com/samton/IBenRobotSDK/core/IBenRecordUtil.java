@@ -4,9 +4,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.iflytek.cloud.ErrorCode;
+import com.iflytek.cloud.LexiconListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.util.UserWords;
 import com.samton.IBenRobotSDK.interfaces.IBenRecordCallBack;
 import com.samton.IBenRobotSDK.media.RecordManager;
 import com.samton.IBenRobotSDK.utils.SPUtils;
@@ -16,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -270,5 +274,21 @@ public final class IBenRecordUtil {
             e.printStackTrace();
         }
         return sb.toString();
+    }
+
+    /**
+     * 开放接口更新热词
+     *
+     * @param name
+     * @param hotWords
+     * @param listener
+     */
+    public int updateLexicon(String name, ArrayList hotWords, LexiconListener listener) {
+        if (mRecordManager == null || hotWords == null || hotWords.size() <= 0) {
+            return ErrorCode.MSP_ERROR_FAIL;
+        }
+        UserWords userWords = new UserWords();
+        userWords.putWords("默认热词", hotWords);
+        return mRecordManager.updateLexicon(name, userWords.toString(), listener);
     }
 }
