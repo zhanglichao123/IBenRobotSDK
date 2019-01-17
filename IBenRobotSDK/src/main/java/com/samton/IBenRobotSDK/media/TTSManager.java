@@ -9,6 +9,7 @@ import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.iflytek.cloud.util.ResourceUtil;
 import com.samton.IBenRobotSDK.utils.LogUtils;
+import com.samton.IBenRobotSDK.utils.SPUtils;
 
 /**
  * <pre>
@@ -81,6 +82,8 @@ public final class TTSManager {
         }
         // 设置离线发音人
         else {
+            // 目前IBenTTSUtil.setTTSParam()未启用，保留此行（修改音色）
+            ttsName = SPUtils.getInstance().getString("voiceSpeaker", "xiaoyan");
             // 设置发音人
             mTts.setParameter(SpeechConstant.VOICE_NAME, ttsName);
             // 设置发音人资源路径
