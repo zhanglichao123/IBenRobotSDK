@@ -27,7 +27,8 @@ import com.slamtec.slamware.robot.Location;
 public class RobotTestActivity extends AppCompatActivity implements
         View.OnClickListener,
         IBenMoveSDK.ConnectCallBack,
-        IBenMoveSDK.MoveCallBack {
+        IBenMoveSDK.MoveCallBack,
+        IBenMoveSDK.StopBtnState {
 
     /**
      * 机器人状态显示
@@ -105,7 +106,7 @@ public class RobotTestActivity extends AppCompatActivity implements
                 }
                 Location location = new Location(
                         Float.valueOf(x), Float.valueOf(y), 0);
-                moveSDK.go2Location(location, Float.valueOf(yaw), this);
+                moveSDK.go2Location(location, Float.valueOf(yaw), this, this);
             default:
                 break;
         }
