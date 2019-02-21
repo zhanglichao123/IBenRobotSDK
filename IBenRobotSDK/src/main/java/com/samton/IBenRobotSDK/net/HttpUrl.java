@@ -15,37 +15,56 @@ public final class HttpUrl {
      * 是否为测试环境
      */
     private static final boolean isTest = true;
+
+    /**
+     * 返回给外部是否处于测试环境
+     */
+    public static boolean getIsTest() {
+        return isTest;
+    }
+
     /**
      * 服务器地址
      * 正式地址 http://114.55.111.3/
      * 测试地址 http://47.96.137.231:7080/
      */
-    final static String BASE_URL =
-            isTest ? "http://43.240.248.100:7080/" : "http://kf.ibenrobot.com/";
+    final static String BASE_URL = isTest ? "http://43.240.248.100:7080/" : "http://kf.ibenrobot.com/";
+
     /**
      * 与小笨聊天的地址接口
      * 正式地址 iben_qa/RobotQADispatcher
      * 测试地址 iben_qa/RobotQADispatcher
      */
     final static String CHAT = isTest ? "iben_qa/RobotQADispatcher" : "iben_qa/RobotQADispatcher";
+
     /**
      * 激活机器人信息接口
      * 正式地址 robotInfo/activeRobot
      * 测试地址 XiaoBenManager/robotInfo/activeRobot
      */
     final static String ADD_ROBOT_INFO = isTest ? "XiaoBenManager/robotInfo/activeRobot" : "robotInfo/activeRobot";
+
     /**
      * 初始化机器人信息接口
      * 正式地址 robotInfo/robotInitNew
      * 测试地址 XiaoBenManager/robotInfo/robotInitNew
      */
     final static String INIT_ROBOT_INFO = isTest ? "XiaoBenManager/robotInfo/robotInitNew" : "robotInfo/robotInitNew";
+
     /**
      * 获取开关状态接口
      * 正式地址 robotInfo/getRobotChatFlag
      * 测试地址 XiaoBenManager/robotInfo/getRobotChatFlag
      */
     final static String GET_ROBOT_CHAT_FLAG = isTest ? "XiaoBenManager/robotInfo/getRobotChatFlag" : "robotInfo/getRobotChatFlag";
+
+    /**
+     * 主动唤醒数据
+     * 正式地址 faceinfo/activeInteraction
+     * 测试地址 XiaoBenManager/faceinfo/activeInteraction
+     */
+    final static String RECOGNITION_FACE = isTest ? "XiaoBenManager/faceinfo/activeInteraction" : "faceinfo/activeInteraction";
+
     /**
      * 富文本连接头
      * 正式地址 resources/views/show.html?content=

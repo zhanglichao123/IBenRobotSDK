@@ -24,6 +24,11 @@ android {
     }
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
 dependencies {
     // 导入jar包
     provided fileTree(include: ['*.jar'], dir: 'libs')
@@ -31,6 +36,9 @@ dependencies {
     provided 'com.android.support:appcompat-v7:25.3.1'
     provided 'com.android.support:support-v4:25.3.1'
     provided 'com.android.support:design:25.3.1'
+    // Face++
+    provided(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
+    provided(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
     // RxJava
     provided 'io.reactivex.rxjava2:rxjava:2.1.0'
     provided 'io.reactivex.rxjava2:rxandroid:2.0.1'
@@ -41,11 +49,18 @@ dependencies {
     // 让Retrofit支持RxJava
     provided 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
 }
+
 task releaseJar(type: Copy) {
+    //SDK-jar名称
+    String JAR_NAME = 'IBenRobotSDK_' + android.defaultConfig.versionName + '.jar'
+    //设置拷贝的文件目录
     from('build/intermediates/bundles/debug/classes.jar')
+    //jar包存放的文件目录
     into('build/outputs/')
-    String jarName = 'IBenRobotSDK_' + android.defaultConfig.versionName + '.jar'
-    rename('classes.jar', jarName)
+    //include ,exclude参数来设置过滤，也可以直接写在from()的文件路径里
+    include('classes.jar')
+    //重命名
+    rename('classes.jar', JAR_NAME)
 }
 android.libraryVariants.all {
     it.generateBuildConfig.enabled = false

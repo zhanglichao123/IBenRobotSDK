@@ -8,12 +8,13 @@ import android.text.TextUtils;
 
 import com.iflytek.cloud.SpeechUtility;
 import com.samton.IBenRobotSDK.data.ActiveBean;
+import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
+import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpRequest;
 import com.samton.IBenRobotSDK.net.HttpUtil;
 import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
-import com.youdao.sdk.app.YouDaoApplication;
 
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
@@ -22,36 +23,28 @@ import io.reactivex.schedulers.Schedulers;
 import static com.samton.IBenRobotSDK.data.Constants.APP_ID;
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_IM_ACCOUNT;
-import static com.samton.IBenRobotSDK.data.Constants.YOU_DAO_APP_ID;
-
 
 /**
- * <pre>
- *     author : syk
- *     e-mail : shenyukun1024@gmail.com
- *     time   : 2017/09/07
- *     desc   : 机器人SDK入口
- *     version: 1.1
- * </pre>
+ * author : syk
+ * e-mail : shenyukun1024@gmail.com
+ * time   : 2017/09/07
+ * desc   : 机器人SDK入口
  */
-
 public final class MainSDK {
+    private static Application mApplication;
+
     /**
      * 初始化机器人SDK
      *
-     * @param app Application对象
+     * @param mApplication Application对象
      */
-    private MainSDK(Application app) {
+    private MainSDK(Application mApplication) {
         // 初始化工具类
-        Utils.init(app);
-        // 科大讯飞的语音系统
-        SpeechUtility.createUtility(app, APP_ID);
+        Utils.init(mApplication);
         // 读取XML中的必须配置
-        readMetaDataFromApplication(app);
-        // 初始化有道在线翻译功能
-        YouDaoApplication.init(app, YOU_DAO_APP_ID);
-        // 初始化深度摄像头
-        // OpenNI.initialize();
+        readMetaDataFromApplication(mApplication);
+        // 科大讯飞的语音系统
+        SpeechUtility.createUtility(mApplication, APP_ID);
     }
 
     /**
@@ -62,7 +55,30 @@ public final class MainSDK {
      * @return SDK对象
      */
     public static MainSDK init(Application app) {
+        mApplication = app;
         return new MainSDK(app);
+    }
+
+    /**
+     * 单独初始化Fece++
+     */
+    public void initFacepp(final int faceppRawId) {
+        final FaceManager faceManager = FaceManager.getInstance();
+        // 检验人脸识别证书是否过期
+        faceManager.CheckFaceLicense(mApplication, faceppRawId, new FaceCheckLicenseCallBack() {
+            @Override
+            public void onCheckSuccess() {
+                LogUtils.e("加载证书成功");
+                // 初始化人脸识别
+                faceManager.initCheckFace(mApplication, faceppRawId);
+            }
+
+            @Override
+            public void onCheckFail(String errorMessage) {
+                LogUtils.e("加载证书失败" + errorMessage);
+                throw new UnsupportedOperationException("加载证书失败" + errorMessage);
+            }
+        });
     }
 
     /**

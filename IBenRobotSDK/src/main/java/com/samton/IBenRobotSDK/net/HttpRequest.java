@@ -4,15 +4,16 @@ import com.samton.IBenRobotSDK.data.ActiveBean;
 import com.samton.IBenRobotSDK.data.ChatFlagBean;
 import com.samton.IBenRobotSDK.data.InitBean;
 import com.samton.IBenRobotSDK.data.MessageBean;
+import com.samton.IBenRobotSDK.data.RouseBean;
 
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
-
-import static com.samton.IBenRobotSDK.net.HttpUrl.ADD_ROBOT_INFO;
-import static com.samton.IBenRobotSDK.net.HttpUrl.CHAT;
-import static com.samton.IBenRobotSDK.net.HttpUrl.GET_ROBOT_CHAT_FLAG;
-import static com.samton.IBenRobotSDK.net.HttpUrl.INIT_ROBOT_INFO;
 
 /**
  * <pre>
@@ -31,7 +32,7 @@ public interface HttpRequest {
      * @param robUuid 机器人ID
      * @return 机器人聊天状态观察者对象
      */
-    @GET(GET_ROBOT_CHAT_FLAG)
+    @GET(HttpUrl.GET_ROBOT_CHAT_FLAG)
     Observable<ChatFlagBean> getRobotChatFlag(@Query("robUuid") String robUuid);
 
     /**
@@ -42,8 +43,9 @@ public interface HttpRequest {
      * @param message 聊天信息
      * @return 跟小笨聊天的观察者对象
      */
-    @GET(CHAT)
-    Observable<MessageBean> send2IBen(@Query("appKey") String appKey, @Query("time") String time,
+    @GET(HttpUrl.CHAT)
+    Observable<MessageBean> send2IBen(@Query("appKey") String appKey,
+                                      @Query("time") String time,
                                       @Query("message") String message);
 
     /**
@@ -52,7 +54,7 @@ public interface HttpRequest {
      * @param appKey 机器人ID
      * @return 激活机器人观察者对象
      */
-    @GET(ADD_ROBOT_INFO)
+    @GET(HttpUrl.ADD_ROBOT_INFO)
     Observable<ActiveBean> activeRobot(@Query("robUuid") String appKey);
 
     /**
@@ -61,6 +63,18 @@ public interface HttpRequest {
      * @param appKey 机器人ID
      * @return 初始化机器人观察者对象
      */
-    @GET(INIT_ROBOT_INFO)
+    @GET(HttpUrl.INIT_ROBOT_INFO)
     Observable<InitBean> initRobot(@Query("robotUUID") String appKey);
+
+    /**
+     * 主动唤醒人脸检测接口
+     *
+     * @param file      人脸文件
+     * @param robotuuid 机器人UUID
+     * @return 人脸属性观察者对象
+     */
+    @Multipart
+    @POST(HttpUrl.RECOGNITION_FACE)
+    Observable<RouseBean> recognitionFace(@Part MultipartBody.Part file,
+                                          @Part("robotUuid") RequestBody robotuuid);
 }
