@@ -51,6 +51,15 @@ public final class InitBean {
     private String broadcastImg;
     private String preachImg;
     private int carouselGroupId;
+    private int workModeid;
+
+    public int getWorkModeid() {
+        return workModeid;
+    }
+
+    public void setWorkModeid(int workModeid) {
+        this.workModeid = workModeid;
+    }
 
     public String getPreachWord() {
         return preachWord;
@@ -565,27 +574,28 @@ public final class InitBean {
     }
 
     public static class MeetingBean {
+
         /**
-         * meetingId : 90
-         * name : 小笨大会议
-         * meetingDate : 1515513600000
-         * meetingStartTime : 3600000
-         * meetingEndTime : 10800000
-         * newVisitorWords : 你好呀
-         * repeatVisitorWords : 你来过了
-         * vipVisitorWords : vip你好
-         * state : 1
+         * meetingId : 121
+         * name : V4.0会场签到3
+         * meetingStartTime : 1551666600000
+         * meetingEndTime : 1551711600000
+         * newVisitorWords : 欢迎#性别#入场
+         * repeatVisitorWords : 您已签到成功，无需重复签到
+         * vipVisitorWords : 欢迎vip#姓氏##性别#入场
+         * photoGroupId : 93
+         * guideWords : 没有签到的嘉宾请到这里签到
          */
 
         private int meetingId;
         private String name;
-        private long meetingDate;
-        private int meetingStartTime;
-        private int meetingEndTime;
+        private long meetingStartTime;
+        private long meetingEndTime;
         private String newVisitorWords;
         private String repeatVisitorWords;
         private String vipVisitorWords;
-        private int state;
+        private int photoGroupId;
+        private String guideWords;
 
         public int getMeetingId() {
             return meetingId;
@@ -603,27 +613,19 @@ public final class InitBean {
             this.name = name;
         }
 
-        public long getMeetingDate() {
-            return meetingDate;
-        }
-
-        public void setMeetingDate(long meetingDate) {
-            this.meetingDate = meetingDate;
-        }
-
-        public int getMeetingStartTime() {
+        public long getMeetingStartTime() {
             return meetingStartTime;
         }
 
-        public void setMeetingStartTime(int meetingStartTime) {
+        public void setMeetingStartTime(long meetingStartTime) {
             this.meetingStartTime = meetingStartTime;
         }
 
-        public int getMeetingEndTime() {
+        public long getMeetingEndTime() {
             return meetingEndTime;
         }
 
-        public void setMeetingEndTime(int meetingEndTime) {
+        public void setMeetingEndTime(long meetingEndTime) {
             this.meetingEndTime = meetingEndTime;
         }
 
@@ -651,12 +653,20 @@ public final class InitBean {
             this.vipVisitorWords = vipVisitorWords;
         }
 
-        public int getState() {
-            return state;
+        public int getPhotoGroupId() {
+            return photoGroupId;
         }
 
-        public void setState(int state) {
-            this.state = state;
+        public void setPhotoGroupId(int photoGroupId) {
+            this.photoGroupId = photoGroupId;
+        }
+
+        public String getGuideWords() {
+            return guideWords;
+        }
+
+        public void setGuideWords(String guideWords) {
+            this.guideWords = guideWords;
         }
     }
 
@@ -1152,27 +1162,51 @@ public final class InitBean {
     }
 
     public static class WorkAttendanceBean {
+
         /**
-         * workAttendanceId : 69
-         * companyName : 慧闻科技
-         * startTime : 3600000
-         * endTime : 5400000
-         * state : 1
+         * workAttendanceId : 116
+         * startTime : 36000000
+         * endTime : 55800000
+         * faceCount : 3
+         * startWarnTime : 1800000
+         * inworkContent : #姓氏##性别#上班打卡成功
+         * startWarnContent : 还有半小时就要上班了
+         * offworkContent : #姓名##性别#下班打卡成功
+         * photoGroupId : 128
+         * notEmployeeContent : 上班打卡仅本公司内部使用
+         * specialContent : #姓氏##姓名#打卡成功
+         * bufferTime : 6
          */
 
         private int workAttendanceId;
-        private String companyName;
         private int startTime;
         private int endTime;
-        private int state;
         private int faceCount;
+        private int startWarnTime;
+        private String inworkContent;
+        private String startWarnContent;
+        private String offworkContent;
+        private int photoGroupId;
+        private String notEmployeeContent;
+        private String specialContent;
+        private int bufferTime;
+        private String companyName;
+        private int workFaceCount;
 
-        public int getFaceCount() {
-            return faceCount;
+        public String getCompanyName() {
+            return companyName;
         }
 
-        public void setFaceCount(int faceCount) {
-            this.faceCount = faceCount;
+        public void setCompanyName(String companyName) {
+            this.companyName = companyName;
+        }
+
+        public int getWorkFaceCount() {
+            return workFaceCount;
+        }
+
+        public void setWorkFaceCount(int workFaceCount) {
+            this.workFaceCount = workFaceCount;
         }
 
         public int getWorkAttendanceId() {
@@ -1181,14 +1215,6 @@ public final class InitBean {
 
         public void setWorkAttendanceId(int workAttendanceId) {
             this.workAttendanceId = workAttendanceId;
-        }
-
-        public String getCompanyName() {
-            return companyName;
-        }
-
-        public void setCompanyName(String companyName) {
-            this.companyName = companyName;
         }
 
         public int getStartTime() {
@@ -1207,12 +1233,76 @@ public final class InitBean {
             this.endTime = endTime;
         }
 
-        public int getState() {
-            return state;
+        public int getFaceCount() {
+            return faceCount;
         }
 
-        public void setState(int state) {
-            this.state = state;
+        public void setFaceCount(int faceCount) {
+            this.faceCount = faceCount;
+        }
+
+        public int getStartWarnTime() {
+            return startWarnTime;
+        }
+
+        public void setStartWarnTime(int startWarnTime) {
+            this.startWarnTime = startWarnTime;
+        }
+
+        public String getInworkContent() {
+            return inworkContent;
+        }
+
+        public void setInworkContent(String inworkContent) {
+            this.inworkContent = inworkContent;
+        }
+
+        public String getStartWarnContent() {
+            return startWarnContent;
+        }
+
+        public void setStartWarnContent(String startWarnContent) {
+            this.startWarnContent = startWarnContent;
+        }
+
+        public String getOffworkContent() {
+            return offworkContent;
+        }
+
+        public void setOffworkContent(String offworkContent) {
+            this.offworkContent = offworkContent;
+        }
+
+        public int getPhotoGroupId() {
+            return photoGroupId;
+        }
+
+        public void setPhotoGroupId(int photoGroupId) {
+            this.photoGroupId = photoGroupId;
+        }
+
+        public String getNotEmployeeContent() {
+            return notEmployeeContent;
+        }
+
+        public void setNotEmployeeContent(String notEmployeeContent) {
+            this.notEmployeeContent = notEmployeeContent;
+        }
+
+        public String getSpecialContent() {
+            return specialContent;
+        }
+
+        public void setSpecialContent(String specialContent) {
+            this.specialContent = specialContent;
+        }
+
+        public int getBufferTime() {
+            return bufferTime;
+        }
+
+        public void setBufferTime(int bufferTime) {
+            this.bufferTime = bufferTime;
         }
     }
 
@@ -1420,6 +1510,24 @@ public final class InitBean {
         private int spotVip;
         private String arousalWords;
         private int wakeFlag;
+        private int lastPower;
+        private int warnPower;
+
+        public int getLastPower() {
+            return lastPower;
+        }
+
+        public void setLastPower(int lastPower) {
+            this.lastPower = lastPower;
+        }
+
+        public int getWarnPower() {
+            return warnPower;
+        }
+
+        public void setWarnPower(int warnPower) {
+            this.warnPower = warnPower;
+        }
 
         public String getRobName() {
             return robName;
