@@ -46,7 +46,9 @@ public interface HttpRequest {
     @GET(HttpUrl.CHAT)
     Observable<MessageBean> send2IBen(@Query("appKey") String appKey,
                                       @Query("time") String time,
-                                      @Query("message") String message);
+                                      @Query("message") String message,
+                                      @Query("relationQuestion") String relationQuestion,
+                                      @Query("relationIndex") String relationIndex);
 
     /**
      * 激活机器人

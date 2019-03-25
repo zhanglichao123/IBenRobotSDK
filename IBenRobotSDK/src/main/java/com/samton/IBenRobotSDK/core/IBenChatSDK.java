@@ -88,44 +88,33 @@ public final class IBenChatSDK {
     /**
      * 与小笨机器人聊天
      *
-     * @param msg 要发送的信息
+     * @param msg   要发送的信息
+     * @param reMsg 返回的关联问题
      */
-    public void sendMessage(final String msg) {
+    public void sendMessage(String msg, String reMsg) {
         // 标识位赋值
-        mTag = -1;
-        HttpUtil.getInstance().create(HttpRequest.class)
-                .getRobotChatFlag(SPUtils.getInstance().getString(ROBOT_APP_KEY))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<ChatFlagBean>() {
-                    @Override
-                    public void accept(@NonNull ChatFlagBean chatFlagBean) throws Exception {
-                        // 发送信息给人工客服客服
-                        if (chatFlagBean.getRs() == 1) {
-                            send2IM(chatFlagBean.getAccout(), msg);
-                        }
-                        // 发送消息给小笨
-                        else {
-                            send2IBen(msg);
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk sendMessage:" + throwable.toString());
-                        callBack.onSuccess(mTag, getDefaultMessageBean());
-                    }
-                });
+        sendMessage(msg, reMsg, "0");
     }
 
     /**
      * 与小笨机器人聊天
      *
-     * @param tag 标识
-     * @param msg 要发送的信息
+     * @param msg   要发送的信息
+     * @param reMsg 返回的关联问题
      */
-    public void sendMessage(final int tag, final String msg) {
+    public void sendMessage(String msg, String reMsg, String reIndex) {
+        // 标识位赋值
+        sendMessage(-1, msg, reMsg, reIndex);
+    }
+
+    /**
+     * 与小笨机器人聊天
+     *
+     * @param tag   标识
+     * @param msg   要发送的信息
+     * @param reMsg 返回的关联问题
+     */
+    public void sendMessage(final int tag, final String msg, final String reMsg, final String reIndex) {
         // 标识位赋值
         mTag = tag;
         HttpUtil.getInstance().create(HttpRequest.class)
@@ -141,7 +130,7 @@ public final class IBenChatSDK {
                         }
                         // 发送消息给小笨
                         else {
-                            send2IBen(msg);
+                            send2IBen(msg, reMsg, reIndex);
                         }
                     }
                 }, new Consumer<Throwable>() {
@@ -170,17 +159,18 @@ public final class IBenChatSDK {
     /**
      * 发送消息给小笨
      *
-     * @param msg 要发送的消息
+     * @param msg   要发送的消息
+     * @param reMsg 返回的关联问题
      */
-    private void send2IBen(String msg) {
+    private void send2IBen(String msg, String reMsg, String reIndex) {
         // 回调状态QA为true
         callBack.onStateChange(mTag, true);
         // APP_KEY
         String appKey = SPUtils.getInstance().getString(ROBOT_APP_KEY);
         // 当前时间
-        String time = System.currentTimeMillis() + "";
+        String time = String.valueOf(System.currentTimeMillis());
         HttpUtil.getInstance().create(HttpRequest.class)
-                .send2IBen(appKey, time, msg)
+                .send2IBen(appKey, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<MessageBean>() {

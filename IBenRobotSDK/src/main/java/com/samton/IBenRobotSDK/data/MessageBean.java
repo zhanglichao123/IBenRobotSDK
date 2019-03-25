@@ -13,13 +13,22 @@ import java.util.List;
  */
 
 public final class MessageBean {
-
-
     /**
+     * commandFlag : 本轮对话是否结束(1结束,0未结束)
      * data : {"appMessage":[{"answerType":-1,"informationJson":{"current":{"city":"北京","date":"2017-07-06","iname":"空气污染扩散指数","index":"优","temp":"25","temphigh":"25","templow":"23","weather":"大雨","week":"星期四","winddirect":"东风","windpower":"3级"},"daily":[{"date":"2017-07-06","day":{"img":"9","temphigh":"25","weather":"大雨","winddirect":"东风","windpower":"微风"},"night":{"img":"8","templow":"23","weather":"中雨","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:45","week":"星期四"},{"date":"2017-07-07","day":{"img":"2","temphigh":"31","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"23","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:44","week":"星期五"},{"date":"2017-07-08","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:55","sunset":"19:44","week":"星期六"},{"date":"2017-07-09","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"26","weather":"多云","winddirect":"南风","windpower":"微风"},"sunrise":"04:56","sunset":"19:44","week":"星期日"},{"date":"2017-07-10","day":{"img":"2","temphigh":"33","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"2","templow":"25","weather":"阴","winddirect":"北风","windpower":"微风"},"sunrise":"04:56","sunset":"19:43","week":"星期一"},{"date":"2017-07-11","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"东南风","windpower":"微风"},"night":{"img":"0","templow":"24","weather":"晴","winddirect":"东南风","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期二"},{"date":"2017-07-12","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期三"}]},"isAnswer":true,"message":"北京今天23℃~25℃ 裤。"}],"code":"10010","info":"消息发送成功","time":"2017-07-06 10:48:48"}
      */
 
+    private int commandFlag;
+
     private DataBean data;
+
+    public int getCommandFlag() {
+        return commandFlag;
+    }
+
+    public void setCommandFlag(int commandFlag) {
+        this.commandFlag = commandFlag;
+    }
 
     public DataBean getData() {
         return data;
@@ -80,8 +89,16 @@ public final class MessageBean {
              * informationJson : {"current":{"city":"北京","date":"2017-07-06","iname":"空气污染扩散指数","index":"优","temp":"25","temphigh":"25","templow":"23","weather":"大雨","week":"星期四","winddirect":"东风","windpower":"3级"},"daily":[{"date":"2017-07-06","day":{"img":"9","temphigh":"25","weather":"大雨","winddirect":"东风","windpower":"微风"},"night":{"img":"8","templow":"23","weather":"中雨","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:45","week":"星期四"},{"date":"2017-07-07","day":{"img":"2","temphigh":"31","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"23","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:44","week":"星期五"},{"date":"2017-07-08","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:55","sunset":"19:44","week":"星期六"},{"date":"2017-07-09","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"26","weather":"多云","winddirect":"南风","windpower":"微风"},"sunrise":"04:56","sunset":"19:44","week":"星期日"},{"date":"2017-07-10","day":{"img":"2","temphigh":"33","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"2","templow":"25","weather":"阴","winddirect":"北风","windpower":"微风"},"sunrise":"04:56","sunset":"19:43","week":"星期一"},{"date":"2017-07-11","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"东南风","windpower":"微风"},"night":{"img":"0","templow":"24","weather":"晴","winddirect":"东南风","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期二"},{"date":"2017-07-12","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期三"}]}
              * isAnswer : true
              * message : 北京今天23℃~25℃ 裤。
+             * TODO 以下新增
+             * relationId : 关联问题ID
+             * relationName : 关联问题
+             * relationWords : 第几轮问答标识
+             * relationWords : 关联问题播报语
+             * readFaceCommand : 消息关联的表情
+             * armSportCommand : 消息关联的手臂动作
+             * HeadSportCommandBean : 消息关联的头部动作
+             * backSportCommand : 消息关联的身体动作
              */
-
             private int answerType;
             private InformationJsonBean informationJson;
             private boolean isAnswer;
@@ -90,6 +107,55 @@ public final class MessageBean {
             private int categoryId = -1;
             private String imgDesc;//图片的描述
             private Pointlist pointlist;
+
+            private int relationId;
+            private String relationName;
+            private String relationIndex;
+            private String relationWords;
+            private int readFaceCommand;
+            private ArmSportCommandBean armSportCommand;
+            private HeadSportCommandBean headSportCommand;
+            private BackSportCommandBean backSportCommand;
+
+            public String getRelationIndex() {
+                return relationIndex;
+            }
+
+            public void setRelationIndex(String relationIndex) {
+                this.relationIndex = relationIndex;
+            }
+
+            public String getRelationWords() {
+                return relationWords;
+            }
+
+            public void setRelationWords(String relationWords) {
+                this.relationWords = relationWords;
+            }
+
+            public int getRelationId() {
+                return relationId;
+            }
+
+            public void setRelationId(int relationId) {
+                this.relationId = relationId;
+            }
+
+            public String getRelationName() {
+                return relationName;
+            }
+
+            public void setRelationName(String relationName) {
+                this.relationName = relationName;
+            }
+
+            public int getReadFaceCommand() {
+                return readFaceCommand;
+            }
+
+            public void setReadFaceCommand(int readFaceCommand) {
+                this.readFaceCommand = readFaceCommand;
+            }
 
             public Pointlist getPointlist() {
                 return pointlist;
@@ -161,6 +227,30 @@ public final class MessageBean {
 
             public void setMessage(String message) {
                 this.message = message;
+            }
+
+            public ArmSportCommandBean getArmSportCommand() {
+                return armSportCommand;
+            }
+
+            public void setArmSportCommand(ArmSportCommandBean armSportCommand) {
+                this.armSportCommand = armSportCommand;
+            }
+
+            public HeadSportCommandBean getHeadSportCommand() {
+                return headSportCommand;
+            }
+
+            public void setHeadSportCommand(HeadSportCommandBean headSportCommand) {
+                this.headSportCommand = headSportCommand;
+            }
+
+            public BackSportCommandBean getBackSportCommand() {
+                return backSportCommand;
+            }
+
+            public void setBackSportCommand(BackSportCommandBean backSportCommand) {
+                this.backSportCommand = backSportCommand;
             }
 
             public static class InformationJsonBean {
@@ -483,7 +573,7 @@ public final class MessageBean {
                 }
             }
 
-            public static class Pointlist{
+            public static class Pointlist {
                 private String sceneName;
                 private String slocLocation;
                 private String slocName;
@@ -564,6 +654,84 @@ public final class MessageBean {
 
                 public void setWayContent(String wayContent) {
                     this.wayContent = wayContent;
+                }
+            }
+
+            public static class ArmSportCommandBean {
+                /**
+                 * armOneCommand : 1代2代
+                 * armTwoCommand : 3代
+                 */
+
+                private int armOneCommand;
+                private int armTwoCommand;
+
+                public int getArmOneCommand() {
+                    return armOneCommand;
+                }
+
+                public void setArmOneCommand(int armOneCommand) {
+                    this.armOneCommand = armOneCommand;
+                }
+
+                public int getArmTwoCommand() {
+                    return armTwoCommand;
+                }
+
+                public void setArmTwoCommand(int armTwoCommand) {
+                    this.armTwoCommand = armTwoCommand;
+                }
+            }
+
+            public static class HeadSportCommandBean {
+                /**
+                 * headOneCommand : 1代2代
+                 * headTwoCommand : 3代
+                 */
+
+                private int headOneCommand;
+                private int headTwoCommand;
+
+                public int getHeadOneCommand() {
+                    return headOneCommand;
+                }
+
+                public void setHeadOneCommand(int headOneCommand) {
+                    this.headOneCommand = headOneCommand;
+                }
+
+                public int getHeadTwoCommand() {
+                    return headTwoCommand;
+                }
+
+                public void setHeadTwoCommand(int headTwoCommand) {
+                    this.headTwoCommand = headTwoCommand;
+                }
+            }
+
+            public static class BackSportCommandBean {
+                /**
+                 * backOneCommand : 1代2代
+                 * baclTwoCommand : 3代
+                 */
+
+                private int backOneCommand;
+                private int baclTwoCommand;
+
+                public int getBackOneCommand() {
+                    return backOneCommand;
+                }
+
+                public void setBackOneCommand(int backOneCommand) {
+                    this.backOneCommand = backOneCommand;
+                }
+
+                public int getBaclTwoCommand() {
+                    return baclTwoCommand;
+                }
+
+                public void setBaclTwoCommand(int baclTwoCommand) {
+                    this.baclTwoCommand = baclTwoCommand;
                 }
             }
         }
