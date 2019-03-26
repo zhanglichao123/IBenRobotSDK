@@ -13,11 +13,11 @@ import com.arcsoft.face.FaceInfo;
 import com.arcsoft.face.FaceSimilar;
 import com.arcsoft.face.GenderInfo;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.target.Target;
 import com.samton.IBenRobotSDK.utils.ImageUtils;
 import com.samton.IBenRobotSDK.utils.LogUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -164,19 +164,27 @@ public class ArcFaceManager {
         // 返回VIP数据列表
         List<ArcFaceInfo> returnArcFaceInfos = new ArrayList<>();
         // VIP人脸库
-        List<VipFaceBean> localVipFaceBeans = VipFaceBank.getVipFaces();
-        if (localVipFaceBeans == null || localVipFaceBeans.size() <= 0
+        List<FaceVipListBean> localFaceVipListBeans = VipFaceBank.getVipFaces();
+        if (localFaceVipListBeans == null || localFaceVipListBeans.size() <= 0
                 || infos == null || infos.size() <= 0) {
-            LogUtils.e("人脸库为空或者传入人脸数据为空");
+            LogUtils.e("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
             return returnArcFaceInfos;
         }
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
             FaceFeature feature = extractFaceFeature(bytes, width, height, info);
-            for (VipFaceBean bean : localVipFaceBeans) {
+            //TODO 判断使用哪一组VIP库
+            List<FaceVipListBean.FaceinfoListBean> localVipInfoLists = new ArrayList<>();
+            for (FaceVipListBean localFaceVipListBean : localFaceVipListBeans) {
+                List<FaceVipListBean.FaceinfoListBean> faceInfoList = localFaceVipListBean.getFaceinfoList();
+                if (faceInfoList != null && faceInfoList.size() > 0) {
+                    localVipInfoLists.addAll(faceInfoList);
+                }
+            }
+            for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
                 FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
                 if (faceSimilar.getScore() >= 0.8) {
-                    info.setVipFaceBean(bean);
+                    info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
                 }
                 LogUtils.e("检索相似度：" + faceSimilar.getScore());
@@ -186,65 +194,55 @@ public class ArcFaceManager {
     }
 
     /**
-     * 注册到本地人脸库
+     * 注册到本地人脸库(其中一组)
      *
-     * @param faceBeans
+     * @param faceVipListBeans
      */
-    public void registerFaceData(final List<VipFaceBean> faceBeans) {
-        Log.e(TAG, "初始数据：" + faceBeans.get(0).toString());
-        RequestManager with = Glide.with(context);
-        for (final VipFaceBean bean : faceBeans) {
-//            Bitmap resource = bean.getBitmap();
-//            if (resource != null) {
-//                int width = resource.getWidth(), height = resource.getHeight();
-//                byte[] bytes = ImageUtil.bitmapToNv21(resource, width, height);
-//                List<FaceInfo> faceInfos = detectFaces(bytes, width, height);
-//                if (faceInfos.size() != 1) {
-//                    // 多张人脸或没有人脸
-//                    faceBeans.remove(bean);
-//                    Log.e(TAG, "没有人脸:" + faceInfos.size());
-//                    continue;
-//                } else {
-//                    bean.setFaceFeature(extractFaceFeature(bytes, width, height, faceInfos.get(0)));
-//                    Log.e(TAG, "人脸注册成功");
-//                }
-//            }
-            // 依次获取bitmap
-            try {
-                Bitmap bitmap = Glide.with(context).load(bean.getFaceUrl()).asBitmap()
-                        .centerCrop().into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
-                int width = bitmap.getWidth(), height = bitmap.getHeight();
-                byte[] bytes = ImageUtils.bitmapToBgr(bitmap);
-                List<ArcFaceInfo> infos = detectFaces(bytes, width, height);
-                if (infos.size() != 1) {
-                    // 多张人脸或没有人脸
-                    faceBeans.remove(bean);
-                } else {
-                    // 只有一张人脸
-                    bean.setFaceFeature(extractFaceFeature(bytes, width, height, infos.get(0)));
-                    // 存储进入VIP库
-                    VipFaceBank.addVipFace(bean);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+    public void registerFaceData(final List<FaceVipListBean> faceVipListBeans) throws ExecutionException, InterruptedException {
+        Log.e(TAG, "初始数据：" + faceVipListBeans.size());
+        if (faceVipListBeans.size() <= 0) {
+            Log.e(TAG, "VIP人脸数据注册失败:没有组数据");
+            return;
+        }
+        // 遍历所有组数据
+        for (final FaceVipListBean faceVipListBean : faceVipListBeans) {
+            // 取出当前组的所有信息
+            List<FaceVipListBean.FaceinfoListBean> faceinfoListBeans = faceVipListBean.getFaceinfoList();
+            if (faceinfoListBeans == null || faceinfoListBeans.size() <= 0) {
+                Log.e(TAG, "VIP人脸数据注册失败:没有人信息");
+                faceVipListBeans.remove(faceVipListBean);
+                continue;
             }
-//            with.load(bean.getFaceUrl()).asBitmap().into(new SimpleTarget<Bitmap>() {
-//                @Override
-//                public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> animation) {
-//                    int width = bitmap.getWidth(), height = bitmap.getHeight();
-//                    byte[] bytes = ImageUtils.bitmapToBgr(bitmap);
-//                    List<ArcFaceInfo> infos = detectFaces(bytes, width, height);
-//                    if (infos.size() != 1) {
-//                        // 多张人脸或没有人脸
-//                        faceBeans.remove(bean);
-//                    } else {
-//                        // 只有一张人脸
-//                        bean.setFaceFeature(extractFaceFeature(bytes, width, height, infos.get(0)));
-//                        // 存储进入VIP库
-//                        VipFaceBank.addVipFace(bean);
-//                    }
-//                }
-//            });
+            for (FaceVipListBean.FaceinfoListBean faceinfoListBean : faceinfoListBeans) {
+                File fFile = new File(faceinfoListBean.getLocalFilePath());
+                // 文件不存在(剔除)
+                if (!fFile.exists()) {
+                    faceinfoListBeans.remove(faceinfoListBean);
+                    continue;
+                }
+                Bitmap bitmap = Glide.with(context).load(fFile)
+                        .asBitmap().into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                // Bitmap bitmap = BitmapFactory.decodeFile(faceinfoListBean.getLocalFilePath());
+                byte[] bytes = ImageUtils.bitmapToBgr(bitmap);
+                int width = bitmap.getWidth(), height = bitmap.getHeight();
+                // 获取当前照片所有人脸
+                List<ArcFaceInfo> faces = detectFaces(bytes, width, height);
+                if (faces == null || faces.size() != 1) {
+                    Log.e(TAG, "VIP人脸数据注册失败:没有人脸");
+                    // 多张人脸或没有人脸(剔除)
+                    faceinfoListBeans.remove(faceinfoListBean);
+                    continue;
+                }
+                Log.e(TAG, "VIP人脸数据注册成功");
+                // 只有一张人脸(获取人脸特征信息)
+                faceinfoListBean.setFaceFeature(extractFaceFeature(bytes, width, height, faces.get(0)));
+            }
+        }
+        if (faceVipListBeans.size() <= 0) {
+            Log.e(TAG, "VIP人脸数据注册失败:全部剔除");
+        } else {
+            // 存储整组进入VIP库
+            VipFaceBank.addVipFace(faceVipListBeans);
         }
     }
 }

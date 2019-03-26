@@ -18,7 +18,7 @@ public class ArcFaceInfo extends FaceInfo {
     // 状态信息，如果值为0 表示检测正常，roll，yaw， pitch 的数值可信，否则上面三个角度信息是不可信的
     private int status;
     // 以上为所有用户共有的信息，以下为VIP信息
-    private VipFaceBean vipFaceBean;
+    private FaceVipListBean.FaceinfoListBean vipInfoBean;
 
     public int getIndex() {
         return index;
@@ -76,11 +76,11 @@ public class ArcFaceInfo extends FaceInfo {
         this.status = status;
     }
 
-    public VipFaceBean getVipFaceBean() {
-        return vipFaceBean;
+    public FaceVipListBean.FaceinfoListBean getVipInfoBean() {
+        return vipInfoBean;
     }
 
-    public void setVipFaceBean(VipFaceBean vipFaceBean) {
-        this.vipFaceBean = vipFaceBean;
+    public void setVipInfoBean(FaceVipListBean.FaceinfoListBean vipInfoBean) {
+        this.vipInfoBean = vipInfoBean;
     }
 }

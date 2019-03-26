@@ -7,16 +7,26 @@ import java.util.List;
  * 存储VIP人脸信息
  */
 public class VipFaceBank {
-    private static List<VipFaceBean> vips;
+    private static List<FaceVipListBean> vips;
 
     /**
      * 新增vip
      */
-    public static void addVipFace(VipFaceBean bean) {
+    public static void addVipFace(FaceVipListBean bean) {
         if (vips == null) {
             vips = new ArrayList<>();
         }
         vips.add(bean);
+    }
+
+    /**
+     * 新增vip
+     */
+    public static void addVipFace(List<FaceVipListBean> beans) {
+        if (vips == null) {
+            vips = new ArrayList<>();
+        }
+        vips.addAll(beans);
     }
 
     /**
@@ -28,7 +38,7 @@ public class VipFaceBank {
         }
     }
 
-    public static void removeVipFace(VipFaceBean bean) {
+    public static void removeVipFace(FaceVipListBean bean) {
         if (vips != null) {
             vips.remove(bean);
         }
@@ -37,7 +47,7 @@ public class VipFaceBank {
     /**
      * 获取vip列表
      */
-    public static List<VipFaceBean> getVipFaces() {
+    public static List<FaceVipListBean> getVipFaces() {
         if (vips == null) {
             vips = new ArrayList<>();
         }

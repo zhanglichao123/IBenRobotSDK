@@ -58,11 +58,14 @@ public class MyntCameraProxy {
      * 开启相机
      */
     public void openCamera(@NonNull final Surface colorSf, @NonNull final Surface depthSf) {
-        LogUtils.e("开启相机-->" + System.currentTimeMillis());
+        LogUtils.e("开启相机");
+        // 确保相机是关闭状态
+        // closeCamera();
+        LogUtils.e("USB监听开始注册");
         mUSBMonitor = new USBMonitor(context, new USBMonitor.IUSBMonitorListener() {
             @Override
             public void didAttach(MYNTCamera myntCamera) {// 设备插入
-                LogUtils.e("设备插入-->" + System.currentTimeMillis());
+                LogUtils.e("设备插入");
                 if (mCamera == null) {
                     // 初始化相机
                     mCamera = myntCamera;
@@ -72,6 +75,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didDettach(MYNTCamera myntCamera) {// 设备拔出
+                LogUtils.e("设备拔出");
                 if (mCamera != null) {
                     mCamera.stop();
                     mCamera.close();
@@ -81,7 +85,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didConnectedCamera(MYNTCamera myntCamera) {// 连接成功
-                LogUtils.e("连接成功-->" + System.currentTimeMillis());
+                LogUtils.e("连接成功");
                 if (mCamera == null) {
                     mCamera = myntCamera;
                 }
@@ -91,6 +95,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didDisconnectedCamera(MYNTCamera myntCamera) {// 连接断开
+                LogUtils.e("连接断开");
                 if (mCamera != null) {
                     mCamera.stop();
                     mCamera.close();
@@ -99,6 +104,7 @@ public class MyntCameraProxy {
             }
         });
         mUSBMonitor.register();
+        LogUtils.e("USB监听注册成功");
     }
 
     /**
