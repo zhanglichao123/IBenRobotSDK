@@ -120,7 +120,7 @@ public class MyntCameraProxy {
         // 深度图预览相关的对象
         mCamera.setPreviewDisplay(depthSf, MYNTCamera.Frame.Depth);
         // 设置预览尺寸
-        mCamera.setPreviewSize(720);
+        mCamera.setPreviewSize(480);
         // 设置深度类型
         mCamera.setDepthType(MYNTCamera.DEPTH_DATA_8_BITS);
         // 预览框宽高
@@ -162,6 +162,17 @@ public class MyntCameraProxy {
             return 0;
         } else {
             return mCamera.getDistanceValue(index);
+        }
+    }
+
+    /**
+     * 获取指定点的距离
+     */
+    public int getDistanceValue(int x, int y) {
+        if (mCamera == null) {
+            return 0;
+        } else {
+            return getDistanceValue(mCamera.getPreviewWidth() * (y - 1) + x);
         }
     }
 

@@ -203,7 +203,7 @@ public class IBenRouseSDK implements Camera.PreviewCallback, MYNTCamera.IFrameCa
             // 因为图片会发生旋转，因此要对图片进行旋转到和手机在一个方向上
             Bitmap bitmap = CameraToBitmap.rotateMyBitmap(mSourceBitmap);
             mSourceBitmap.recycle();
-            List<ArcFaceInfo> faces = arcFaceManager.detectFaces(bytes, bitmap.getWidth(), bitmap.getHeight());
+            List<ArcFaceInfo> faces = arcFaceManager.detectFacesNV21(bytes, bitmap.getWidth(), bitmap.getHeight());
             if (faces == null || faces.size() <= 0) {
                 // 没有检测到人脸
                 detectedSuccessCount = 0;
@@ -377,7 +377,7 @@ public class IBenRouseSDK implements Camera.PreviewCallback, MYNTCamera.IFrameCa
             arcFaceManager = ArcFaceManager.getInstance(mContext);
         }
         byte[] bytes = ImageUtils.bitmapToNv21(bitmap, width, height);
-        List<ArcFaceInfo> faces = arcFaceManager.detectFaces(bytes, width, height);
+        List<ArcFaceInfo> faces = arcFaceManager.detectFacesNV21(bytes, width, height);
         LogUtils.e("主动唤醒-人脸数量：" + faces.size());
         // 检测到有人脸，本地判断有没有正脸
         for (FaceInfo face : faces) {

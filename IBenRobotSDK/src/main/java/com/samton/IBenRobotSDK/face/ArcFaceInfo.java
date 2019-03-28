@@ -1,5 +1,6 @@
 package com.samton.IBenRobotSDK.face;
 
+import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.FaceInfo;
 
 public class ArcFaceInfo extends FaceInfo {
@@ -17,6 +18,8 @@ public class ArcFaceInfo extends FaceInfo {
     private float yaw;
     // 状态信息，如果值为0 表示检测正常，roll，yaw， pitch 的数值可信，否则上面三个角度信息是不可信的
     private int status;
+    // 人脸特征信息
+    private FaceFeature faceFeature;
     // 以上为所有用户共有的信息，以下为VIP信息
     private FaceVipListBean.FaceinfoListBean vipInfoBean;
 
@@ -74,6 +77,14 @@ public class ArcFaceInfo extends FaceInfo {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public FaceFeature getFaceFeature() {
+        return faceFeature;
+    }
+
+    public void setFaceFeature(FaceFeature faceFeature) {
+        this.faceFeature = faceFeature;
     }
 
     public FaceVipListBean.FaceinfoListBean getVipInfoBean() {
