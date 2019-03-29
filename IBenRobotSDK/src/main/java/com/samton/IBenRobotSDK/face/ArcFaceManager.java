@@ -19,6 +19,7 @@ import com.samton.IBenRobotSDK.utils.LogUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -293,7 +294,9 @@ public class ArcFaceManager {
             return;
         }
         // 遍历所有组数据
-        for (final FaceVipListBean faceVipListBean : faceVipListBeans) {
+        Iterator<FaceVipListBean> faceVipListBeanIterator = faceVipListBeans.iterator();
+        while (faceVipListBeanIterator.hasNext()) {
+            FaceVipListBean faceVipListBean = faceVipListBeanIterator.next();
             // 取出当前组的所有信息
             List<FaceVipListBean.FaceinfoListBean> faceinfoListBeans = faceVipListBean.getFaceinfoList();
             if (faceinfoListBeans == null || faceinfoListBeans.size() <= 0) {
@@ -301,34 +304,39 @@ public class ArcFaceManager {
                 faceVipListBeans.remove(faceVipListBean);
                 continue;
             }
-            for (FaceVipListBean.FaceinfoListBean faceinfoListBean : faceinfoListBeans) {
+            // 遍历组内所有人数据
+            Iterator<FaceVipListBean.FaceinfoListBean> faceinfoListBeanIterator = faceinfoListBeans.iterator();
+            while (faceinfoListBeanIterator.hasNext()) {
+                FaceVipListBean.FaceinfoListBean faceinfoListBean = faceinfoListBeanIterator.next();
                 File fFile = new File(faceinfoListBean.getLocalFilePath());
                 // 文件不存在(剔除)
                 if (!fFile.exists()) {
                     faceinfoListBeans.remove(faceinfoListBean);
                     continue;
                 }
-                Bitmap bitmap = Glide.with(context).load(fFile)
+                final Bitmap bitmap = Glide.with(context).load(fFile)
                         .asBitmap().into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
-                // Bitmap bitmap = BitmapFactory.decodeFile(faceinfoListBean.getLocalFilePath());
-                byte[] bytes = ImageUtils.bitmapToBgr(bitmap);
                 int width = bitmap.getWidth(), height = bitmap.getHeight();
+                byte[] bytes = ImageUtils.bitmapToNv21(bitmap, width, height);
                 // 获取当前照片所有人脸
-                List<ArcFaceInfo> faces = detectFacesBGR24(bytes, width, height);
+                List<ArcFaceInfo> faces = detectFacesNV21(bytes, width, height);
                 if (faces == null || faces.size() != 1) {
                     Log.e(TAG, "VIP人脸数据注册失败:没有人脸");
                     // 多张人脸或没有人脸(剔除)
                     faceinfoListBeans.remove(faceinfoListBean);
                     continue;
                 }
-                Log.e(TAG, "VIP人脸数据注册成功");
                 // 只有一张人脸(获取人脸特征信息)
                 faceinfoListBean.setFaceFeature(extractFaceFeatureNV21(bytes, width, height, faces.get(0)));
+                Log.e(TAG, "VIP人脸数据注册成功");
+            }
+            if (faceinfoListBeans.size() <= 0) {
+                Log.e(TAG, "VIP人脸数据注册失败:人信息剔除完");
+                faceVipListBeans.remove(faceVipListBean);
             }
         }
-        if (faceVipListBeans.size() <= 0) {
-            Log.e(TAG, "VIP人脸数据注册失败:全部剔除");
-        } else {
+        if (faceVipListBeans.size() > 0) {
+            Log.e(TAG, "VIP人脸数据注册:存储整组数据");
             // 存储整组进入VIP库
             VipFaceBank.addVipFace(faceVipListBeans);
         }

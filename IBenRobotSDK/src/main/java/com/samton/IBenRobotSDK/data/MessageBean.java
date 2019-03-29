@@ -660,11 +660,11 @@ public final class MessageBean {
             public static class ArmSportCommandBean {
                 /**
                  * armOneCommand : 1代2代
-                 * armTwoCommand : 3代
+                 * armThreeCommand : 3代
                  */
 
                 private int armOneCommand;
-                private int armTwoCommand;
+                private int armThreeCommand;
 
                 public int getArmOneCommand() {
                     return armOneCommand;
@@ -674,12 +674,12 @@ public final class MessageBean {
                     this.armOneCommand = armOneCommand;
                 }
 
-                public int getArmTwoCommand() {
-                    return armTwoCommand;
+                public int getArmThreeCommand() {
+                    return armThreeCommand;
                 }
 
-                public void setArmTwoCommand(int armTwoCommand) {
-                    this.armTwoCommand = armTwoCommand;
+                public void setArmThreeCommand(int armThreeCommand) {
+                    this.armThreeCommand = armThreeCommand;
                 }
             }
 
@@ -690,7 +690,7 @@ public final class MessageBean {
                  */
 
                 private int headOneCommand;
-                private int headTwoCommand;
+                private int headThreeCommand;
 
                 public int getHeadOneCommand() {
                     return headOneCommand;
@@ -700,12 +700,12 @@ public final class MessageBean {
                     this.headOneCommand = headOneCommand;
                 }
 
-                public int getHeadTwoCommand() {
-                    return headTwoCommand;
+                public int getHeadThreeCommand() {
+                    return headThreeCommand;
                 }
 
-                public void setHeadTwoCommand(int headTwoCommand) {
-                    this.headTwoCommand = headTwoCommand;
+                public void setHeadThreeCommand(int headThreeCommand) {
+                    this.headThreeCommand = headThreeCommand;
                 }
             }
 
@@ -716,7 +716,7 @@ public final class MessageBean {
                  */
 
                 private int backOneCommand;
-                private int baclTwoCommand;
+                private int backThreeCommand;
 
                 public int getBackOneCommand() {
                     return backOneCommand;
@@ -726,12 +726,12 @@ public final class MessageBean {
                     this.backOneCommand = backOneCommand;
                 }
 
-                public int getBaclTwoCommand() {
-                    return baclTwoCommand;
+                public int getBackThreeCommand() {
+                    return backThreeCommand;
                 }
 
-                public void setBaclTwoCommand(int baclTwoCommand) {
-                    this.baclTwoCommand = baclTwoCommand;
+                public void setBackThreeCommand(int backThreeCommand) {
+                    this.backThreeCommand = backThreeCommand;
                 }
             }
         }

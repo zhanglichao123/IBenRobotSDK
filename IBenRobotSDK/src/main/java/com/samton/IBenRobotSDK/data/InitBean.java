@@ -1,5 +1,7 @@
 package com.samton.IBenRobotSDK.data;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -27,6 +29,7 @@ public final class InitBean {
      * preachGroup : {"groupId":74,"name":"小笨宣讲组","describe":"小笨宣讲描述","sceneId":55,"state":1,"sceneName":"小笨新公司","preachItemList":[{"itemId":372,"groupId":74,"slocId":145,"preachType":1,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_ba9a4c.jpg","content":"我已到达办公区","contentOnTheWay":"带我去办公区","showType":1,"orderNum":1,"state":1,"slocName":"\b办公区"},{"itemId":373,"groupId":74,"slocId":146,"preachType":1,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_580923.jpg","content":"我已到达办公区2","contentOnTheWay":"带我去办公区2","showType":2,"orderNum":2,"state":1,"slocName":"\b办公区2"},{"itemId":374,"groupId":74,"slocId":147,"preachType":2,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_4098a5.jpg","voiceUrl":"http://121.41.40.145:7080/img/preach/voice/2018-01-09_bafc41.mp3","contentOnTheWay":"带我去办公区3","showType":0,"orderNum":3,"state":1,"slocName":"\b办公区3"},{"itemId":375,"groupId":74,"slocId":148,"preachType":3,"videoUrl":"http://121.41.40.145:7080/img/preach/video/2018-01-09_b8fe7c.mp4","contentOnTheWay":"带我去办公区4","showType":0,"orderNum":4,"state":1,"slocName":"\b办公区4"},{"itemId":376,"groupId":74,"slocId":149,"orderNum":5,"state":1,"slocName":"\b办公区5"},{"itemId":377,"groupId":74,"slocId":150,"orderNum":6,"state":1,"slocName":"\b饮水间"}]}
      * printGroup : {"groupId":86,"name":"小笨名片","state":1,"prints":[{"printId":168,"name":"小笨名片","describe":"魂牵梦萦","state":1,"printItems":[{"printItemId":749,"content":"我想打印","style":{"type":"jsonb","value":"{\"size\": 3, \"type\": 1, \"align\": 2, \"width\": null, \"height\": null, \"weight\": null, \"afterParagraph\": 5}"},"printId":168,"orderNum":1,"state":1},{"printItemId":750,"content":"http://121.41.40.145:7080/img/print//2018-01-09_f11edb.jpg","style":{"type":"jsonb","value":"{\"size\": null, \"type\": 2, \"align\": 2, \"width\": 400, \"height\": 0, \"weight\": null, \"afterParagraph\": null}"},"printId":168,"orderNum":2,"state":1},{"printItemId":751,"content":"魂牵梦萦","style":{"type":"jsonb","value":"{\"size\": null, \"type\": 3, \"align\": 2, \"width\": 400, \"height\": 0, \"weight\": null, \"afterParagraph\": 5}"},"printId":168,"orderNum":3,"state":1}]}]}
      * workAttendance : {"workAttendanceId":69,"companyName":"慧闻科技","startTime":3600000,"endTime":5400000,"state":1}
+     * cleverPreach : {"id":1,"robUuid":"f72c4e38d0f64a338ea32bbcc0194f99","preachEndMsg":"宣讲结束播报","stopPreachPwd":"终止宣讲口令","halfwayQuizFlag":2,"switchMsg":"切换业务咨询播报语","advisoryMsg":"需要咨询播报语","noAdvisoryMsg":"不需要咨询播报语","beforeMsg":"运动前提示播报语","noPreachMsg":"不需要宣讲播报语","otherMsg":"其它内容回复","preachImg":"http://43.240.248.100:7080/img/preach/img/202/2019-02-22_2e2a1e.jpg","callMsg":"宣讲号召播报","callMsgTime":10,"isleadVip":"欢迎尊敬的#全名#@你好","isleadNotVip":"欢迎尊敬的#性别#@你好","noPreachTime":30,"repeatPointFlag":2,"notPointMsg":"不到点播报","halfwayTime":30,"halfwayOtherMsg":"中途提问-其他内容回复"}
      * voiceTag : xiaoyan
      */
     // 存储是否需要低电量播报状态
@@ -52,6 +55,7 @@ public final class InitBean {
     private String preachImg;
     private int carouselGroupId;
     private int workModeid;
+    private CleverPreachBean cleverPreach;
 
     public int getWorkModeid() {
         return workModeid;
@@ -203,6 +207,14 @@ public final class InitBean {
 
     public void setMaps(List<MapsBean> maps) {
         this.maps = maps;
+    }
+
+    public CleverPreachBean getCleverPreach() {
+        return cleverPreach;
+    }
+
+    public void setCleverPreach(CleverPreachBean cleverPreach) {
+        this.cleverPreach = cleverPreach;
     }
 
     public static class SetBean {
@@ -1398,6 +1410,223 @@ public final class InitBean {
         }
     }
 
+    public static class CleverPreachBean {
+        /**
+         * id : 1
+         * robUuid : f72c4e38d0f64a338ea32bbcc0194f99
+         * preachEndMsg : 宣讲结束播报
+         * stopPreachPwd : 终止宣讲口令
+         * halfwayQuizFlag : 2
+         * switchMsg : 切换业务咨询播报语
+         * advisoryMsg : 需要咨询播报语
+         * noAdvisoryMsg : 不需要咨询播报语
+         * beforeMsg : 运动前提示播报语
+         * noPreachMsg : 不需要宣讲播报语
+         * otherMsg : 其它内容回复
+         * preachImg : http://43.240.248.100:7080/img/preach/img/202/2019-02-22_2e2a1e.jpg
+         * callMsg : 宣讲号召播报
+         * callMsgTime : 10
+         * isleadVip : 欢迎尊敬的#全名#@你好
+         * isleadNotVip : 欢迎尊敬的#性别#@你好
+         * noPreachTime : 30
+         * repeatPointFlag : 2
+         * notPointMsg : 不到点播报
+         * halfwayTime : 30
+         * halfwayOtherMsg : 中途提问-其他内容回复
+         */
+
+        private int id;
+        private String robUuid;
+        private String preachEndMsg;
+        private String stopPreachPwd;
+        private int halfwayQuizFlag;
+        private String switchMsg;
+        private String advisoryMsg;
+        private String noAdvisoryMsg;
+        private String beforeMsg;
+        private String noPreachMsg;
+        private String otherMsg;
+        @SerializedName("preachImg")
+        private String preachImgX;
+        private String callMsg;
+        private int callMsgTime;
+        private String isleadVip;
+        private String isleadNotVip;
+        private int noPreachTime;
+        private int repeatPointFlag;
+        private String notPointMsg;
+        private int halfwayTime;
+        private String halfwayOtherMsg;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getRobUuid() {
+            return robUuid;
+        }
+
+        public void setRobUuid(String robUuid) {
+            this.robUuid = robUuid;
+        }
+
+        public String getPreachEndMsg() {
+            return preachEndMsg;
+        }
+
+        public void setPreachEndMsg(String preachEndMsg) {
+            this.preachEndMsg = preachEndMsg;
+        }
+
+        public String getStopPreachPwd() {
+            return stopPreachPwd;
+        }
+
+        public void setStopPreachPwd(String stopPreachPwd) {
+            this.stopPreachPwd = stopPreachPwd;
+        }
+
+        public int getHalfwayQuizFlag() {
+            return halfwayQuizFlag;
+        }
+
+        public void setHalfwayQuizFlag(int halfwayQuizFlag) {
+            this.halfwayQuizFlag = halfwayQuizFlag;
+        }
+
+        public String getSwitchMsg() {
+            return switchMsg;
+        }
+
+        public void setSwitchMsg(String switchMsg) {
+            this.switchMsg = switchMsg;
+        }
+
+        public String getAdvisoryMsg() {
+            return advisoryMsg;
+        }
+
+        public void setAdvisoryMsg(String advisoryMsg) {
+            this.advisoryMsg = advisoryMsg;
+        }
+
+        public String getNoAdvisoryMsg() {
+            return noAdvisoryMsg;
+        }
+
+        public void setNoAdvisoryMsg(String noAdvisoryMsg) {
+            this.noAdvisoryMsg = noAdvisoryMsg;
+        }
+
+        public String getBeforeMsg() {
+            return beforeMsg;
+        }
+
+        public void setBeforeMsg(String beforeMsg) {
+            this.beforeMsg = beforeMsg;
+        }
+
+        public String getNoPreachMsg() {
+            return noPreachMsg;
+        }
+
+        public void setNoPreachMsg(String noPreachMsg) {
+            this.noPreachMsg = noPreachMsg;
+        }
+
+        public String getOtherMsg() {
+            return otherMsg;
+        }
+
+        public void setOtherMsg(String otherMsg) {
+            this.otherMsg = otherMsg;
+        }
+
+        public String getPreachImgX() {
+            return preachImgX;
+        }
+
+        public void setPreachImgX(String preachImgX) {
+            this.preachImgX = preachImgX;
+        }
+
+        public String getCallMsg() {
+            return callMsg;
+        }
+
+        public void setCallMsg(String callMsg) {
+            this.callMsg = callMsg;
+        }
+
+        public int getCallMsgTime() {
+            return callMsgTime;
+        }
+
+        public void setCallMsgTime(int callMsgTime) {
+            this.callMsgTime = callMsgTime;
+        }
+
+        public String getIsleadVip() {
+            return isleadVip;
+        }
+
+        public void setIsleadVip(String isleadVip) {
+            this.isleadVip = isleadVip;
+        }
+
+        public String getIsleadNotVip() {
+            return isleadNotVip;
+        }
+
+        public void setIsleadNotVip(String isleadNotVip) {
+            this.isleadNotVip = isleadNotVip;
+        }
+
+        public int getNoPreachTime() {
+            return noPreachTime;
+        }
+
+        public void setNoPreachTime(int noPreachTime) {
+            this.noPreachTime = noPreachTime;
+        }
+
+        public int getRepeatPointFlag() {
+            return repeatPointFlag;
+        }
+
+        public void setRepeatPointFlag(int repeatPointFlag) {
+            this.repeatPointFlag = repeatPointFlag;
+        }
+
+        public String getNotPointMsg() {
+            return notPointMsg;
+        }
+
+        public void setNotPointMsg(String notPointMsg) {
+            this.notPointMsg = notPointMsg;
+        }
+
+        public int getHalfwayTime() {
+            return halfwayTime;
+        }
+
+        public void setHalfwayTime(int halfwayTime) {
+            this.halfwayTime = halfwayTime;
+        }
+
+        public String getHalfwayOtherMsg() {
+            return halfwayOtherMsg;
+        }
+
+        public void setHalfwayOtherMsg(String halfwayOtherMsg) {
+            this.halfwayOtherMsg = halfwayOtherMsg;
+        }
+    }
+
     public class DataBean {
         private String errorCode;
         private String errorMsg;
@@ -1492,42 +1721,42 @@ public final class InitBean {
 
     public static class RobotInfoBean {
         /**
-         * robName : 第四版本
-         * timbreId : 1
-         * moveMsg : 移动播报语
-         * thirtyDownMsg : 低于百分之三十
-         * fifteenDownMsg : 低于百分之十五
-         * spotVip : 1
-         * arousalWords : 唤醒词
+         * robName : 小笨
+         * timbreId : 0
          * wakeFlag : 1
+         * moveMsg : 请先关闭急停按钮
+         * thirtyDownMsg : 小笨电量不足请及时充电
+         * fifteenDownMsg : 小笨要回充电桩充电了
+         * spotVip : 1
+         * welcomeStatus : 2
+         * moreVipWelcomeContent : 欢迎各位嘉宾
+         * vipContent : 欢迎尊敬的#姓氏##全名#你好
+         * strangerContent : #性别#你好
+         * moreVipContent : 尊敬的VIP你们好
+         * moreStrangerContent : 先生女士们好
+         * lastPower : 15
+         * warnPower : 30
+         * nowakeContent : 真正的智能机器人#机器人名称#即将为你服务
+         * arousalWords : 你好·小笨
          */
 
         private String robName;
         private int timbreId;
+        private int wakeFlag;
         private String moveMsg;
         private String thirtyDownMsg;
         private String fifteenDownMsg;
         private int spotVip;
-        private String arousalWords;
-        private int wakeFlag;
+        private int welcomeStatus;
+        private String moreVipWelcomeContent;
+        private String vipContent;
+        private String strangerContent;
+        private String moreVipContent;
+        private String moreStrangerContent;
         private int lastPower;
         private int warnPower;
-
-        public int getLastPower() {
-            return lastPower;
-        }
-
-        public void setLastPower(int lastPower) {
-            this.lastPower = lastPower;
-        }
-
-        public int getWarnPower() {
-            return warnPower;
-        }
-
-        public void setWarnPower(int warnPower) {
-            this.warnPower = warnPower;
-        }
+        private String nowakeContent;
+        private String arousalWords;
 
         public String getRobName() {
             return robName;
@@ -1543,6 +1772,14 @@ public final class InitBean {
 
         public void setTimbreId(int timbreId) {
             this.timbreId = timbreId;
+        }
+
+        public int getWakeFlag() {
+            return wakeFlag;
+        }
+
+        public void setWakeFlag(int wakeFlag) {
+            this.wakeFlag = wakeFlag;
         }
 
         public String getMoveMsg() {
@@ -1577,20 +1814,84 @@ public final class InitBean {
             this.spotVip = spotVip;
         }
 
+        public int getWelcomeStatus() {
+            return welcomeStatus;
+        }
+
+        public void setWelcomeStatus(int welcomeStatus) {
+            this.welcomeStatus = welcomeStatus;
+        }
+
+        public String getMoreVipWelcomeContent() {
+            return moreVipWelcomeContent;
+        }
+
+        public void setMoreVipWelcomeContent(String moreVipWelcomeContent) {
+            this.moreVipWelcomeContent = moreVipWelcomeContent;
+        }
+
+        public String getVipContent() {
+            return vipContent;
+        }
+
+        public void setVipContent(String vipContent) {
+            this.vipContent = vipContent;
+        }
+
+        public String getStrangerContent() {
+            return strangerContent;
+        }
+
+        public void setStrangerContent(String strangerContent) {
+            this.strangerContent = strangerContent;
+        }
+
+        public String getMoreVipContent() {
+            return moreVipContent;
+        }
+
+        public void setMoreVipContent(String moreVipContent) {
+            this.moreVipContent = moreVipContent;
+        }
+
+        public String getMoreStrangerContent() {
+            return moreStrangerContent;
+        }
+
+        public void setMoreStrangerContent(String moreStrangerContent) {
+            this.moreStrangerContent = moreStrangerContent;
+        }
+
+        public int getLastPower() {
+            return lastPower;
+        }
+
+        public void setLastPower(int lastPower) {
+            this.lastPower = lastPower;
+        }
+
+        public int getWarnPower() {
+            return warnPower;
+        }
+
+        public void setWarnPower(int warnPower) {
+            this.warnPower = warnPower;
+        }
+
+        public String getNowakeContent() {
+            return nowakeContent;
+        }
+
+        public void setNowakeContent(String nowakeContent) {
+            this.nowakeContent = nowakeContent;
+        }
+
         public String getArousalWords() {
             return arousalWords;
         }
 
         public void setArousalWords(String arousalWords) {
             this.arousalWords = arousalWords;
-        }
-
-        public int getWakeFlag() {
-            return wakeFlag;
-        }
-
-        public void setWakeFlag(int wakeFlag) {
-            this.wakeFlag = wakeFlag;
         }
     }
 

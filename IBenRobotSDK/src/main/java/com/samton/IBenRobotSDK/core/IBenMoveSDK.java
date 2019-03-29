@@ -448,6 +448,41 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 根据方向进行移动和距离移动
+     */
+    public void moveToLication(Location location, MoveCallBack callBack, StopBtnState btnState) {
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
+        cancelAllActions();
+        if (location != null && mRobotPlatform != null) {
+            // 开启运动
+            try {
+                mRobotPlatform.moveTo(location);
+            } catch (RequestFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionTimeOutException e) {
+                e.printStackTrace();
+            } catch (UnauthorizedRequestException e) {
+                e.printStackTrace();
+            } catch (UnsupportedCommandException e) {
+                e.printStackTrace();
+            } catch (ParseInvalidException e) {
+                e.printStackTrace();
+            } catch (InvalidArgumentException e) {
+                e.printStackTrace();
+            } catch (OperationFailException e) {
+                e.printStackTrace();
+            }
+        } else {
+            onRequestError();
+        }
+    }
+
+    /**
      * 旋转机器人
      *
      * @param angle 需要旋转的角度
