@@ -52,6 +52,7 @@ dependencies {
     provided 'com.squareup.retrofit2:converter-gson:2.3.0'
     // 让Retrofit支持RxJava
     provided 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    compile files('libs/YTX_Android_Full_SDK_v5.4.1r.jar')
 }
 
 task releaseJar(type: Copy) {
