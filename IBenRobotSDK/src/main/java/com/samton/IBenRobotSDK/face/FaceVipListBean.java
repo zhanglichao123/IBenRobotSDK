@@ -224,124 +224,38 @@ public class FaceVipListBean {
         public void setLocalFilePath(String localFilePath) {
             this.localFilePath = localFilePath;
         }
+
+        @Override
+        public String toString() {
+            return "FaceinfoListBean{" +
+                    "createDate=" + createDate +
+                    ", enterpriseId=" + enterpriseId +
+                    ", fid=" + fid +
+                    ", fimagepath='" + fimagepath + '\'' +
+                    ", state=" + state +
+                    ", fname='" + fname + '\'' +
+                    ", objectId='" + objectId + '\'' +
+                    ", robotWorkmod=" + robotWorkmod +
+                    ", isModify=" + isModify +
+                    ", positionName='" + positionName + '\'' +
+                    ", groupId=" + groupId +
+                    ", sex=" + sex +
+                    ", oldImgName='" + oldImgName + '\'' +
+                    ", imgMdfive='" + imgMdfive + '\'' +
+                    ", faceFeature=" + faceFeature +
+                    ", localFilePath='" + localFilePath + '\'' +
+                    '}';
+        }
     }
 
-//    private int enterpriseId;
-//    private int id;
-//    private String name;
-//    private int number;
-//    private List<FaceinfoListBean> faceinfoList;
-//
-//    public int getEnterpriseId() {
-//        return enterpriseId;
-//    }
-//
-//    public void setEnterpriseId(int enterpriseId) {
-//        this.enterpriseId = enterpriseId;
-//    }
-//
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public void setId(int id) {
-//        this.id = id;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public int getNumber() {
-//        return number;
-//    }
-//
-//    public void setNumber(int number) {
-//        this.number = number;
-//    }
-//
-//    public List<FaceinfoListBean> getFaceinfoList() {
-//        return faceinfoList;
-//    }
-//
-//    public void setFaceinfoList(List<FaceinfoListBean> faceinfoList) {
-//        this.faceinfoList = faceinfoList;
-//    }
-//
-//    public static class FaceinfoListBean {
-//        // 位置标示
-//        private int _id;
-//        // 姓名
-//        private String name;
-//        // 姓别
-//        private int sex;
-//        // 职位
-//        private String jobTitle;
-//        // 人脸图片
-//        private String faceUrl;
-//        // 人脸特征信息
-//        private FaceFeature faceFeature;
-//        // 本地存储位置
-//        private String filePath;
-//
-//        public int get_id() {
-//            return _id;
-//        }
-//
-//        public void set_id(int _id) {
-//            this._id = _id;
-//        }
-//
-//        public String getName() {
-//            return name;
-//        }
-//
-//        public void setName(String name) {
-//            this.name = name;
-//        }
-//
-//        public int getSex() {
-//            return sex;
-//        }
-//
-//        public void setSex(int sex) {
-//            this.sex = sex;
-//        }
-//
-//        public String getJobTitle() {
-//            return jobTitle;
-//        }
-//
-//        public void setJobTitle(String jobTitle) {
-//            this.jobTitle = jobTitle;
-//        }
-//
-//        public String getFaceUrl() {
-//            return faceUrl;
-//        }
-//
-//        public void setFaceUrl(String faceUrl) {
-//            this.faceUrl = faceUrl;
-//        }
-//
-//        public FaceFeature getFaceFeature() {
-//            return faceFeature;
-//        }
-//
-//        public void setFaceFeature(FaceFeature faceFeature) {
-//            this.faceFeature = faceFeature;
-//        }
-//
-//        public String getFilePath() {
-//            return filePath;
-//        }
-//
-//        public void setFilePath(String filePath) {
-//            this.filePath = filePath;
-//        }
-//    }
+    @Override
+    public String toString() {
+        return "FaceVipListBean{" +
+                "enterpriseId=" + enterpriseId +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", number=" + number +
+                ", faceinfoList=" + faceinfoList +
+                '}';
+    }
 }

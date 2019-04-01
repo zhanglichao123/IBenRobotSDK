@@ -18,6 +18,8 @@ public class ArcFaceInfo extends FaceInfo {
     private float yaw;
     // 状态信息，如果值为0 表示检测正常，roll，yaw， pitch 的数值可信，否则上面三个角度信息是不可信的
     private int status;
+    // 人脸距离
+    private int distance;
     // 人脸特征信息
     private FaceFeature faceFeature;
     // 以上为所有用户共有的信息，以下为VIP信息
@@ -79,6 +81,14 @@ public class ArcFaceInfo extends FaceInfo {
         this.status = status;
     }
 
+    public int getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
     public FaceFeature getFaceFeature() {
         return faceFeature;
     }
@@ -93,5 +103,21 @@ public class ArcFaceInfo extends FaceInfo {
 
     public void setVipInfoBean(FaceVipListBean.FaceinfoListBean vipInfoBean) {
         this.vipInfoBean = vipInfoBean;
+    }
+
+    @Override
+    public String toString() {
+        return "ArcFaceInfo{" +
+                "index=" + index +
+                ", age=" + age +
+                ", gender=" + gender +
+                ", pitch=" + pitch +
+                ", roll=" + roll +
+                ", yaw=" + yaw +
+                ", status=" + status +
+                ", distance=" + distance +
+                ", faceFeature=" + faceFeature +
+                ", vipInfoBean=" + vipInfoBean +
+                '}';
     }
 }

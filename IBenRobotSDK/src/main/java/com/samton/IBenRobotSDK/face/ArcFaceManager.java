@@ -97,8 +97,8 @@ public class ArcFaceManager {
         faceEngine.getFace3DAngle(face3DAngles);
         // 初始化要返回的数据
         int faceInfosSize = faceInfos.size();
-        if (faceInfosSize != ageInfos.size() || faceInfosSize != genderInfos.size()
-                || faceInfosSize != face3DAngles.size()) {
+        if (faceInfosSize <= 0 || faceInfosSize != ageInfos.size()
+                || faceInfosSize != genderInfos.size() || faceInfosSize != face3DAngles.size()) {
             LogUtils.d("数据不对称，无法返回人脸数据");
         } else {
             for (int i = 0; i < faceInfosSize; i++) {
@@ -109,8 +109,10 @@ public class ArcFaceManager {
                 arcFaceInfo.setAge(ageInfos.get(i).getAge());
                 // 姓别
                 arcFaceInfo.setGender(genderInfos.get(i).getGender());
-                // 位置
-                arcFaceInfo.setRect(faceInfos.get(i).getRect());
+                // 位置、方向
+                FaceInfo faceInfo = faceInfos.get(i);
+                arcFaceInfo.setRect(faceInfo.getRect());
+                arcFaceInfo.setOrient(faceInfo.getOrient());
                 // 角度
                 Face3DAngle face3DAngle = face3DAngles.get(i);
                 arcFaceInfo.setPitch(face3DAngle.getPitch());
@@ -147,8 +149,8 @@ public class ArcFaceManager {
         faceEngine.getFace3DAngle(face3DAngles);
         // 初始化要返回的数据
         int faceInfosSize = faceInfos.size();
-        if (faceInfosSize != ageInfos.size() || faceInfosSize != genderInfos.size()
-                || faceInfosSize != face3DAngles.size()) {
+        if (faceInfosSize <= 0 || faceInfosSize != ageInfos.size()
+                || faceInfosSize != genderInfos.size() || faceInfosSize != face3DAngles.size()) {
             LogUtils.d("数据不对称，无法返回人脸数据");
         } else {
             for (int i = 0; i < faceInfosSize; i++) {
@@ -159,8 +161,10 @@ public class ArcFaceManager {
                 arcFaceInfo.setAge(ageInfos.get(i).getAge());
                 // 姓别
                 arcFaceInfo.setGender(genderInfos.get(i).getGender());
-                // 位置
-                arcFaceInfo.setRect(faceInfos.get(i).getRect());
+                // 位置、方向
+                FaceInfo faceInfo = faceInfos.get(i);
+                arcFaceInfo.setRect(faceInfo.getRect());
+                arcFaceInfo.setOrient(faceInfo.getOrient());
                 // 角度
                 Face3DAngle face3DAngle = face3DAngles.get(i);
                 arcFaceInfo.setPitch(face3DAngle.getPitch());
@@ -179,9 +183,10 @@ public class ArcFaceManager {
      * @return 人脸特征信息
      */
     public FaceFeature extractFaceFeatureBGR24(byte[] data, int width, int height, FaceInfo faceInfo) {
+        // FaceInfo faceInfo = new FaceInfo(arcFaceInfo.getRect(), arcFaceInfo.getOrient());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfo, faceFeature);
-        return faceFeature;
+        return faceFeature.clone();
     }
 
     /**
@@ -190,9 +195,10 @@ public class ArcFaceManager {
      * @return 人脸特征信息
      */
     public FaceFeature extractFaceFeatureNV21(byte[] data, int width, int height, FaceInfo faceInfo) {
+        // FaceInfo faceInfo = new FaceInfo(arcFaceInfo.getRect(), arcFaceInfo.getOrient());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_NV21, faceInfo, faceFeature);
-        return faceFeature;
+        return faceFeature.clone();
     }
 
     /**
@@ -224,7 +230,8 @@ public class ArcFaceManager {
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
             FaceFeature feature = extractFaceFeatureBGR24(bytes, width, height, info);
-            //TODO 判断使用哪一组VIP库
+            // 签到时需要判断使用哪一组VIP库(主动交互判断所有VIP)
+            // 取出所有VIP信息，放入同一个列表
             List<FaceVipListBean.FaceinfoListBean> localVipInfoLists = new ArrayList<>();
             for (FaceVipListBean localFaceVipListBean : localFaceVipListBeans) {
                 List<FaceVipListBean.FaceinfoListBean> faceInfoList = localFaceVipListBean.getFaceinfoList();
@@ -232,6 +239,7 @@ public class ArcFaceManager {
                     localVipInfoLists.addAll(faceInfoList);
                 }
             }
+            // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
                 FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
                 if (faceSimilar.getScore() >= 0.8) {
@@ -262,7 +270,8 @@ public class ArcFaceManager {
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
             FaceFeature feature = extractFaceFeatureNV21(bytes, width, height, info);
-            //TODO 判断使用哪一组VIP库
+            // 签到时需要判断使用哪一组VIP库(主动交互判断所有VIP)
+            // 取出所有VIP信息，放入同一个列表
             List<FaceVipListBean.FaceinfoListBean> localVipInfoLists = new ArrayList<>();
             for (FaceVipListBean localFaceVipListBean : localFaceVipListBeans) {
                 List<FaceVipListBean.FaceinfoListBean> faceInfoList = localFaceVipListBean.getFaceinfoList();
@@ -270,6 +279,7 @@ public class ArcFaceManager {
                     localVipInfoLists.addAll(faceInfoList);
                 }
             }
+            // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
                 FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
                 if (faceSimilar.getScore() >= 0.8) {
@@ -288,7 +298,7 @@ public class ArcFaceManager {
      * @param faceVipListBeans
      */
     public void registerFaceData(final List<FaceVipListBean> faceVipListBeans) throws ExecutionException, InterruptedException {
-        Log.e(TAG, "初始数据：" + faceVipListBeans.size());
+        Log.e(TAG, "初始数据(组)：" + faceVipListBeans.size());
         if (faceVipListBeans.size() <= 0) {
             Log.e(TAG, "VIP人脸数据注册失败:没有组数据");
             return;
@@ -301,7 +311,7 @@ public class ArcFaceManager {
             List<FaceVipListBean.FaceinfoListBean> faceinfoListBeans = faceVipListBean.getFaceinfoList();
             if (faceinfoListBeans == null || faceinfoListBeans.size() <= 0) {
                 Log.e(TAG, "VIP人脸数据注册失败:没有人信息");
-                faceVipListBeans.remove(faceVipListBean);
+                faceVipListBeanIterator.remove();
                 continue;
             }
             // 遍历组内所有人数据
@@ -311,7 +321,7 @@ public class ArcFaceManager {
                 File fFile = new File(faceinfoListBean.getLocalFilePath());
                 // 文件不存在(剔除)
                 if (!fFile.exists()) {
-                    faceinfoListBeans.remove(faceinfoListBean);
+                    faceinfoListBeanIterator.remove();
                     continue;
                 }
                 final Bitmap bitmap = Glide.with(context).load(fFile)
@@ -323,16 +333,15 @@ public class ArcFaceManager {
                 if (faces == null || faces.size() != 1) {
                     Log.e(TAG, "VIP人脸数据注册失败:没有人脸");
                     // 多张人脸或没有人脸(剔除)
-                    faceinfoListBeans.remove(faceinfoListBean);
+                    faceinfoListBeanIterator.remove();
                     continue;
                 }
                 // 只有一张人脸(获取人脸特征信息)
                 faceinfoListBean.setFaceFeature(extractFaceFeatureNV21(bytes, width, height, faces.get(0)));
-                Log.e(TAG, "VIP人脸数据注册成功");
             }
             if (faceinfoListBeans.size() <= 0) {
                 Log.e(TAG, "VIP人脸数据注册失败:人信息剔除完");
-                faceVipListBeans.remove(faceVipListBean);
+                faceVipListBeanIterator.remove();
             }
         }
         if (faceVipListBeans.size() > 0) {
