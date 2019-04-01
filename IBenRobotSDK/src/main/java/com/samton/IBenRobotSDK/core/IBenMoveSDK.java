@@ -1520,6 +1520,35 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 判断底盘是否正在运动
+     */
+    public boolean isMoveing() {
+        if (mRobotPlatform == null) {
+            return false;
+        } else {
+            try {
+                IMoveAction currentAction = mRobotPlatform.getCurrentAction();
+                if (currentAction == null) {
+                    return false;
+                }
+                ActionStatus status = currentAction.getStatus();
+                if (status == null) {
+                    return false;
+                }
+                return status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
+            } catch (RequestFailException
+                    | ConnectionFailException
+                    | UnauthorizedRequestException
+                    | ConnectionTimeOutException
+                    | InvalidArgumentException
+                    | UnsupportedCommandException
+                    | ParseInvalidException e) {
+                return false;
+            }
+        }
+    }
+
+    /**
      * 机器人连接回调
      */
     public interface ConnectCallBack {
