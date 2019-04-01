@@ -70,7 +70,7 @@ public class ArcFaceManager {
                 10,// 引擎最多能检测出的人脸数
                 FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE |
                         FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_LIVENESS);
-        LogUtils.e("虹软sdk初始化结果:" + "active-" + active + ",init-" + initCode);
+        LogUtils.d("虹软sdk初始化结果:" + "active-" + active + ",init-" + initCode);
     }
 
     /**
@@ -99,7 +99,7 @@ public class ArcFaceManager {
         int faceInfosSize = faceInfos.size();
         if (faceInfosSize != ageInfos.size() || faceInfosSize != genderInfos.size()
                 || faceInfosSize != face3DAngles.size()) {
-            LogUtils.e("数据不对称，无法返回人脸数据");
+            LogUtils.d("数据不对称，无法返回人脸数据");
         } else {
             for (int i = 0; i < faceInfosSize; i++) {
                 ArcFaceInfo arcFaceInfo = new ArcFaceInfo();
@@ -149,7 +149,7 @@ public class ArcFaceManager {
         int faceInfosSize = faceInfos.size();
         if (faceInfosSize != ageInfos.size() || faceInfosSize != genderInfos.size()
                 || faceInfosSize != face3DAngles.size()) {
-            LogUtils.e("数据不对称，无法返回人脸数据");
+            LogUtils.d("数据不对称，无法返回人脸数据");
         } else {
             for (int i = 0; i < faceInfosSize; i++) {
                 ArcFaceInfo arcFaceInfo = new ArcFaceInfo();
@@ -218,7 +218,7 @@ public class ArcFaceManager {
         List<FaceVipListBean> localFaceVipListBeans = VipFaceBank.getVipFaces();
         if (localFaceVipListBeans == null || localFaceVipListBeans.size() <= 0
                 || infos == null || infos.size() <= 0) {
-            LogUtils.e("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
+            LogUtils.d("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
             return returnArcFaceInfos;
         }
         int width = bitmap.getWidth(), height = bitmap.getHeight();
@@ -238,7 +238,7 @@ public class ArcFaceManager {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
                 }
-                LogUtils.e("检索相似度：" + faceSimilar.getScore());
+                LogUtils.d("检索相似度：" + faceSimilar.getScore());
             }
         }
         return returnArcFaceInfos;
@@ -256,7 +256,7 @@ public class ArcFaceManager {
         List<FaceVipListBean> localFaceVipListBeans = VipFaceBank.getVipFaces();
         if (localFaceVipListBeans == null || localFaceVipListBeans.size() <= 0
                 || infos == null || infos.size() <= 0) {
-            LogUtils.e("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
+            LogUtils.d("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
             return returnArcFaceInfos;
         }
         int width = bitmap.getWidth(), height = bitmap.getHeight();
@@ -276,7 +276,7 @@ public class ArcFaceManager {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
                 }
-                LogUtils.e("检索相似度：" + faceSimilar.getScore());
+                LogUtils.d("检索相似度：" + faceSimilar.getScore());
             }
         }
         return returnArcFaceInfos;

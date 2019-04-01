@@ -38,16 +38,21 @@ public class MyntCameraProxy {
      * 关闭相机
      */
     public void closeCamera() {
-        LogUtils.e("关闭相机");
-        if (mCamera != null) {
-            mCamera.stop();
-            mCamera.close();
-            mCamera = null;
-        }
-        if (mUSBMonitor != null) {
-            mUSBMonitor.unregister();
-            mUSBMonitor.destroy();
-            mUSBMonitor = null;
+        LogUtils.d("关闭相机");
+        try {
+            if (mCamera != null) {
+                mCamera.stop();
+                mCamera.close();
+                mCamera = null;
+            }
+            if (mUSBMonitor != null) {
+                mUSBMonitor.unregister();
+                mUSBMonitor.destroy();
+                mUSBMonitor = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtils.d("关闭相机异常" + e.toString());
         }
         if (iMyntCallBack != null) {
             iMyntCallBack = null;
@@ -58,14 +63,14 @@ public class MyntCameraProxy {
      * 开启相机
      */
     public void openCamera(@NonNull final Surface colorSf, @NonNull final Surface depthSf) {
-        LogUtils.e("开启相机");
+        LogUtils.d("开启相机");
         // 确保相机是关闭状态
         // closeCamera();
-        LogUtils.e("USB监听开始注册");
+        LogUtils.d("USB监听开始注册");
         mUSBMonitor = new USBMonitor(context, new USBMonitor.IUSBMonitorListener() {
             @Override
             public void didAttach(MYNTCamera myntCamera) {// 设备插入
-                LogUtils.e("设备插入");
+                LogUtils.d("设备插入");
                 if (mCamera == null) {
                     // 初始化相机
                     mCamera = myntCamera;
@@ -75,7 +80,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didDettach(MYNTCamera myntCamera) {// 设备拔出
-                LogUtils.e("设备拔出");
+                LogUtils.d("设备拔出");
                 if (mCamera != null) {
                     mCamera.stop();
                     mCamera.close();
@@ -85,7 +90,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didConnectedCamera(MYNTCamera myntCamera) {// 连接成功
-                LogUtils.e("连接成功");
+                LogUtils.d("连接成功");
                 if (mCamera == null) {
                     mCamera = myntCamera;
                 }
@@ -95,7 +100,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didDisconnectedCamera(MYNTCamera myntCamera) {// 连接断开
-                LogUtils.e("连接断开");
+                LogUtils.d("连接断开");
                 if (mCamera != null) {
                     mCamera.stop();
                     mCamera.close();
@@ -104,7 +109,7 @@ public class MyntCameraProxy {
             }
         });
         mUSBMonitor.register();
-        LogUtils.e("USB监听注册成功");
+        LogUtils.d("USB监听注册成功");
     }
 
     /**
@@ -180,7 +185,7 @@ public class MyntCameraProxy {
      * 设置图像回调
      */
     public void setFrameCallBack(IMyntCallBack iMyntCallBack) {
-        LogUtils.e("设置数据回调监听");
+        LogUtils.d("设置数据回调监听");
         if (iMyntCallBack != null) {
             this.iMyntCallBack = iMyntCallBack;
         }
