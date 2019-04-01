@@ -57,6 +57,11 @@ public final class InitBean {
     private int workModeid;
     private CleverPreachBean cleverPreach;
 
+
+
+
+
+
     public int getWorkModeid() {
         return workModeid;
     }
@@ -1658,6 +1663,33 @@ public final class InitBean {
     private List<String> statusBars;
     private RobotInfoBean robotInfo;
     private int expressionGroupId;
+    private List<String> isContent;//肯定库
+    private List<String> noContent;//否定库
+    private List<String> wholeContent;//一体库
+
+    public List<String> getNoContent() {
+        return noContent;
+    }
+
+    public void setNoContent(List<String> noContent) {
+        this.noContent = noContent;
+    }
+
+    public List<String> getIsContent() {
+        return isContent;
+    }
+
+    public void setIsContent(List<String> isContent) {
+        this.isContent = isContent;
+    }
+
+    public List<String> getWholeContent() {
+        return wholeContent;
+    }
+
+    public void setWholeContent(List<String> wholeContent) {
+        this.wholeContent = wholeContent;
+    }
 
     public int getExpressionGroupId() {
         return expressionGroupId;
