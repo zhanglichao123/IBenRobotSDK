@@ -242,7 +242,7 @@ public class ArcFaceManager {
             // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
                 FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
-                if (faceSimilar.getScore() >= 0.8) {
+                if (faceSimilar.getScore() >= 0.7) {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
                 }
@@ -282,7 +282,7 @@ public class ArcFaceManager {
             // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
                 FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
-                if (faceSimilar.getScore() >= 0.8) {
+                if (faceSimilar.getScore() >= 0.6) {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
                 }

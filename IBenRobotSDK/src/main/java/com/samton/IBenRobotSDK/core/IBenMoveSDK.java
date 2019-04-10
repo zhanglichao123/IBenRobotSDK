@@ -131,7 +131,10 @@ public final class IBenMoveSDK {
      * 动作接口
      */
     private IMoveAction moveAction;
-
+    /**
+     * 回到充电桩监听轮询
+     */
+    private Timer toDockTimer = null;
 
     /**
      * 私有构造
@@ -945,21 +948,6 @@ public final class IBenMoveSDK {
      *
      * @return 是否在无线充电状态
      */
-/*    public boolean isHome() {
-        boolean isHome = false;
-        if (mRobotPlatform != null) {
-            try {
-                boolean isCharging = mRobotPlatform.getPowerStatus().isCharging();
-                boolean isDcConnect = mRobotPlatform.getPowerStatus().isDCConnected();
-                isHome = isCharging && !isDcConnect;
-            }  catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            onRequestError();
-        }
-        return isHome;
-    }*/
     public boolean isHome() {
         boolean dockingStatusValue = false;
         try {
@@ -971,6 +959,31 @@ public final class IBenMoveSDK {
         }
         return dockingStatusValue;
     }
+
+    /**
+     * 查询机器人电池状态
+     *
+     * @return 0未在充电1线充2桩充
+     */
+    public int getPowerStatus() {
+        try {
+            PowerStatus status = mRobotPlatform.getPowerStatus();
+            if (status.isCharging()) {
+                // 直流电源连接
+                if (status.isDCConnected()) {
+                    return 1;
+                } else {
+                    return 2;
+                }
+            } else {
+                return 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 
     /**
      * 保存地图
@@ -1500,7 +1513,7 @@ public final class IBenMoveSDK {
     /**
      * 判断底盘急停按钮是否开启
      */
-    private boolean hasSystemEmergencyStop() {
+    public boolean hasSystemEmergencyStop() {
         if (mRobotPlatform == null) {
             onRequestError();
             return true;
@@ -1617,5 +1630,12 @@ public final class IBenMoveSDK {
          * 获取电量失败
          */
         void onFailed();
+    }
+
+    /**
+     * 回到充电桩回调
+     */
+    public interface toDockCallBack {
+        void onDock(boolean isOnDock);
     }
 }

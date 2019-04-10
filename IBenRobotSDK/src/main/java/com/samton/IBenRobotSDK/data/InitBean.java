@@ -58,10 +58,6 @@ public final class InitBean {
     private CleverPreachBean cleverPreach;
 
 
-
-
-
-
     public int getWorkModeid() {
         return workModeid;
     }
@@ -602,6 +598,7 @@ public final class InitBean {
          * vipVisitorWords : 欢迎vip#姓氏##性别#入场
          * photoGroupId : 93
          * guideWords : 没有签到的嘉宾请到这里签到
+         * guideWordsTime: 15
          */
 
         private int meetingId;
@@ -613,6 +610,7 @@ public final class InitBean {
         private String vipVisitorWords;
         private int photoGroupId;
         private String guideWords;
+        private int guideWordsTime;
 
         public int getMeetingId() {
             return meetingId;
@@ -684,6 +682,14 @@ public final class InitBean {
 
         public void setGuideWords(String guideWords) {
             this.guideWords = guideWords;
+        }
+
+        public int getGuideWordsTime() {
+            return guideWordsTime;
+        }
+
+        public void setGuideWordsTime(int guideWordsTime) {
+            this.guideWordsTime = guideWordsTime;
         }
     }
 

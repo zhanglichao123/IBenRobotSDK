@@ -99,10 +99,10 @@ public class IBenRouseSDK implements Camera.PreviewCallback, MYNTCamera.IFrameCa
         if (arcFaceManager == null) {
             arcFaceManager = ArcFaceManager.getInstance(mContext);
         }
-        // 初始化相机
-        if (myntCameraProxy == null) {
-            myntCameraProxy = MyntCameraProxy.getInstance(mContext);
-        }
+//        // 初始化相机
+//        if (myntCameraProxy == null) {
+//            myntCameraProxy = MyntCameraProxy.getInstance(mContext);
+//        }
 //        myntCameraProxy.initMyntCamera(colorTv, depthTv, this);
     }
 

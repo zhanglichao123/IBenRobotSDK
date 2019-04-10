@@ -1,12 +1,17 @@
 package com.samton.IBenRobotSDK.utils;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.Surface;
 
 import com.myntai.d.sdk.MYNTCamera;
 import com.myntai.d.sdk.USBMonitor;
 import com.myntai.d.sdk.bean.FrameData;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author: xkbai
@@ -17,19 +22,19 @@ import com.myntai.d.sdk.bean.FrameData;
 public class MyntCameraProxy {
     private String TAG = "MyntCameraProxy";
     private static MyntCameraProxy instance;
-    private Context context;
+    private Activity activity;
 
     private USBMonitor mUSBMonitor;
     private MYNTCamera mCamera;
     private IMyntCallBack iMyntCallBack;
 
-    public MyntCameraProxy(Context context) {
-        this.context = context;
+    public MyntCameraProxy(Activity activity) {
+        this.activity = activity;
     }
 
-    public static MyntCameraProxy getInstance(Context context) {
+    public static MyntCameraProxy getInstance(Activity activity) {
         if (instance == null) {
-            instance = new MyntCameraProxy(context);
+            instance = new MyntCameraProxy(activity);
         }
         return instance;
     }
@@ -41,8 +46,8 @@ public class MyntCameraProxy {
         LogUtils.d("关闭相机");
         try {
             if (mCamera != null) {
-                mCamera.stop();
                 mCamera.close();
+                mCamera.destroy();
                 mCamera = null;
             }
             if (mUSBMonitor != null) {
@@ -67,7 +72,7 @@ public class MyntCameraProxy {
         // 确保相机是关闭状态
         // closeCamera();
         LogUtils.d("USB监听开始注册");
-        mUSBMonitor = new USBMonitor(context, new USBMonitor.IUSBMonitorListener() {
+        mUSBMonitor = new USBMonitor(activity, new USBMonitor.IUSBMonitorListener() {
             @Override
             public void didAttach(MYNTCamera myntCamera) {// 设备插入
                 LogUtils.d("设备插入");
@@ -82,8 +87,8 @@ public class MyntCameraProxy {
             public void didDettach(MYNTCamera myntCamera) {// 设备拔出
                 LogUtils.d("设备拔出");
                 if (mCamera != null) {
-                    mCamera.stop();
                     mCamera.close();
+                    mCamera.destroy();
                     mCamera = null;
                 }
             }
@@ -102,8 +107,8 @@ public class MyntCameraProxy {
             public void didDisconnectedCamera(MYNTCamera myntCamera) {// 连接断开
                 LogUtils.d("连接断开");
                 if (mCamera != null) {
-                    mCamera.stop();
                     mCamera.close();
+                    mCamera.destroy();
                     mCamera = null;
                 }
             }
@@ -125,9 +130,9 @@ public class MyntCameraProxy {
         // 深度图预览相关的对象
         mCamera.setPreviewDisplay(depthSf, MYNTCamera.Frame.Depth);
         // 设置预览尺寸
-        mCamera.setPreviewSize(480);
+        mCamera.setPreviewSize(720);
         // 设置深度类型
-        mCamera.setDepthType(MYNTCamera.DEPTH_DATA_8_BITS);
+        mCamera.setDepthType(MYNTCamera.DEPTH_DATA_11_BITS);
         // 预览框宽高
         final int width = mCamera.getPreviewWidth(), height = mCamera.getPreviewHeight();
         // 设置图像回调
@@ -155,7 +160,7 @@ public class MyntCameraProxy {
         if (mCamera == null) {
             return false;
         } else {
-            return mCamera.isConnected();
+            return mCamera.isOpen();
         }
     }
 
@@ -178,6 +183,48 @@ public class MyntCameraProxy {
             return 0;
         } else {
             return getDistanceValue(mCamera.getPreviewWidth() * (y - 1) + x);
+        }
+    }
+
+    /**
+     * 获取指定点的距离(降噪)
+     */
+    public int denoiseDistanceValue(int x, int y) {
+        if (mCamera == null) {
+            return 0;
+        } else {
+            int dvc = getDistanceValue(x, y);       // 标准
+            // 获取标准点上下左右10像素的点距离
+            int dvt = getDistanceValue(x, y - 10);  // 上
+            int dvb = getDistanceValue(x, y + 10);  // 下
+            int dvl = getDistanceValue(x - 10, y);  // 左
+            int dvr = getDistanceValue(x + 10, y);  // 右
+            List<Integer> distances = Arrays.asList(dvc, dvt, dvb, dvl, dvr);
+            Collections.sort(distances, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    if (o1 > o2) {
+                        return 1;
+                    }
+                    if (o1 == o2) {
+                        return 0;
+                    }
+                    return -1;
+                }
+            });
+            distances.remove(0);
+            distances.remove(distances.size() - 1);
+            LogUtils.e("获取距离：" + distances.toString());
+            int dvSum = 0;
+            for (Integer distance : distances) {
+                dvSum = distance + dvSum;
+            }
+            LogUtils.e("距离和：" + dvSum);
+            if (dvSum == 0) {
+                return 0;
+            } else {
+                return dvSum / distances.size();
+            }
         }
     }
 
