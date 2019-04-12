@@ -695,13 +695,15 @@ public final class InitBean {
 
     public static class PreachGroupBean {
         /**
-         * groupId : 74
-         * name : 小笨宣讲组
-         * describe : 小笨宣讲描述
-         * sceneId : 55
+         * groupId : 146
+         * name : 旋转角度
+         * describe : 二代
+         * sceneId : 148
          * state : 1
-         * sceneName : 小笨新公司
-         * preachItemList : [{"itemId":372,"groupId":74,"slocId":145,"preachType":1,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_ba9a4c.jpg","content":"我已到达办公区","contentOnTheWay":"带我去办公区","showType":1,"orderNum":1,"state":1,"slocName":"\b办公区"},{"itemId":373,"groupId":74,"slocId":146,"preachType":1,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_580923.jpg","content":"我已到达办公区2","contentOnTheWay":"带我去办公区2","showType":2,"orderNum":2,"state":1,"slocName":"\b办公区2"},{"itemId":374,"groupId":74,"slocId":147,"preachType":2,"imgUrl":"http://121.41.40.145:7080/img/preach/img/2018-01-09_4098a5.jpg","voiceUrl":"http://121.41.40.145:7080/img/preach/voice/2018-01-09_bafc41.mp3","contentOnTheWay":"带我去办公区3","showType":0,"orderNum":3,"state":1,"slocName":"\b办公区3"},{"itemId":375,"groupId":74,"slocId":148,"preachType":3,"videoUrl":"http://121.41.40.145:7080/img/preach/video/2018-01-09_b8fe7c.mp4","contentOnTheWay":"带我去办公区4","showType":0,"orderNum":4,"state":1,"slocName":"\b办公区4"},{"itemId":376,"groupId":74,"slocId":149,"orderNum":5,"state":1,"slocName":"\b办公区5"},{"itemId":377,"groupId":74,"slocId":150,"orderNum":6,"state":1,"slocName":"\b饮水间"}]
+         * sceneName : 角度旋转
+         * robModelNum : 2
+         * updateFlag : 1
+         * preachItemList : [{"itemId":899,"groupId":146,"slocId":485,"preachType":3,"videoUrl":"http://47.96.137.231:7080/img/preach/video/2018-04-16_f5e80c.mp4","contentOnTheWay":"对方就会受到粉丝的话","showType":0,"orderNum":6,"state":1,"videoOldname":"30 巴塔木_高清.mp4","slocName":"花盆","location":"0.52149945,1.2457348,0.0,-2.4355483","updateFlag":0},{"itemId":894,"groupId":146,"slocId":486,"preachType":1,"imgUrl":"http://47.96.137.231:7080/img/preach/img/2018-04-11_5900d2.jpg","content":"11","contentOnTheWay":"融合古典与现代的卓著品位,精致与奢华的精彩呈现.尽享意大利精湛工艺的臻至尊荣.","showType":2,"orderNum":2,"state":1,"imgOldname":"timg (15)_meitu_2.jpg","slocName":"饮水机","location":"1.9200913,3.7839558,0.0,-2.2910438","updateFlag":0},{"itemId":893,"groupId":146,"slocId":487,"preachType":3,"videoUrl":"http://47.96.137.231:7080/img/preach/video/2018-04-16_2ff00b.mp4","content":"迪奥香水","contentOnTheWay":"草木精华浓缩修护精华,源自植物的愈颜奇迹,修护保湿,肌肤强韧新生!开启你的肌肤奢华焕变之旅!","showType":0,"orderNum":3,"state":1,"videoOldname":"30 巴塔木_高清.mp4","slocName":"工位","location":"-0.14026612,3.415485,0.0,-1.5524257","updateFlag":0},{"itemId":901,"groupId":146,"slocId":483,"preachType":2,"imgUrl":"http://47.96.137.231:7080/img/preach/img/2018-04-16_483dcf.jpg","voiceUrl":"http://47.96.137.231:7080/img/preach/voice/2018-04-16_36e30c.mp3","contentOnTheWay":"我是去第四个点，茶几的途径播报语","showType":0,"orderNum":4,"state":1,"voiceOldname":"크러쉬 (Crush)-잠 못드는 밤 (铃声).mp3","imgOldname":"cb23fd081bf85369459e2e256f12221b88dca3f32fae5e-Vfzam4_fw658.jpg","slocName":"茶几","location":"2.1094348,0.09500635,0.0,2.8074174","updateFlag":0},{"itemId":900,"groupId":146,"slocId":484,"preachType":1,"imgUrl":"http://47.96.137.231:7080/img/preach/img/2018-04-16_dea36f.jpg","content":"jsdkbvdkjbvdkaslksdkvjdkjhvdskjvbwfwesfaweafasaf11上充满那边吃的不错的三从四德发生大收到擦的是 v 啊 v","contentOnTheWay":"我是去第五个点，电视机的途径播报语","showType":2,"orderNum":5,"state":1,"imgOldname":"timg (18)_meitu_6.jpg","slocName":"电视","location":"2.7995903,-4.274479,0.0,-2.5405376","updateFlag":0},{"itemId":892,"groupId":146,"slocId":488,"preachType":2,"imgUrl":"http://47.96.137.231:7080/img/preach/img/2018-05-25_413d61.jpg","voiceUrl":"http://47.96.137.231:7080/img/preach/voice/2018-04-16_e19ae1.mp3","content":"迪奥眼霜","contentOnTheWay":"迪奥眼霜","showType":0,"orderNum":1,"state":1,"voiceOldname":"태양 (太阳)-눈,코,입 (铃声).mp3","imgOldname":"5970a905N210fa9a2.jpg","slocName":"角落","location":"0.60027647,-4.560518,0.0,-0.4125727","updateFlag":0},{"itemId":898,"groupId":146,"slocId":490,"preachType":2,"imgUrl":"http://47.96.137.231:7080/img/preach/img/2018-04-16_d41c30.jpg","voiceUrl":"http://47.96.137.231:7080/img/preach/voice/2018-04-16_4fe9a2.mp3","contentOnTheWay":"科技文化的深刻的方式点击发货速度","showType":0,"orderNum":7,"state":1,"voiceOldname":"Heitor Pereira - Theme from the Monkees.mp3","imgOldname":"timg (16)_meitu_1.jpg","slocName":"硬件","location":"-4.6653085,3.3449478,0.0,0.46597287","updateFlag":0}]
          */
 
         private int groupId;
@@ -710,6 +712,8 @@ public final class InitBean {
         private int sceneId;
         private int state;
         private String sceneName;
+        private int robModelNum;
+        private int updateFlag;
         private List<PreachItemListBean> preachItemList;
 
         public int getGroupId() {
@@ -760,6 +764,22 @@ public final class InitBean {
             this.sceneName = sceneName;
         }
 
+        public int getRobModelNum() {
+            return robModelNum;
+        }
+
+        public void setRobModelNum(int robModelNum) {
+            this.robModelNum = robModelNum;
+        }
+
+        public int getUpdateFlag() {
+            return updateFlag;
+        }
+
+        public void setUpdateFlag(int updateFlag) {
+            this.updateFlag = updateFlag;
+        }
+
         public List<PreachItemListBean> getPreachItemList() {
             return preachItemList;
         }
@@ -770,79 +790,44 @@ public final class InitBean {
 
         public static class PreachItemListBean {
             /**
-             * itemId : 372
-             * groupId : 74
-             * slocId : 145
-             * preachType : 1
-             * imgUrl : http://121.41.40.145:7080/img/preach/img/2018-01-09_ba9a4c.jpg
-             * content : 我已到达办公区
-             * contentOnTheWay : 带我去办公区
-             * showType : 1
-             * orderNum : 1
+             * itemId : 899
+             * groupId : 146
+             * slocId : 485
+             * preachType : 3
+             * videoUrl : http://47.96.137.231:7080/img/preach/video/2018-04-16_f5e80c.mp4
+             * contentOnTheWay : 对方就会受到粉丝的话
+             * showType : 0
+             * orderNum : 6
              * state : 1
-             * slocName : 办公区
-             * voiceUrl : http://121.41.40.145:7080/img/preach/voice/2018-01-09_bafc41.mp3
-             * videoUrl : http://121.41.40.145:7080/img/preach/video/2018-01-09_b8fe7c.mp4
+             * videoOldname : 30 巴塔木_高清.mp4
+             * slocName : 花盆
+             * location : 0.52149945,1.2457348,0.0,-2.4355483
+             * updateFlag : 0
+             * imgUrl : http://47.96.137.231:7080/img/preach/img/2018-04-11_5900d2.jpg
+             * content : 11
+             * imgOldname : timg (15)_meitu_2.jpg
+             * voiceUrl : http://47.96.137.231:7080/img/preach/voice/2018-04-16_36e30c.mp3
+             * voiceOldname : 크러쉬 (Crush)-잠 못드는 밤 (铃声).mp3
              */
 
             private int itemId;
             private int groupId;
             private int slocId;
             private int preachType;
-            private String imgUrl;
-            private String content;
+            private String videoUrl;
             private String contentOnTheWay;
             private int showType;
             private int orderNum;
             private int state;
-            private String slocName;
-            private String voiceUrl;
-            private String videoUrl;
-            private String location;
-            private String voiceOldname;
             private String videoOldname;
+            private String slocName;
+            private String location;
+            private int updateFlag;
+            private String imgUrl;
+            private String content;
             private String imgOldname;
-            private boolean isReach;
-
-            public boolean isReach() {
-                return isReach;
-            }
-
-            public void setReach(boolean reach) {
-                isReach = reach;
-            }
-
-            public String getVoiceOldname() {
-                return voiceOldname;
-            }
-
-            public void setVoiceOldname(String voiceOldname) {
-                this.voiceOldname = voiceOldname;
-            }
-
-            public String getVideoOldname() {
-                return videoOldname;
-            }
-
-            public void setVideoOldname(String videoOldname) {
-                this.videoOldname = videoOldname;
-            }
-
-            public String getImgOldname() {
-                return imgOldname;
-            }
-
-            public void setImgOldname(String imgOldname) {
-                this.imgOldname = imgOldname;
-            }
-
-            public String getLocation() {
-                return location;
-            }
-
-            public void setLocation(String location) {
-                this.location = location;
-            }
+            private String voiceUrl;
+            private String voiceOldname;
 
             public int getItemId() {
                 return itemId;
@@ -876,20 +861,12 @@ public final class InitBean {
                 this.preachType = preachType;
             }
 
-            public String getImgUrl() {
-                return imgUrl;
+            public String getVideoUrl() {
+                return videoUrl;
             }
 
-            public void setImgUrl(String imgUrl) {
-                this.imgUrl = imgUrl;
-            }
-
-            public String getContent() {
-                return content;
-            }
-
-            public void setContent(String content) {
-                this.content = content;
+            public void setVideoUrl(String videoUrl) {
+                this.videoUrl = videoUrl;
             }
 
             public String getContentOnTheWay() {
@@ -924,12 +901,60 @@ public final class InitBean {
                 this.state = state;
             }
 
+            public String getVideoOldname() {
+                return videoOldname;
+            }
+
+            public void setVideoOldname(String videoOldname) {
+                this.videoOldname = videoOldname;
+            }
+
             public String getSlocName() {
                 return slocName;
             }
 
             public void setSlocName(String slocName) {
                 this.slocName = slocName;
+            }
+
+            public String getLocation() {
+                return location;
+            }
+
+            public void setLocation(String location) {
+                this.location = location;
+            }
+
+            public int getUpdateFlag() {
+                return updateFlag;
+            }
+
+            public void setUpdateFlag(int updateFlag) {
+                this.updateFlag = updateFlag;
+            }
+
+            public String getImgUrl() {
+                return imgUrl;
+            }
+
+            public void setImgUrl(String imgUrl) {
+                this.imgUrl = imgUrl;
+            }
+
+            public String getContent() {
+                return content;
+            }
+
+            public void setContent(String content) {
+                this.content = content;
+            }
+
+            public String getImgOldname() {
+                return imgOldname;
+            }
+
+            public void setImgOldname(String imgOldname) {
+                this.imgOldname = imgOldname;
             }
 
             public String getVoiceUrl() {
@@ -940,16 +965,15 @@ public final class InitBean {
                 this.voiceUrl = voiceUrl;
             }
 
-            public String getVideoUrl() {
-                return videoUrl;
+            public String getVoiceOldname() {
+                return voiceOldname;
             }
 
-            public void setVideoUrl(String videoUrl) {
-                this.videoUrl = videoUrl;
+            public void setVoiceOldname(String voiceOldname) {
+                this.voiceOldname = voiceOldname;
             }
         }
     }
-
     public static class PrintGroupBean {
         /**
          * groupId : 86

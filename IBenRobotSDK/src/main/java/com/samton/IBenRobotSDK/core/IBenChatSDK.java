@@ -1,5 +1,6 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.app.PendingIntent;
 import android.content.Context;
 
 import com.samton.IBenRobotSDK.data.ChatFlagBean;
@@ -82,7 +83,7 @@ public final class IBenChatSDK {
      */
     public void initIMSDK(Context mContext) {
         // 初始化IM模块
-        IBenIMHelper.getInstance().init(mTag, mContext, callBack);
+        IBenIMHelper.getInstance().init(mTag, mContext,callBack);
     }
 
     /**

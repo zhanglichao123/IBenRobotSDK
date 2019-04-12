@@ -37,4 +37,5 @@ public interface IBenMsgCallBack {
      * @param isQA true为QA false为人工
      */
     void onStateChange(int tag, boolean isQA);
+
 }
