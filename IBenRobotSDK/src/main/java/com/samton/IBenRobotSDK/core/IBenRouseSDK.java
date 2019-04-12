@@ -349,10 +349,10 @@ public class IBenRouseSDK implements Camera.PreviewCallback, MYNTCamera.IFrameCa
      */
     @Override
     public void onFrame(FrameData data) {
-        if (data.flag == FrameData.COLOR) {
-            LogUtils.e("主动唤醒-彩色图");
-            convertBitmap(data.byteBuffer);
-        }
+//        if (data.flag == FrameData.COLOR) {
+//            LogUtils.e("主动唤醒-彩色图");
+//            convertBitmap(data.byteBuffer);
+//        }
     }
 
     /**
