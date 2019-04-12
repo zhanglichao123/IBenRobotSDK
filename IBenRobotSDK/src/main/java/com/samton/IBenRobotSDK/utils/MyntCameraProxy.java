@@ -1,6 +1,9 @@
 package com.samton.IBenRobotSDK.utils;
 
 import android.app.Activity;
+import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.view.Surface;
 
@@ -8,10 +11,7 @@ import com.myntai.d.sdk.MYNTCamera;
 import com.myntai.d.sdk.USBMonitor;
 import com.myntai.d.sdk.bean.FrameData;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Random;
 
 /**
  * @author: xkbai
@@ -26,7 +26,7 @@ public class MyntCameraProxy {
 
     private USBMonitor mUSBMonitor;
     private MYNTCamera mCamera;
-    private IMyntCallBack iMyntCallBack;
+    private MYNTCamera.IFrameCallback frameCallback;
 
     public MyntCameraProxy(Activity activity) {
         this.activity = activity;
@@ -40,10 +40,17 @@ public class MyntCameraProxy {
     }
 
     /**
+     * 相机数据回调
+     */
+    public interface FrameCallback {
+        void onFrame(FrameData color, FrameData depth);
+    }
+
+    /**
      * 关闭相机
      */
     public void closeCamera() {
-        LogUtils.d("关闭相机");
+        LogUtils.e("关闭相机");
         try {
             if (mCamera != null) {
                 mCamera.close();
@@ -57,35 +64,55 @@ public class MyntCameraProxy {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            LogUtils.d("关闭相机异常" + e.toString());
+            LogUtils.e("关闭相机异常" + e.toString());
         }
-        if (iMyntCallBack != null) {
-            iMyntCallBack = null;
+        if (frameCallback != null) {
+            frameCallback = null;
+        }
+        if (mHandler != null) {
+            mHandler.removeMessages(0x90890);
         }
     }
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 0x90890:
+                    if (mCamera != null) {
+                        mCamera.connect();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     /**
      * 开启相机
      */
     public void openCamera(@NonNull final Surface colorSf, @NonNull final Surface depthSf) {
-        LogUtils.d("开启相机");
+        LogUtils.e("开启相机");
         // 确保相机是关闭状态
         // closeCamera();
-        LogUtils.d("USB监听开始注册");
+        LogUtils.e("USB监听开始注册");
         mUSBMonitor = new USBMonitor(activity, new USBMonitor.IUSBMonitorListener() {
             @Override
             public void didAttach(MYNTCamera myntCamera) {// 设备插入
-                LogUtils.d("设备插入");
+                LogUtils.e("设备插入");
                 if (mCamera == null) {
                     // 初始化相机
                     mCamera = myntCamera;
                 }
-                mCamera.connect();
+                // 不能立即启动相机，间隔1s后再打开
+                mHandler.sendEmptyMessageDelayed(0x90890, 1000);
             }
 
             @Override
             public void didDettach(MYNTCamera myntCamera) {// 设备拔出
-                LogUtils.d("设备拔出");
+                LogUtils.e("设备拔出");
                 if (mCamera != null) {
                     mCamera.close();
                     mCamera.destroy();
@@ -95,7 +122,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didConnectedCamera(MYNTCamera myntCamera) {// 连接成功
-                LogUtils.d("连接成功");
+                LogUtils.e("连接成功");
                 if (mCamera == null) {
                     mCamera = myntCamera;
                 }
@@ -105,7 +132,7 @@ public class MyntCameraProxy {
 
             @Override
             public void didDisconnectedCamera(MYNTCamera myntCamera) {// 连接断开
-                LogUtils.d("连接断开");
+                LogUtils.e("连接断开");
                 if (mCamera != null) {
                     mCamera.close();
                     mCamera.destroy();
@@ -114,7 +141,7 @@ public class MyntCameraProxy {
             }
         });
         mUSBMonitor.register();
-        LogUtils.d("USB监听注册成功");
+        LogUtils.e("USB监听注册成功");
     }
 
     /**
@@ -133,15 +160,10 @@ public class MyntCameraProxy {
         mCamera.setPreviewSize(720);
         // 设置深度类型
         mCamera.setDepthType(MYNTCamera.DEPTH_DATA_11_BITS);
-        // 预览框宽高
-        final int width = mCamera.getPreviewWidth(), height = mCamera.getPreviewHeight();
         // 设置图像回调
-        mCamera.setFrameCallback(new MYNTCamera.IFrameCallback() {
-            @Override
-            public void onFrame(FrameData data) {
-                iMyntCallBack.onFrame(data, width, height);
-            }
-        });
+        if (frameCallback != null) {
+            mCamera.setFrameCallback(frameCallback);
+        }
         // 开始启动预览
         mCamera.start(MYNTCamera.Source.ALL);
     }
@@ -161,6 +183,16 @@ public class MyntCameraProxy {
             return false;
         } else {
             return mCamera.isOpen();
+        }
+    }
+
+    /**
+     * 设置图像回调
+     */
+    public void setFrameCallback(MYNTCamera.IFrameCallback frameCallback) {
+        LogUtils.e("设置数据回调监听");
+        if (frameCallback != null) {
+            this.frameCallback = frameCallback;
         }
     }
 
@@ -185,64 +217,96 @@ public class MyntCameraProxy {
             return getDistanceValue(mCamera.getPreviewWidth() * (y - 1) + x);
         }
     }
+//    /**
+//     * 获取区域范围内的所有点距离(降噪)
+//     */
+//    public int getDistanceValue(FrameData data, Rect rect) {
+//        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
+//        int distanceSum = 0, distanceNum = 0;
+//        for (int i = left; i < right; i += 30) {
+//            for (int j = top; j < bottom; j += 30) {
+//                int distance = data.getDistanceValue(j, i);
+//                // 距离为0mm或者大于5000mm
+//                if (distance <= 0 || distance > 5 * 1000) {
+//                    continue;
+//                }
+//                // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
+//                if (distanceSum != 0 && distanceNum != 0 &&
+//                        Math.abs((distanceSum / distanceNum) - distance) > 1000) {
+//                    continue;
+//                }
+//                distanceSum += distance;
+//                distanceNum++;
+//                LogUtils.e("获取点位置x:" + j + ",y:" + i + ",距离:" + distance);
+//            }
+//        }
+//        LogUtils.e("获取点位置结束distanceSum：" + distanceSum + "，distanceNum：" + distanceNum);
+//        if (distanceSum <= 0 || distanceNum <= 0) {
+//            return 0;
+//        }
+//        return (distanceSum / distanceNum);
+//    }
 
     /**
-     * 获取指定点的距离(降噪)
+     * 获取区域范围内的随机20点距离(降噪)
      */
-    public int denoiseDistanceValue(int x, int y) {
-        if (mCamera == null) {
+    public int getDistanceValue(Rect rect) {
+        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
+        int distanceSum = 0, distanceNum = 0;
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            int x = random.nextInt(right - left) + left;
+            int y = random.nextInt(bottom - top) + top;
+            int distance = getDistanceValue(x, y);
+            LogUtils.e("获取点位置x:" + x + ",y:" + y + ",距离:" + distance);
+            // 距离为0mm或者大于5000mm
+            if (distance <= 0 || distance > 5 * 1000) {
+                continue;
+            }
+            // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
+            if (distanceSum != 0 && distanceNum != 0 &&
+                    Math.abs((distanceSum / distanceNum) - distance) > 1000) {
+                continue;
+            }
+            distanceSum += distance;
+            distanceNum++;
+            LogUtils.e("有效点位置x:" + x + ",y:" + y + ",距离:" + distance);
+        }
+        LogUtils.e("获取点位置结束distanceSum：" + distanceSum + "，distanceNum：" + distanceNum);
+        if (distanceSum <= 0 || distanceNum <= 0) {
             return 0;
-        } else {
-            int dvc = getDistanceValue(x, y);       // 标准
-            // 获取标准点上下左右10像素的点距离
-            int dvt = getDistanceValue(x, y - 10);  // 上
-            int dvb = getDistanceValue(x, y + 10);  // 下
-            int dvl = getDistanceValue(x - 10, y);  // 左
-            int dvr = getDistanceValue(x + 10, y);  // 右
-            List<Integer> distances = Arrays.asList(dvc, dvt, dvb, dvl, dvr);
-            Collections.sort(distances, new Comparator<Integer>() {
-                @Override
-                public int compare(Integer o1, Integer o2) {
-                    if (o1 > o2) {
-                        return 1;
-                    }
-                    if (o1 == o2) {
-                        return 0;
-                    }
-                    return -1;
-                }
-            });
-            distances.remove(0);
-            distances.remove(distances.size() - 1);
-            LogUtils.e("获取距离：" + distances.toString());
-            int dvSum = 0;
-            for (Integer distance : distances) {
-                dvSum = distance + dvSum;
-            }
-            LogUtils.e("距离和：" + dvSum);
-            if (dvSum == 0) {
-                return 0;
-            } else {
-                return dvSum / distances.size();
-            }
         }
+        return (distanceSum / distanceNum);
     }
 
-    /**
-     * 设置图像回调
-     */
-    public void setFrameCallBack(IMyntCallBack iMyntCallBack) {
-        LogUtils.d("设置数据回调监听");
-        if (iMyntCallBack != null) {
-            this.iMyntCallBack = iMyntCallBack;
-        }
-    }
-
-    /**
-     * 相机相关回调
-     */
-    public interface IMyntCallBack {
-        // 图像数据，预览框宽高
-        void onFrame(FrameData data, int width, int height);
-    }
+//    /**
+//     * 获取区域范围内的所有点距离(降噪)
+//     *
+//     * @return 返回所有有效值(除0)的平均数
+//     */
+//    public int getDistanceValue(Rect rect) {
+//        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
+//        int distanceSum = 0, distanceNum = 0;
+//        for (int i = left; i < right; i += 30) {
+//            for (int j = top; j < bottom; j += 30) {
+//                int distance = getDistanceValue(j, i);
+//                // 距离为0mm或者大于5000mm
+//                if (distance <= 0 || distance > 5 * 1000) {
+//                    continue;
+//                }
+//                // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
+//                if (distanceSum != 0 && distanceNum != 0 &&
+//                        Math.abs((distanceSum / distanceNum) - distance) > 1000) {
+//                    continue;
+//                }
+//                distanceSum += distance;
+//                distanceNum++;
+//                LogUtils.e("获取点位置x:" + j + ",y:" + i + ",距离:" + distance);
+//            }
+//        }
+//        if (distanceSum <= 0 || distanceNum <= 0) {
+//            return 0;
+//        }
+//        return distanceSum / distanceNum;
+//    }
 }
