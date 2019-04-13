@@ -56,7 +56,15 @@ public final class InitBean {
     private int carouselGroupId;
     private int workModeid;
     private CleverPreachBean cleverPreach;
+    private int  preachTimbreId;//宣讲音色
 
+    public int getPreachTimbreId() {
+        return preachTimbreId;
+    }
+
+    public void setPreachTimbreId(int preachTimbreId) {
+        this.preachTimbreId = preachTimbreId;
+    }
 
     public int getWorkModeid() {
         return workModeid;
