@@ -19,14 +19,14 @@ import java.util.Random;
  * time: 2019/3/15
  * desc: 使用小觅摄像头的工具
  */
-public class MyntCameraProxy {
+public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
     private String TAG = "MyntCameraProxy";
     private static MyntCameraProxy instance;
     private Activity activity;
 
     private USBMonitor mUSBMonitor;
     private MYNTCamera mCamera;
-    private MYNTCamera.IFrameCallback frameCallback;
+    private FrameCallback frameCallback;
 
     public MyntCameraProxy(Activity activity) {
         this.activity = activity;
@@ -43,6 +43,7 @@ public class MyntCameraProxy {
      * 相机数据回调
      */
     public interface FrameCallback {
+        // 同步返回color和depth帧
         void onFrame(FrameData color, FrameData depth);
     }
 
@@ -162,7 +163,7 @@ public class MyntCameraProxy {
         mCamera.setDepthType(MYNTCamera.DEPTH_DATA_11_BITS);
         // 设置图像回调
         if (frameCallback != null) {
-            mCamera.setFrameCallback(frameCallback);
+            mCamera.setFrameCallback(MyntCameraProxy.this);
         }
         // 开始启动预览
         mCamera.start(MYNTCamera.Source.ALL);
@@ -189,10 +190,22 @@ public class MyntCameraProxy {
     /**
      * 设置图像回调
      */
-    public void setFrameCallback(MYNTCamera.IFrameCallback frameCallback) {
+    public void setFrameCallback(FrameCallback frameCallback) {
         LogUtils.e("设置数据回调监听");
         if (frameCallback != null) {
             this.frameCallback = frameCallback;
+        }
+    }
+
+    @Override
+    public void onFrame(FrameData data) {
+        if (frameCallback == null || mCamera == null) {
+            return;
+        }
+        // 回调返回实时同步的彩色和深度数据
+        FrameData color = mCamera.getColorFrameData(), depth = mCamera.getDepthFrameData();
+        if (depth != null && color != null) {
+            frameCallback.onFrame(color, depth);
         }
     }
 
@@ -217,35 +230,6 @@ public class MyntCameraProxy {
             return getDistanceValue(mCamera.getPreviewWidth() * (y - 1) + x);
         }
     }
-//    /**
-//     * 获取区域范围内的所有点距离(降噪)
-//     */
-//    public int getDistanceValue(FrameData data, Rect rect) {
-//        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
-//        int distanceSum = 0, distanceNum = 0;
-//        for (int i = left; i < right; i += 30) {
-//            for (int j = top; j < bottom; j += 30) {
-//                int distance = data.getDistanceValue(j, i);
-//                // 距离为0mm或者大于5000mm
-//                if (distance <= 0 || distance > 5 * 1000) {
-//                    continue;
-//                }
-//                // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
-//                if (distanceSum != 0 && distanceNum != 0 &&
-//                        Math.abs((distanceSum / distanceNum) - distance) > 1000) {
-//                    continue;
-//                }
-//                distanceSum += distance;
-//                distanceNum++;
-//                LogUtils.e("获取点位置x:" + j + ",y:" + i + ",距离:" + distance);
-//            }
-//        }
-//        LogUtils.e("获取点位置结束distanceSum：" + distanceSum + "，distanceNum：" + distanceNum);
-//        if (distanceSum <= 0 || distanceNum <= 0) {
-//            return 0;
-//        }
-//        return (distanceSum / distanceNum);
-//    }
 
     /**
      * 获取区域范围内的随机20点距离(降噪)
@@ -278,6 +262,67 @@ public class MyntCameraProxy {
         }
         return (distanceSum / distanceNum);
     }
+
+    /**
+     * 获取区域范围内的随机20点距离(降噪)
+     */
+    public int getDistanceValue(FrameData depth, Rect rect) {
+        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
+        int distanceSum = 0, distanceNum = 0;
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            int x = random.nextInt(right - left) + left;
+            int y = random.nextInt(bottom - top) + top;
+            int distance = depth.getDistanceValue(x, y);
+            LogUtils.e("获取点位置x:" + x + ",y:" + y + ",距离:" + distance);
+            // 距离为0mm或者大于5000mm
+            if (distance <= 0 || distance > 5 * 1000) {
+                continue;
+            }
+            // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
+            if (distanceSum != 0 && distanceNum != 0 &&
+                    Math.abs((distanceSum / distanceNum) - distance) > 1000) {
+                continue;
+            }
+            distanceSum += distance;
+            distanceNum++;
+            LogUtils.e("有效点位置x:" + x + ",y:" + y + ",距离:" + distance);
+        }
+        LogUtils.e("获取点位置结束distanceSum：" + distanceSum + "，distanceNum：" + distanceNum);
+        if (distanceSum <= 0 || distanceNum <= 0) {
+            return 0;
+        }
+        return (distanceSum / distanceNum);
+    }
+//    /**
+//     * 获取区域范围内的所有点距离(降噪)
+//     */
+//    public int getDistanceValue(FrameData data, Rect rect) {
+//        int left = rect.left, right = rect.right, top = rect.top, bottom = rect.bottom;
+//        int distanceSum = 0, distanceNum = 0;
+//        for (int i = left; i < right; i += 30) {
+//            for (int j = top; j < bottom; j += 30) {
+//                int distance = data.getDistanceValue(j, i);
+//                // 距离为0mm或者大于5000mm
+//                if (distance <= 0 || distance > 5 * 1000) {
+//                    continue;
+//                }
+//                // 当前获取到的距离与当前已获取所有点的平均值相差1000mm以上
+//                if (distanceSum != 0 && distanceNum != 0 &&
+//                        Math.abs((distanceSum / distanceNum) - distance) > 1000) {
+//                    continue;
+//                }
+//                distanceSum += distance;
+//                distanceNum++;
+//                LogUtils.e("获取点位置x:" + j + ",y:" + i + ",距离:" + distance);
+//            }
+//        }
+//        LogUtils.e("获取点位置结束distanceSum：" + distanceSum + "，distanceNum：" + distanceNum);
+//        if (distanceSum <= 0 || distanceNum <= 0) {
+//            return 0;
+//        }
+//        return (distanceSum / distanceNum);
+//    }
 
 //    /**
 //     * 获取区域范围内的所有点距离(降噪)
