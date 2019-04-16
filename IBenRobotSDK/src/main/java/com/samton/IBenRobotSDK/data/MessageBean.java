@@ -20,7 +20,18 @@ public final class MessageBean {
 
     private int commandFlag;
 
+    private int preachFlag;
+
     private DataBean data;
+    public int getPreachFlag() {
+        return preachFlag;
+    }
+
+    public void setPreachFlag(int preachFlag) {
+        this.preachFlag = preachFlag;
+    }
+
+
 
     public int getCommandFlag() {
         return commandFlag;
