@@ -199,7 +199,7 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
 
     @Override
     public void onFrame(FrameData data) {
-        if (frameCallback == null || mCamera == null) {
+        if (frameCallback == null || mCamera == null || data.flag != FrameData.DEPTH) {
             return;
         }
         // 回调返回实时同步的彩色和深度数据

@@ -64,9 +64,9 @@ public class ArcFaceManager {
             faceEngine = new FaceEngine();
         }
         active = faceEngine.active(context, appId, appKey);
-        initCode = faceEngine.init(context, FaceEngine.ASF_DETECT_MODE_IMAGE,// 检测模式
-                FaceEngine.ASF_OP_0_HIGHER_EXT,// 检测角度
-                32,// 人脸相对于所在图片的长边的占比
+        initCode = faceEngine.init(context, FaceEngine.ASF_DETECT_MODE_VIDEO,// 检测模式
+                FaceEngine.ASF_OP_0_ONLY,// 检测角度
+                16,// 人脸相对于所在图片的长边的占比
                 10,// 引擎最多能检测出的人脸数
                 FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE |
                         FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_LIVENESS);
