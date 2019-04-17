@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.arcsoft.face.AgeInfo;
-import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.Face3DAngle;
 import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.FaceFeature;
@@ -49,21 +48,25 @@ public class ArcFaceManager {
     }
 
     /**
-     * sdk是否初始化成功
+     * 注销ArcSoftFace
      */
-    public boolean isRegister() {
-        return (active == ErrorInfo.MERR_ASF_ALREADY_ACTIVATED
-                || active == ErrorInfo.MOK) && initCode == ErrorInfo.MOK;
+    public void closeArcSoftFace() {
+        if (faceEngine != null) {
+            faceEngine.unInit();
+            faceEngine = null;
+        }
     }
 
     /**
      * 初始化ArcSoftFace
      */
-    public void initArcSoftFace(String appId, String appKey) {
+    public void initArcSoftFace() {
         if (faceEngine == null) {
             faceEngine = new FaceEngine();
         }
-        active = faceEngine.active(context, appId, appKey);
+        active = faceEngine.active(context,
+                "FJZJmFaY4M39pRKNkcRStEL4BbFScsrqaSv9woKGoq3q",
+                "87pRX3QdVkHJDjynTXMQjufDgf7mN9Y4q8QYVhWDNwf6");
         initCode = faceEngine.init(context, FaceEngine.ASF_DETECT_MODE_VIDEO,// 检测模式
                 FaceEngine.ASF_OP_0_ONLY,// 检测角度
                 16,// 人脸相对于所在图片的长边的占比
@@ -83,6 +86,9 @@ public class ArcFaceManager {
         List<FaceInfo> faceInfos = new ArrayList<>();
         // 返回人脸数据
         List<ArcFaceInfo> arcFaceInfos = new ArrayList<>();
+        if (faceEngine == null) {
+            initArcSoftFace();
+        }
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -135,6 +141,9 @@ public class ArcFaceManager {
         List<FaceInfo> faceInfos = new ArrayList<>();
         // 返回人脸数据
         List<ArcFaceInfo> arcFaceInfos = new ArrayList<>();
+        if (faceEngine == null) {
+            initArcSoftFace();
+        }
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -183,7 +192,9 @@ public class ArcFaceManager {
      * @return 人脸特征信息
      */
     public FaceFeature extractFaceFeatureBGR24(byte[] data, int width, int height, FaceInfo faceInfo) {
-        // FaceInfo faceInfo = new FaceInfo(arcFaceInfo.getRect(), arcFaceInfo.getOrient());
+        if (faceEngine == null) {
+            initArcSoftFace();
+        }
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -195,7 +206,9 @@ public class ArcFaceManager {
      * @return 人脸特征信息
      */
     public FaceFeature extractFaceFeatureNV21(byte[] data, int width, int height, FaceInfo faceInfo) {
-        // FaceInfo faceInfo = new FaceInfo(arcFaceInfo.getRect(), arcFaceInfo.getOrient());
+        if (faceEngine == null) {
+            initArcSoftFace();
+        }
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_NV21, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -207,6 +220,9 @@ public class ArcFaceManager {
      * @return 相似度信息
      */
     public FaceSimilar compareFaceFeature(FaceFeature feature1, FaceFeature feature2) {
+        if (faceEngine == null) {
+            initArcSoftFace();
+        }
         FaceSimilar faceSimilar = new FaceSimilar();
         faceEngine.compareFaceFeature(feature1, feature2, faceSimilar);
         return faceSimilar;
