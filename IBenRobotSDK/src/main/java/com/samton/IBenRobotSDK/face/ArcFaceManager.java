@@ -2,7 +2,6 @@ package com.samton.IBenRobotSDK.face;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.Face3DAngle;
@@ -32,9 +31,9 @@ public class ArcFaceManager {
     private String TAG = "IBenFaceUtil";
     private static ArcFaceManager instance;
     private Context context;
-    private FaceEngine faceEngine;
-    // sdk回调结果
-    private int active, initCode;
+//    private FaceEngine faceEngine;
+//    // sdk回调结果
+//    private int active, initCode;
 
     public ArcFaceManager(Context context) {
         this.context = context;
@@ -50,30 +49,64 @@ public class ArcFaceManager {
     /**
      * 注销ArcSoftFace
      */
-    public void closeArcSoftFace() {
+    public void closeArcSoftFace(FaceEngine faceEngine) {
         if (faceEngine != null) {
             faceEngine.unInit();
-            faceEngine = null;
+            LogUtils.e("FaceEngine对象" + faceEngine.toString());
         }
     }
 
+//    /**
+//     * 初始化ArcSoftFace
+//     */
+//    public void initArcSoftFace() {
+//        if (faceEngine == null) {
+//            faceEngine = new FaceEngine();
+//        }
+//        active = faceEngine.active(context,
+//                "FJZJmFaY4M39pRKNkcRStEL4BbFScsrqaSv9woKGoq3q",
+//                "87pRX3QdVkHJDjynTXMQjufDgf7mN9Y4q8QYVhWDNwf6");
+//        initCode = faceEngine.init(context, FaceEngine.ASF_DETECT_MODE_IMAGE,// 检测模式
+//                FaceEngine.ASF_OP_0_ONLY,// 检测角度
+//                32,// 人脸相对于所在图片的长边的占比
+//                10,// 引擎最多能检测出的人脸数
+//                FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE |
+//                        FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_LIVENESS);
+//        LogUtils.d("虹软sdk初始化结果:" + "active-" + active + ",init-" + initCode);
+//    }
+
     /**
-     * 初始化ArcSoftFace
+     * 初始化ArcSoftFace(image模式)
      */
-    public void initArcSoftFace() {
-        if (faceEngine == null) {
-            faceEngine = new FaceEngine();
-        }
-        active = faceEngine.active(context,
+    public FaceEngine initASFtoImage() {
+        FaceEngine faceEngineImage = new FaceEngine();
+        faceEngineImage.active(context,
                 "FJZJmFaY4M39pRKNkcRStEL4BbFScsrqaSv9woKGoq3q",
                 "87pRX3QdVkHJDjynTXMQjufDgf7mN9Y4q8QYVhWDNwf6");
-        initCode = faceEngine.init(context, FaceEngine.ASF_DETECT_MODE_VIDEO,// 检测模式
+        faceEngineImage.init(context, FaceEngine.ASF_DETECT_MODE_IMAGE,// 检测模式
+                FaceEngine.ASF_OP_0_ONLY,// 检测角度
+                32,// 人脸相对于所在图片的长边的占比
+                10,// 引擎最多能检测出的人脸数
+                FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE |
+                        FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_LIVENESS);
+        return faceEngineImage;
+    }
+
+    /**
+     * 初始化ArcSoftFace(video模式)
+     */
+    public FaceEngine initASFtoVideo() {
+        FaceEngine faceEngineVideo = new FaceEngine();
+        faceEngineVideo.active(context,
+                "FJZJmFaY4M39pRKNkcRStEL4BbFScsrqaSv9woKGoq3q",
+                "87pRX3QdVkHJDjynTXMQjufDgf7mN9Y4q8QYVhWDNwf6");
+        faceEngineVideo.init(context, FaceEngine.ASF_DETECT_MODE_VIDEO,// 检测模式
                 FaceEngine.ASF_OP_0_ONLY,// 检测角度
                 16,// 人脸相对于所在图片的长边的占比
                 10,// 引擎最多能检测出的人脸数
                 FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE |
                         FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_LIVENESS);
-        LogUtils.d("虹软sdk初始化结果:" + "active-" + active + ",init-" + initCode);
+        return faceEngineVideo;
     }
 
     /**
@@ -81,14 +114,15 @@ public class ArcFaceManager {
      *
      * @return 人脸列表
      */
-    public List<ArcFaceInfo> detectFacesBGR24(byte[] data, int width, int height) {
+    public List<ArcFaceInfo> detectFacesBGR24(FaceEngine faceEngine, byte[] data, int width, int height) {
         // 原始人脸数据
         List<FaceInfo> faceInfos = new ArrayList<>();
         // 返回人脸数据
         List<ArcFaceInfo> arcFaceInfos = new ArrayList<>();
         if (faceEngine == null) {
-            initArcSoftFace();
+            faceEngine = initASFtoVideo();
         }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -136,14 +170,15 @@ public class ArcFaceManager {
      *
      * @return 人脸列表
      */
-    public List<ArcFaceInfo> detectFacesNV21(byte[] data, int width, int height) {
+    public List<ArcFaceInfo> detectFacesNV21(FaceEngine faceEngine, byte[] data, int width, int height) {
         // 原始人脸数据
         List<FaceInfo> faceInfos = new ArrayList<>();
         // 返回人脸数据
         List<ArcFaceInfo> arcFaceInfos = new ArrayList<>();
         if (faceEngine == null) {
-            initArcSoftFace();
+            faceEngine = initASFtoVideo();
         }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -191,10 +226,11 @@ public class ArcFaceManager {
      *
      * @return 人脸特征信息
      */
-    public FaceFeature extractFaceFeatureBGR24(byte[] data, int width, int height, FaceInfo faceInfo) {
+    public FaceFeature extractFaceFeatureBGR24(FaceEngine faceEngine, byte[] data, int width, int height, FaceInfo faceInfo) {
         if (faceEngine == null) {
-            initArcSoftFace();
+            faceEngine = initASFtoImage();
         }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -205,10 +241,11 @@ public class ArcFaceManager {
      *
      * @return 人脸特征信息
      */
-    public FaceFeature extractFaceFeatureNV21(byte[] data, int width, int height, FaceInfo faceInfo) {
+    public FaceFeature extractFaceFeatureNV21(FaceEngine faceEngine, byte[] data, int width, int height, FaceInfo faceInfo) {
         if (faceEngine == null) {
-            initArcSoftFace();
+            faceEngine = initASFtoImage();
         }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_NV21, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -219,10 +256,11 @@ public class ArcFaceManager {
      *
      * @return 相似度信息
      */
-    public FaceSimilar compareFaceFeature(FaceFeature feature1, FaceFeature feature2) {
+    public FaceSimilar compareFaceFeature(FaceEngine faceEngine, FaceFeature feature1, FaceFeature feature2) {
         if (faceEngine == null) {
-            initArcSoftFace();
+            faceEngine = initASFtoImage();
         }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceSimilar faceSimilar = new FaceSimilar();
         faceEngine.compareFaceFeature(feature1, feature2, faceSimilar);
         return faceSimilar;
@@ -233,7 +271,7 @@ public class ArcFaceManager {
      *
      * @return
      */
-    public List<ArcFaceInfo> searchFaceFeatureBGR24(List<ArcFaceInfo> infos, byte[] bytes, Bitmap bitmap) {
+    public List<ArcFaceInfo> searchFaceFeatureBGR24(FaceEngine faceEngine, List<ArcFaceInfo> infos, byte[] bytes, Bitmap bitmap) {
         // 返回VIP数据列表
         List<ArcFaceInfo> returnArcFaceInfos = new ArrayList<>();
         // VIP人脸库
@@ -243,9 +281,13 @@ public class ArcFaceManager {
             LogUtils.d("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
             return returnArcFaceInfos;
         }
+        if (faceEngine == null) {
+            faceEngine = initASFtoImage();
+        }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
-            FaceFeature feature = extractFaceFeatureBGR24(bytes, width, height, info);
+            FaceFeature feature = extractFaceFeatureBGR24(faceEngine, bytes, width, height, info);
             // 签到时需要判断使用哪一组VIP库(主动交互判断所有VIP)
             // 取出所有VIP信息，放入同一个列表
             List<FaceVipListBean.FaceinfoListBean> localVipInfoLists = new ArrayList<>();
@@ -257,7 +299,7 @@ public class ArcFaceManager {
             }
             // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
-                FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
+                FaceSimilar faceSimilar = compareFaceFeature(faceEngine, feature, bean.getFaceFeature());
                 if (faceSimilar.getScore() >= 0.7) {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
@@ -273,7 +315,7 @@ public class ArcFaceManager {
      *
      * @return
      */
-    public List<ArcFaceInfo> searchFaceFeatureNV21(List<ArcFaceInfo> infos, byte[] bytes, Bitmap bitmap) {
+    public List<ArcFaceInfo> searchFaceFeatureNV21(FaceEngine faceEngine, List<ArcFaceInfo> infos, byte[] bytes, Bitmap bitmap) {
         // 返回VIP数据列表
         List<ArcFaceInfo> returnArcFaceInfos = new ArrayList<>();
         // VIP人脸库
@@ -283,9 +325,13 @@ public class ArcFaceManager {
             LogUtils.d("人脸库为空或者传入人脸数据为空:" + localFaceVipListBeans.size());
             return returnArcFaceInfos;
         }
+        if (faceEngine == null) {
+            faceEngine = initASFtoImage();
+        }
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
-            FaceFeature feature = extractFaceFeatureNV21(bytes, width, height, info);
+            FaceFeature feature = extractFaceFeatureNV21(faceEngine, bytes, width, height, info);
             // 签到时需要判断使用哪一组VIP库(主动交互判断所有VIP)
             // 取出所有VIP信息，放入同一个列表
             List<FaceVipListBean.FaceinfoListBean> localVipInfoLists = new ArrayList<>();
@@ -297,7 +343,7 @@ public class ArcFaceManager {
             }
             // 开始遍历是否有VIP存在
             for (FaceVipListBean.FaceinfoListBean bean : localVipInfoLists) {
-                FaceSimilar faceSimilar = compareFaceFeature(feature, bean.getFaceFeature());
+                FaceSimilar faceSimilar = compareFaceFeature(faceEngine, feature, bean.getFaceFeature());
                 if (faceSimilar.getScore() >= 0.6) {
                     info.setVipInfoBean(bean);
                     returnArcFaceInfos.add(info);
@@ -314,11 +360,14 @@ public class ArcFaceManager {
      * @param faceVipListBeans
      */
     public void registerFaceData(final List<FaceVipListBean> faceVipListBeans) throws ExecutionException, InterruptedException {
-        Log.e(TAG, "初始数据(组)：" + faceVipListBeans.size());
+        LogUtils.e("初始数据(组)：" + faceVipListBeans.size());
         if (faceVipListBeans.size() <= 0) {
-            Log.e(TAG, "VIP人脸数据注册失败:没有组数据");
+            LogUtils.e("VIP人脸数据注册失败:没有组数据");
             return;
         }
+        // 单独初始化一个人脸识别对象
+        FaceEngine faceEngine = initASFtoImage();
+        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         // 遍历所有组数据
         Iterator<FaceVipListBean> faceVipListBeanIterator = faceVipListBeans.iterator();
         while (faceVipListBeanIterator.hasNext()) {
@@ -326,7 +375,7 @@ public class ArcFaceManager {
             // 取出当前组的所有信息
             List<FaceVipListBean.FaceinfoListBean> faceinfoListBeans = faceVipListBean.getFaceinfoList();
             if (faceinfoListBeans == null || faceinfoListBeans.size() <= 0) {
-                Log.e(TAG, "VIP人脸数据注册失败:没有人信息");
+                LogUtils.e("VIP人脸数据注册失败:没有人信息");
                 faceVipListBeanIterator.remove();
                 continue;
             }
@@ -345,25 +394,29 @@ public class ArcFaceManager {
                 int width = bitmap.getWidth(), height = bitmap.getHeight();
                 byte[] bytes = ImageUtils.bitmapToNv21(bitmap, width, height);
                 // 获取当前照片所有人脸
-                List<ArcFaceInfo> faces = detectFacesNV21(bytes, width, height);
+                List<ArcFaceInfo> faces = detectFacesNV21(faceEngine, bytes, width, height);
                 if (faces == null || faces.size() != 1) {
-                    Log.e(TAG, "VIP人脸数据注册失败:没有人脸");
+                    LogUtils.e("VIP人脸数据注册失败:没有人脸");
                     // 多张人脸或没有人脸(剔除)
                     faceinfoListBeanIterator.remove();
                     continue;
                 }
                 // 只有一张人脸(获取人脸特征信息)
-                faceinfoListBean.setFaceFeature(extractFaceFeatureNV21(bytes, width, height, faces.get(0)));
+                faceinfoListBean.setFaceFeature(extractFaceFeatureNV21(faceEngine, bytes, width, height, faces.get(0)));
             }
             if (faceinfoListBeans.size() <= 0) {
-                Log.e(TAG, "VIP人脸数据注册失败:人信息剔除完");
                 faceVipListBeanIterator.remove();
+                // 注销人脸识别对象
+                faceEngine.unInit();
+                LogUtils.e("VIP人脸数据注册失败:人信息剔除完");
             }
         }
         if (faceVipListBeans.size() > 0) {
-            Log.e(TAG, "VIP人脸数据注册:存储整组数据");
             // 存储整组进入VIP库
             VipFaceBank.addVipFace(faceVipListBeans);
+            // 注销人脸识别对象
+            faceEngine.unInit();
+            LogUtils.e("VIP人脸数据注册:存储整组数据");
         }
     }
 }

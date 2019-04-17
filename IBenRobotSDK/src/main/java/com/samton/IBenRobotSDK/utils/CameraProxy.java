@@ -100,7 +100,7 @@ public class CameraProxy {
                     mCamera.addCallbackBuffer(new byte[640 * 480 * 3 / 2]);
                 }
                 mCamera.setPreviewCallbackWithBuffer(callBack);
-                setCameraDisplayOrientation();
+                // setCameraDisplayOrientation();
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
             } catch (Exception e) {
