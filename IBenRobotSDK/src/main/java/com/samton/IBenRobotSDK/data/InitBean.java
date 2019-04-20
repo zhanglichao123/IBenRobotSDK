@@ -56,7 +56,7 @@ public final class InitBean {
     private int carouselGroupId;
     private int workModeid;
     private CleverPreachBean cleverPreach;
-    private int  preachTimbreId;//宣讲音色
+    private int preachTimbreId;//宣讲音色
 
     public int getPreachTimbreId() {
         return preachTimbreId;
@@ -982,6 +982,7 @@ public final class InitBean {
             }
         }
     }
+
     public static class PrintGroupBean {
         /**
          * groupId : 86
@@ -1799,7 +1800,7 @@ public final class InitBean {
          * fifteenDownMsg : 小笨要回充电桩充电了
          * spotVip : 1
          * welcomeStatus : 2
-         * moreVipWelcomeContent : 欢迎各位嘉宾
+         * vipWelcomeContent : 欢迎各位嘉宾
          * vipContent : 欢迎尊敬的#姓氏##全名#你好
          * strangerContent : #性别#你好
          * moreVipContent : 尊敬的VIP你们好
@@ -1818,7 +1819,7 @@ public final class InitBean {
         private String fifteenDownMsg;
         private int spotVip;
         private int welcomeStatus;
-        private String moreVipWelcomeContent;
+        private String vipWelcomeContent;
         private String vipContent;
         private String strangerContent;
         private String moreVipContent;
@@ -1892,12 +1893,12 @@ public final class InitBean {
             this.welcomeStatus = welcomeStatus;
         }
 
-        public String getMoreVipWelcomeContent() {
-            return moreVipWelcomeContent;
+        public String getVipWelcomeContent() {
+            return vipWelcomeContent;
         }
 
-        public void setMoreVipWelcomeContent(String moreVipWelcomeContent) {
-            this.moreVipWelcomeContent = moreVipWelcomeContent;
+        public void setVipWelcomeContent(String vipWelcomeContent) {
+            this.vipWelcomeContent = vipWelcomeContent;
         }
 
         public String getVipContent() {
