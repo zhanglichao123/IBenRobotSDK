@@ -836,6 +836,14 @@ public final class InitBean {
             private String imgOldname;
             private String voiceUrl;
             private String voiceOldname;
+            private String actionIds;
+            public String getActionIds() {
+                return actionIds;
+            }
+
+            public void setActionIds(String actionIds) {
+                this.actionIds = actionIds;
+            }
 
             public int getItemId() {
                 return itemId;
