@@ -52,7 +52,6 @@ public class ArcFaceManager {
     public void closeArcSoftFace(FaceEngine faceEngine) {
         if (faceEngine != null) {
             faceEngine.unInit();
-            LogUtils.e("FaceEngine对象" + faceEngine.toString());
         }
     }
 
@@ -122,7 +121,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoVideo();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -178,7 +176,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoVideo();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         faceEngine.detectFaces(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos);
         faceEngine.process(data, width, height, FaceEngine.CP_PAF_NV21, faceInfos,
                 FaceEngine.ASF_AGE | FaceEngine.ASF_GENDER | FaceEngine.ASF_FACE3DANGLE);
@@ -230,7 +227,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoImage();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_BGR24, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -245,7 +241,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoImage();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceFeature faceFeature = new FaceFeature();
         faceEngine.extractFaceFeature(data, width, height, FaceEngine.CP_PAF_NV21, faceInfo, faceFeature);
         return faceFeature.clone();
@@ -260,7 +255,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoImage();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         FaceSimilar faceSimilar = new FaceSimilar();
         faceEngine.compareFaceFeature(feature1, feature2, faceSimilar);
         return faceSimilar;
@@ -284,7 +278,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoImage();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
             FaceFeature feature = extractFaceFeatureBGR24(faceEngine, bytes, width, height, info);
@@ -328,7 +321,6 @@ public class ArcFaceManager {
         if (faceEngine == null) {
             faceEngine = initASFtoImage();
         }
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         int width = bitmap.getWidth(), height = bitmap.getHeight();
         for (ArcFaceInfo info : infos) {
             FaceFeature feature = extractFaceFeatureNV21(faceEngine, bytes, width, height, info);
@@ -367,7 +359,6 @@ public class ArcFaceManager {
         }
         // 单独初始化一个人脸识别对象
         FaceEngine faceEngine = initASFtoImage();
-        LogUtils.e("FaceEngine对象" + faceEngine.toString());
         // 遍历所有组数据
         Iterator<FaceVipListBean> faceVipListBeanIterator = faceVipListBeans.iterator();
         while (faceVipListBeanIterator.hasNext()) {
