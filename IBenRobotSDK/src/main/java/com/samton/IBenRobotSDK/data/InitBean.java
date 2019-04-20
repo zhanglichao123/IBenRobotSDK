@@ -39,7 +39,6 @@ public final class InitBean {
     private int rs;
     private DataBean data;
     private SetBean set;
-    private BroadcastBean broadcast;
     private CurrentMapBean currentMap;
     private ExpressionMapBean expressionMap;
     private String robotName;
@@ -50,13 +49,11 @@ public final class InitBean {
     private WorkAttendanceBean workAttendance;
     private String voiceTag;
     private String preachWord;
-    private List<MapsBean> maps;
     private String broadcastImg;
-    private String preachImg;
     private int carouselGroupId;
     private int workModeid;
     private CleverPreachBean cleverPreach;
-    private int  preachTimbreId;//宣讲音色
+    private int preachTimbreId;//宣讲音色
 
     public int getPreachTimbreId() {
         return preachTimbreId;
@@ -90,14 +87,6 @@ public final class InitBean {
         this.broadcastImg = broadcastImg;
     }
 
-    public String getPreachImg() {
-        return preachImg == null ? "" : preachImg;
-    }
-
-    public void setPreachImg(String preachImg) {
-        this.preachImg = preachImg;
-    }
-
     public int getCarouselGroupId() {
         return carouselGroupId;
     }
@@ -128,14 +117,6 @@ public final class InitBean {
 
     public void setSet(SetBean set) {
         this.set = set;
-    }
-
-    public BroadcastBean getBroadcast() {
-        return broadcast;
-    }
-
-    public void setBroadcast(BroadcastBean broadcast) {
-        this.broadcast = broadcast;
     }
 
     public CurrentMapBean getCurrentMap() {
@@ -210,14 +191,6 @@ public final class InitBean {
         this.voiceTag = voiceTag;
     }
 
-    public List<MapsBean> getMaps() {
-        return maps;
-    }
-
-    public void setMaps(List<MapsBean> maps) {
-        this.maps = maps;
-    }
-
     public CleverPreachBean getCleverPreach() {
         return cleverPreach;
     }
@@ -233,6 +206,7 @@ public final class InitBean {
          * logoImg : http://121.41.40.145:7080/img/deault/company_logo.png
          * questionTip : ["回充电桩","宣讲模式","今天天气怎么样","打印个名片","跳个舞吧","看看我颜值多少分","讲个笑话吧","北京的景区"]
          */
+        private int version;
         private String leftHeadImg;
         private String rightHeadImg;
         private String logoImg;
@@ -353,79 +327,13 @@ public final class InitBean {
         public void setRightHandPwd(List<String> rightHandPwd) {
             this.rightHandPwd = rightHandPwd;
         }
-    }
 
-    public static class BroadcastBean {
-        /**
-         * broadcastId : 164
-         * name : 十八大会议
-         * describe : 会议有什么要求
-         * state : 1
-         * mainImg : http://121.41.40.145:7080/img/robotLogo/2018-01-09_f38376.png
-         */
-
-        private int broadcastId;
-        private String name;
-        private String describe;
-        private int state;
-        private String mainImg;
-        private int robModelNum;
-        private int flag;
-
-        public int getRobModelNum() {
-            return robModelNum;
+        public int getVersion() {
+            return version;
         }
 
-        public void setRobModelNum(int robModelNum) {
-            this.robModelNum = robModelNum;
-        }
-
-        public int getFlag() {
-            return flag;
-        }
-
-        public void setFlag(int flag) {
-            this.flag = flag;
-        }
-
-        public int getBroadcastId() {
-            return broadcastId;
-        }
-
-        public void setBroadcastId(int broadcastId) {
-            this.broadcastId = broadcastId;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDescribe() {
-            return describe;
-        }
-
-        public void setDescribe(String describe) {
-            this.describe = describe;
-        }
-
-        public int getState() {
-            return state;
-        }
-
-        public void setState(int state) {
-            this.state = state;
-        }
-
-        public String getMainImg() {
-            return mainImg;
-        }
-
-        public void setMainImg(String mainImg) {
-            this.mainImg = mainImg;
+        public void setVersion(int version) {
+            this.version = version;
         }
     }
 
@@ -437,6 +345,7 @@ public final class InitBean {
          * file : http://121.41.40.145:7080/img/mapFile/2018-01-09_623bf7
          */
         private int mapId;
+        private int version;
         private String mapName;
         private String imgUrl;
         private String file;
@@ -448,6 +357,14 @@ public final class InitBean {
 
         public void setMapId(int mapId) {
             this.mapId = mapId;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
         }
 
         public String getMapName() {
@@ -537,13 +454,30 @@ public final class InitBean {
          * speak : http://121.41.40.145:7080/img/face/default/talk.gif
          * smile : http://121.41.40.145:7080/img/face/default/smile.gif
          */
-
+        private int groupId;
+        private int version;
         private String awaken;
         private String anthomaniac;
-        private String sad;
+        private String unawaken;
         private String happy;
         private String speak;
-        private String smile;
+        private String sorry;
+
+        public int getGroupId() {
+            return groupId;
+        }
+
+        public void setGroupId(int groupId) {
+            this.groupId = groupId;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
+        }
 
         public String getAwaken() {
             return awaken;
@@ -559,14 +493,6 @@ public final class InitBean {
 
         public void setAnthomaniac(String anthomaniac) {
             this.anthomaniac = anthomaniac;
-        }
-
-        public String getSad() {
-            return sad;
-        }
-
-        public void setSad(String sad) {
-            this.sad = sad;
         }
 
         public String getHappy() {
@@ -585,12 +511,20 @@ public final class InitBean {
             this.speak = speak;
         }
 
-        public String getSmile() {
-            return smile;
+        public String getUnawaken() {
+            return unawaken;
         }
 
-        public void setSmile(String smile) {
-            this.smile = smile;
+        public void setUnawaken(String unawaken) {
+            this.unawaken = unawaken;
+        }
+
+        public String getSorry() {
+            return sorry;
+        }
+
+        public void setSorry(String sorry) {
+            this.sorry = sorry;
         }
     }
 
@@ -722,6 +656,7 @@ public final class InitBean {
         private String sceneName;
         private int robModelNum;
         private int updateFlag;
+        private int version;
         private List<PreachItemListBean> preachItemList;
 
         public int getGroupId() {
@@ -794,6 +729,14 @@ public final class InitBean {
 
         public void setPreachItemList(List<PreachItemListBean> preachItemList) {
             this.preachItemList = preachItemList;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
         }
 
         public static class PreachItemListBean {
@@ -990,6 +933,7 @@ public final class InitBean {
             }
         }
     }
+
     public static class PrintGroupBean {
         /**
          * groupId : 86
@@ -1369,98 +1313,6 @@ public final class InitBean {
         }
     }
 
-    public static class MapsBean {
-        /**
-         * mapId : 148
-         * mapName : 小笨总部
-         * imgUrl : http://121.41.40.145:7080/img/mapImgFile/2018-01-09_592cbe.jpg
-         * file : http://121.41.40.145:7080/img/mapFile/2018-01-09_592cbe
-         * positionPoints : [{"name":"\b办公区","location":"00","broadcast":""},{"name":"\b饮水间","location":"01","broadcast":""}]
-         */
-
-        private String mapId;
-        private String mapName;
-        private String imgUrl;
-        private String file;
-        private List<PositionPointsBeanX> positionPoints;
-
-        public String getMapId() {
-            return mapId;
-        }
-
-        public void setMapId(String mapId) {
-            this.mapId = mapId;
-        }
-
-        public String getMapName() {
-            return mapName;
-        }
-
-        public void setMapName(String mapName) {
-            this.mapName = mapName;
-        }
-
-        public String getImgUrl() {
-            return imgUrl;
-        }
-
-        public void setImgUrl(String imgUrl) {
-            this.imgUrl = imgUrl;
-        }
-
-        public String getFile() {
-            return file;
-        }
-
-        public void setFile(String file) {
-            this.file = file;
-        }
-
-        public List<PositionPointsBeanX> getPositionPoints() {
-            return positionPoints;
-        }
-
-        public void setPositionPoints(List<PositionPointsBeanX> positionPoints) {
-            this.positionPoints = positionPoints;
-        }
-
-        public static class PositionPointsBeanX {
-            /**
-             * name : 办公区
-             * location : 00
-             * broadcast :
-             */
-
-            private String name;
-            private String location;
-            private String broadcast;
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public String getLocation() {
-                return location;
-            }
-
-            public void setLocation(String location) {
-                this.location = location;
-            }
-
-            public String getBroadcast() {
-                return broadcast;
-            }
-
-            public void setBroadcast(String broadcast) {
-                this.broadcast = broadcast;
-            }
-        }
-    }
-
     public static class CleverPreachBean {
         /**
          * id : 1
@@ -1487,6 +1339,7 @@ public final class InitBean {
          */
 
         private int id;
+        private int version;
         private String robUuid;
         private String preachEndMsg;
         private String stopPreachPwd;
@@ -1515,6 +1368,14 @@ public final class InitBean {
 
         public void setId(int id) {
             this.id = id;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
         }
 
         public String getRobUuid() {
@@ -1807,7 +1668,7 @@ public final class InitBean {
          * fifteenDownMsg : 小笨要回充电桩充电了
          * spotVip : 1
          * welcomeStatus : 2
-         * moreVipWelcomeContent : 欢迎各位嘉宾
+         * vipWelcomeContent : 欢迎各位嘉宾
          * vipContent : 欢迎尊敬的#姓氏##全名#你好
          * strangerContent : #性别#你好
          * moreVipContent : 尊敬的VIP你们好
@@ -1826,7 +1687,7 @@ public final class InitBean {
         private String fifteenDownMsg;
         private int spotVip;
         private int welcomeStatus;
-        private String moreVipWelcomeContent;
+        private String vipWelcomeContent;
         private String vipContent;
         private String strangerContent;
         private String moreVipContent;
@@ -1900,12 +1761,12 @@ public final class InitBean {
             this.welcomeStatus = welcomeStatus;
         }
 
-        public String getMoreVipWelcomeContent() {
-            return moreVipWelcomeContent;
+        public String getVipWelcomeContent() {
+            return vipWelcomeContent;
         }
 
-        public void setMoreVipWelcomeContent(String moreVipWelcomeContent) {
-            this.moreVipWelcomeContent = moreVipWelcomeContent;
+        public void setVipWelcomeContent(String vipWelcomeContent) {
+            this.vipWelcomeContent = vipWelcomeContent;
         }
 
         public String getVipContent() {
