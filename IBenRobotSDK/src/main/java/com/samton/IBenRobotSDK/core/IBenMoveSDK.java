@@ -1142,18 +1142,19 @@ public final class IBenMoveSDK {
      * @param mapNamePath 地图文件路径
      * @param callBack    回调函数
      */
-    public void loadMap(final String mapNamePath, final MapCallBack callBack) {
-        loadMap(mapNamePath, false, callBack);
+    public void loadMap(final String mapNamePath, final Pose mapPose, final MapCallBack callBack) {
+        loadMap(mapNamePath, false, mapPose, callBack);
     }
 
     /**
      * 根据地图名字加载地图
      *
-     * @param mapNamePath 地图文件路径
+     * @param mapNamePath 保存的地图文件路径
      * @param isNewMap    是否为新格式的地图
+     * @param currentPose 当前位置的姿态信息
      * @param callBack    回调函数
      */
-    public void loadMap(final String mapNamePath, final boolean isNewMap, final MapCallBack callBack) {
+    public void loadMap(final String mapNamePath, final boolean isNewMap, final Pose currentPose, final MapCallBack callBack) {
         Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
@@ -1165,7 +1166,7 @@ public final class IBenMoveSDK {
                         CompositeMap map = helper.loadFile(mapNamePath);
                         // 地图不为空的话加载地图
                         if (mRobotPlatform != null && map != null) {
-                            mRobotPlatform.setCompositeMap(map, new Pose());
+                            mRobotPlatform.setCompositeMap(map, currentPose == null ? new Pose() : currentPose);
                             e.onNext(true);
                         } else {
                             e.onNext(false);
