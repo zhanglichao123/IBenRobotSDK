@@ -1696,6 +1696,7 @@ public final class InitBean {
         private int warnPower;
         private String nowakeContent;
         private String arousalWords;
+        private int version;
 
         public String getRobName() {
             return robName;
@@ -1831,6 +1832,14 @@ public final class InitBean {
 
         public void setArousalWords(String arousalWords) {
             this.arousalWords = arousalWords;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
         }
     }
 
