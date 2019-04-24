@@ -54,7 +54,7 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
         LogUtils.e("关闭相机");
         try {
             if (mCamera != null) {
-//                mCamera.close();
+                mCamera.close();
                 mCamera.destroy();
                 mCamera = null;
             }
@@ -115,7 +115,7 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
             public void didDettach(MYNTCamera myntCamera) {// 设备拔出
                 LogUtils.e("设备拔出");
                 if (mCamera != null) {
-//                    mCamera.close();
+                    mCamera.close();
                     mCamera.destroy();
                     mCamera = null;
                 }
@@ -135,7 +135,7 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
             public void didDisconnectedCamera(MYNTCamera myntCamera) {// 连接断开
                 LogUtils.e("连接断开");
                 if (mCamera != null) {
-//                    mCamera.close();
+                    mCamera.close();
                     mCamera.destroy();
                     mCamera = null;
                 }
