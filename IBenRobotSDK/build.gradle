@@ -40,7 +40,7 @@ dependencies {
     provided(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
     provided(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
     // MYNTEYE
-    provided(name: 'mynteye_d_android_sdk-release_1.2.4.4_20190425184117', ext: 'aar')
+    provided(name: 'mynteye_d_android_sdk-release_1.2.4.5_20190426105744', ext: 'aar')
     // RxJava
     provided 'io.reactivex.rxjava2:rxjava:2.1.0'
     provided 'io.reactivex.rxjava2:rxandroid:2.0.1'
