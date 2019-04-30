@@ -54,6 +54,14 @@ public final class InitBean {
     private int workModeid;
     private CleverPreachBean cleverPreach;
     private int preachTimbreId;//宣讲音色
+    private String accout;//容联云账号
+
+    public String getAccout() {
+        return accout;
+    }
+    public void setAccout(String accout) {
+        this.accout = accout;
+    }
 
     public int getPreachTimbreId() {
         return preachTimbreId;
@@ -780,6 +788,7 @@ public final class InitBean {
             private String voiceUrl;
             private String voiceOldname;
             private String actionIds;
+
             public String getActionIds() {
                 return actionIds;
             }

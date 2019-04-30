@@ -150,7 +150,7 @@ public final class IBenChatSDK {
      * @param account 人工客服账号
      * @param msg     要发送的消息
      */
-    private void send2IM(String account, String msg) {
+    public void send2IM(String account, String msg) {
         // 回调状态QA为false
         callBack.onStateChange(mTag, false);
         // 发送给人工的消息

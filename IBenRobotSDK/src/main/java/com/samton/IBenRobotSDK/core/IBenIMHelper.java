@@ -115,7 +115,7 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
             ECDevice.initial(mContext.getApplicationContext(), new ECDevice.InitListener() {
                 @Override
                 public void onError(Exception e) {
-                    LogUtils.e(e.getMessage());
+                    LogUtils.e("容联初始化失败---"+e.getMessage());
                 }
 
                 @Override
