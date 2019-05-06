@@ -59,13 +59,6 @@ public final class HttpUrl {
     final static String GET_ROBOT_CHAT_FLAG = isTest ? "XiaoBenManager/robotInfo/getRobotChatFlag" : "robotInfo/getRobotChatFlag";
 
     /**
-     * 主动唤醒数据
-     * 正式地址 faceinfo/activeInteraction
-     * 测试地址 XiaoBenManager/faceinfo/activeInteraction
-     */
-    final static String RECOGNITION_FACE = isTest ? "XiaoBenManager/faceinfo/activeInteraction" : "faceinfo/activeInteraction";
-
-    /**
      * 富文本连接头
      * 正式地址 resources/views/show.html?content=
      * 测试地址 XiaoBenManager/resources/views/show.html?content=

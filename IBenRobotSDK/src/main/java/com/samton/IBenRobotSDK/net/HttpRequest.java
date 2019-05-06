@@ -4,15 +4,9 @@ import com.samton.IBenRobotSDK.data.ActiveBean;
 import com.samton.IBenRobotSDK.data.ChatFlagBean;
 import com.samton.IBenRobotSDK.data.InitBean;
 import com.samton.IBenRobotSDK.data.MessageBean;
-import com.samton.IBenRobotSDK.data.RouseBean;
 
 import io.reactivex.Observable;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.http.GET;
-import retrofit2.http.Multipart;
-import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 /**
@@ -67,16 +61,4 @@ public interface HttpRequest {
      */
     @GET(HttpUrl.INIT_ROBOT_INFO)
     Observable<InitBean> initRobot(@Query("robotUUID") String appKey);
-
-    /**
-     * 主动唤醒人脸检测接口
-     *
-     * @param file      人脸文件
-     * @param robotuuid 机器人UUID
-     * @return 人脸属性观察者对象
-     */
-    @Multipart
-    @POST(HttpUrl.RECOGNITION_FACE)
-    Observable<RouseBean> recognitionFace(@Part MultipartBody.Part file,
-                                          @Part("robotUuid") RequestBody robotuuid);
 }
