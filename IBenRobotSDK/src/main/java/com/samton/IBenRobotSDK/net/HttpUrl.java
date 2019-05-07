@@ -14,7 +14,7 @@ public final class HttpUrl {
     /**
      * 是否为测试环境
      */
-    private static final boolean isTest = true;
+    private static final boolean isTest =false;
 
     /**
      * 返回给外部是否处于测试环境
