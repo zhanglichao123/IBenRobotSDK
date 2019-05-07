@@ -3,6 +3,7 @@ package com.samton.IBenRobotSDK.utils;
 import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.view.Surface;
@@ -27,6 +28,8 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
     private USBMonitor mUSBMonitor;
     private MYNTCamera mCamera;
     private FrameCallback frameCallback;
+    private Handler mHandler;
+    private HandlerThread mThread;
 
     public MyntCameraProxy(Activity activity) {
         this.activity = activity;
@@ -52,53 +55,106 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
      */
     public void closeCamera() {
         LogUtils.e("关闭相机");
-        try {
-            if (mCamera != null) {
-                mCamera.close();
-                mCamera.destroy();
-                mCamera = null;
-            }
-            if (mUSBMonitor != null) {
-                mUSBMonitor.unregister();
-                mUSBMonitor.destroy();
-                mUSBMonitor = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LogUtils.e("关闭相机异常" + e.toString());
-        }
+//        try {
+//            if (mCamera != null) {
+//                mCamera.close();
+//                mCamera.destroy();
+//                mCamera = null;
+//            }
+//            if (mUSBMonitor != null) {
+//                mUSBMonitor.unregister();
+//                mUSBMonitor.destroy();
+//                mUSBMonitor = null;
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            LogUtils.e("关闭相机异常" + e.toString());
+//        }
         if (frameCallback != null) {
             frameCallback = null;
         }
         if (mHandler != null) {
-            mHandler.removeMessages(0x90890);
+            mHandler.sendEmptyMessage(0x90891);
         }
     }
 
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 0x90890:
-                    if (mCamera != null) {
-                        mCamera.connect();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
+//    private Handler mHandler = new Handler(mThread.getLooper()) {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            switch (msg.what) {
+//                case 0x90890:// 连接相机
+//                    if (mCamera != null) {
+//                        mCamera.connect();
+//                    }
+//                    break;
+//                case 0x90891:// 销毁相机
+//                    try {
+//                        if (mCamera != null) {
+//                            mCamera.close();
+//                            mCamera.destroy();
+//                            mCamera = null;
+//                        }
+//                        if (mUSBMonitor != null) {
+//                            mUSBMonitor.unregister();
+//                            mUSBMonitor.destroy();
+//                            mUSBMonitor = null;
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        LogUtils.e("关闭相机异常" + e.toString());
+//                    }
+//                    mThread.quit();
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//    };
 
     /**
      * 开启相机
      */
     public void openCamera(@NonNull final Surface colorSf, @NonNull final Surface depthSf) {
         LogUtils.e("开启相机");
-        // 确保相机是关闭状态
-        // closeCamera();
-        LogUtils.e("USB监听开始注册");
+        mThread = new HandlerThread("mmThread");
+        mThread.start();
+        mHandler = new Handler(mThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case 0x90890:// 连接相机
+                        LogUtils.e("连接相机");
+                        if (mCamera != null) {
+                            mCamera.connect();
+                        }
+                        break;
+                    case 0x90891:// 销毁相机
+                        LogUtils.e("销毁相机");
+                        try {
+                            if (mCamera != null) {
+                                mCamera.close();
+                                mCamera.destroy();
+                                mCamera = null;
+                            }
+                            if (mUSBMonitor != null) {
+                                mUSBMonitor.unregister();
+                                mUSBMonitor.destroy();
+                                mUSBMonitor = null;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            LogUtils.e("关闭相机异常" + e.toString());
+                        }
+                        mThread.quit();
+                        mHandler.removeCallbacksAndMessages(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
         mUSBMonitor = new USBMonitor(activity, new USBMonitor.IUSBMonitorListener() {
             @Override
             public void didAttach(MYNTCamera myntCamera) {// 设备插入
@@ -108,7 +164,9 @@ public class MyntCameraProxy implements MYNTCamera.IFrameCallback {
                     mCamera = myntCamera;
                 }
                 // 不能立即启动相机，间隔1s后再打开
-                mHandler.sendEmptyMessageDelayed(0x90890, 1000);
+                if (mHandler != null) {
+                    mHandler.sendEmptyMessageDelayed(0x90890, 1000);
+                }
             }
 
             @Override
