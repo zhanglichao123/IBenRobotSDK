@@ -178,6 +178,15 @@ public final class IBenTTSUtil {
     }
 
     /**
+     * 停止合成（某个标识）
+     */
+    public void stopSpeaking(int tag) {
+        if (tag == mTag && mTTSManager != null) {
+            mTTSManager.stopSpeaking();
+        }
+    }
+
+    /**
      * 在界面销毁中调用
      */
     public void recycle() {
