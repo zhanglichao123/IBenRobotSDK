@@ -69,5 +69,5 @@ public interface HttpRequest {
      * @return 初始化机器人观察者对象
      */
     @GET(HttpUrl.INIT_ROBOT_INFO)
-    Observable<InitBean> initRobot(@Query("robotUUID") String appKey, @Query("checkFlag") int checkFlag);
+    Observable<InitBean> initRobot(@Query("robotUUID") String appKey, @Query("checkFlag") String checkFlag);
 }
