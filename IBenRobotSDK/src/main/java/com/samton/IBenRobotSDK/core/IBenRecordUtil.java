@@ -67,19 +67,25 @@ public final class IBenRecordUtil {
         @Override
         public void onVolumeChanged(int i, byte[] bytes) {
             // 当前正在说话 i = 音量大小
-            mCallBack.onVolumeChanged(mTag, i, bytes);
+            if (mCallBack != null) {
+                mCallBack.onVolumeChanged(mTag, i, bytes);
+            }
         }
 
         @Override
         public void onBeginOfSpeech() {
             // 开始说话
-            mCallBack.onBeginOfSpeech(mTag);
+            if (mCallBack != null) {
+                mCallBack.onBeginOfSpeech(mTag);
+            }
         }
 
         @Override
         public void onEndOfSpeech() {
             // 结束说话
-            mCallBack.onEndOfSpeech(mTag);
+            if (mCallBack != null) {
+                mCallBack.onEndOfSpeech(mTag);
+            }
         }
 
         @Override

@@ -32,31 +32,36 @@ import static com.samton.IBenRobotSDK.data.Constants.ROBOT_IM_ACCOUNT;
  */
 public final class MainSDK {
     private static Application mApplication;
+    private static volatile MainSDK mInstance = null;
+
+    private MainSDK() {
+    }
+
+    public static MainSDK getInstance() {
+        if (mInstance == null) {
+            synchronized (MainSDK.class) {
+                if (mInstance == null) {
+                    mInstance = new MainSDK();
+                }
+            }
+        }
+        return mInstance;
+    }
 
     /**
-     * 初始化机器人SDK
+     * 初始化SDK
      *
-     * @param mApplication Application对象
+     * @param application Application对象
+     *                    请在XML中配置好robUuid、appKey和appId
      */
-    private MainSDK(Application mApplication) {
+    public void init(Application application) {
+        mApplication = application;
         // 初始化工具类
         Utils.init(mApplication);
         // 读取XML中的必须配置
         readMetaDataFromApplication(mApplication);
         // 科大讯飞的语音系统
         SpeechUtility.createUtility(mApplication, APP_ID);
-    }
-
-    /**
-     * 初始化SDK
-     *
-     * @param app Application对象
-     *            请在XML中配置好robUuid、appKey和appId
-     * @return SDK对象
-     */
-    public static MainSDK init(Application app) {
-        mApplication = app;
-        return new MainSDK(app);
     }
 
     /**

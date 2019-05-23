@@ -59,6 +59,7 @@ public final class InitBean {
     public String getAccout() {
         return accout;
     }
+
     public void setAccout(String accout) {
         this.accout = accout;
     }
@@ -112,6 +113,9 @@ public final class InitBean {
     }
 
     public DataBean getData() {
+        if (data == null) {
+            data = new DataBean();
+        }
         return data;
     }
 
@@ -120,6 +124,9 @@ public final class InitBean {
     }
 
     public SetBean getSet() {
+        if (set == null) {
+            set = new SetBean();
+        }
         return set;
     }
 
@@ -128,6 +135,9 @@ public final class InitBean {
     }
 
     public CurrentMapBean getCurrentMap() {
+        if (currentMap == null) {
+            currentMap = new CurrentMapBean();
+        }
         return currentMap;
     }
 
@@ -136,6 +146,9 @@ public final class InitBean {
     }
 
     public ExpressionMapBean getExpressionMap() {
+        if (expressionMap == null) {
+            expressionMap = new ExpressionMapBean();
+        }
         return expressionMap;
     }
 
@@ -160,6 +173,9 @@ public final class InitBean {
     }
 
     public MeetingBean getMeeting() {
+        if (meeting == null) {
+            meeting = new MeetingBean();
+        }
         return meeting;
     }
 
@@ -168,6 +184,9 @@ public final class InitBean {
     }
 
     public PreachGroupBean getPreachGroup() {
+        if (preachGroup == null) {
+            preachGroup = new PreachGroupBean();
+        }
         return preachGroup;
     }
 
@@ -176,6 +195,9 @@ public final class InitBean {
     }
 
     public PrintGroupBean getPrintGroup() {
+        if (printGroup == null) {
+            printGroup = new PrintGroupBean();
+        }
         return printGroup;
     }
 
@@ -184,6 +206,9 @@ public final class InitBean {
     }
 
     public WorkAttendanceBean getWorkAttendance() {
+        if (workAttendance == null) {
+            workAttendance = new WorkAttendanceBean();
+        }
         return workAttendance;
     }
 
@@ -200,6 +225,9 @@ public final class InitBean {
     }
 
     public CleverPreachBean getCleverPreach() {
+        if (cleverPreach == null) {
+            cleverPreach = new CleverPreachBean();
+        }
         return cleverPreach;
     }
 
@@ -1117,6 +1145,9 @@ public final class InitBean {
                 }
 
                 public StyleBean getStyle() {
+                    if (style == null) {
+                        style = new StyleBean();
+                    }
                     return style;
                 }
 
@@ -1660,6 +1691,9 @@ public final class InitBean {
     }
 
     public RobotInfoBean getRobotInfo() {
+        if (robotInfo == null) {
+            robotInfo = new RobotInfoBean();
+        }
         return robotInfo;
     }
 

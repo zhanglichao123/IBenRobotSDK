@@ -39,7 +39,7 @@ public class SerialTestActivity extends AppCompatActivity implements ISerialCall
         mTextView = (TextView) findViewById(R.id.mTextView);
         mContent = (ScrollView) findViewById(R.id.mContent);
 
-        MainSDK.init(getApplication());
+        MainSDK.getInstance().init(getApplication());
         IBenSerialUtil.getInstance().setCallBack(this);
 
         FileUtils.createOrExistsFile(Constants.MAP_PATH + "/log.txt");
