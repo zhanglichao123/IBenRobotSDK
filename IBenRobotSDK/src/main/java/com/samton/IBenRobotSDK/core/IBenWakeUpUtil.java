@@ -28,7 +28,7 @@ public final class IBenWakeUpUtil {
     /**
      * 串口操作工具类
      */
-    private SerialUtil mSerialUtil = null;
+    private SerialUtil mSerialUtil;
     /**
      * 唤醒工具单例
      */
@@ -60,7 +60,8 @@ public final class IBenWakeUpUtil {
             // 设置串口号、波特率，
             // mSerialUtil = new SerialUtil("/dev/ttyS3");//旧板子
             mSerialUtil = new SerialUtil("/dev/ttyS4");//新开发板子
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
+            mSerialUtil = null;
             e.printStackTrace();
         }
     }
@@ -86,7 +87,9 @@ public final class IBenWakeUpUtil {
      */
     public void setBeam() {
         String beamIndex = "BEAM0\n";
-        mSerialUtil.setData(beamIndex.getBytes());
+        if (mSerialUtil != null) {
+            mSerialUtil.setData(beamIndex.getBytes());
+        }
     }
 
     /**
@@ -96,7 +99,9 @@ public final class IBenWakeUpUtil {
      */
     public void startWakeUp(boolean isPassive) {
         // 手动开启唤醒功能并默认角度为0的麦克风进行增强录音
-        mSerialUtil.setData("BEAM0\r".getBytes());
+        if (mSerialUtil != null) {
+            mSerialUtil.setData("BEAM0\r".getBytes());
+        }
         if (callBack != null) {
             callBack.onWakeUp(0, isPassive);
         }
@@ -107,7 +112,8 @@ public final class IBenWakeUpUtil {
      */
     public void stopWakeUp() {
         // 手动开启唤醒功能并默认角度为0的麦克风进行增强录音
-        mSerialUtil.setData("RESET\r".getBytes());
+        if (mSerialUtil != null)
+            mSerialUtil.setData("RESET\r".getBytes());
         // 置空回调
         callBack = null;
         // 清空回显定时器
@@ -121,6 +127,7 @@ public final class IBenWakeUpUtil {
         return new DisposableObserver<Long>() {
             @Override
             public void onNext(Long aLong) {
+                if (mSerialUtil == null) return;
                 // 读取数据
                 byte[] data = mSerialUtil.getDataByte();
                 // 不为空的话进行回写

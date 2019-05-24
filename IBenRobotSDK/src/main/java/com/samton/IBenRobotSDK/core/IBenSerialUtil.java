@@ -24,7 +24,7 @@ public final class IBenSerialUtil {
     /**
      * 串口操作工具类
      */
-    private SerialUtil mSerialUtil = null;
+    private SerialUtil mSerialUtil;
     /**
      * 唤醒工具单例
      */
@@ -56,7 +56,8 @@ public final class IBenSerialUtil {
             // 设置串口号、波特率，
             // mSerialUtil = new SerialUtil("/dev/ttyS0");// 旧板子
             mSerialUtil = new SerialUtil("/dev/ttyS1");//新开发版
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
+            mSerialUtil = null;
             e.printStackTrace();
         }
     }
@@ -84,7 +85,8 @@ public final class IBenSerialUtil {
      * @param msg 要写的数据
      */
     public void sendData(String msg) {
-        mSerialUtil.setData(msg.getBytes());
+        if (mSerialUtil != null)
+            mSerialUtil.setData(msg.getBytes());
     }
 
     /**
@@ -96,7 +98,8 @@ public final class IBenSerialUtil {
      */
     public void sendData(String position, String angle, String speed) {
         String data = "{S" + position + angle + speed + "}";
-        mSerialUtil.setData(data.getBytes());
+        if (mSerialUtil != null)
+            mSerialUtil.setData(data.getBytes());
     }
 
     /**
@@ -106,6 +109,7 @@ public final class IBenSerialUtil {
         return new DisposableObserver<Long>() {
             @Override
             public void onNext(Long aLong) {
+                if (mSerialUtil == null) return;
                 // 读取数据
                 byte[] data = mSerialUtil.getDataByte();
                 // 不为空的话进行回写
