@@ -75,13 +75,11 @@ public class SerialUtil {
      *
      * @return 回写的byte数组
      */
-    public synchronized byte[] getData() throws NullPointerException {
+    public synchronized byte[] getData() {
+        if (mInputStream == null) return null;
         //上锁，每次只能一个线程在取得数据
         try {
             byte[] buffer = new byte[MAX];
-            if (mInputStream == null) {
-                throw new NullPointerException("mInputStream is null");
-            }
             //一次最多可读Max的长度
             size = mInputStream.read(buffer);
             if (size > 0) return buffer;
@@ -98,11 +96,9 @@ public class SerialUtil {
      * @return 回显的数组
      * @throws NullPointerException 空指针异常
      */
-    public synchronized byte[] getDataByte() throws NullPointerException {
+    public synchronized byte[] getDataByte() {
+        if (mInputStream == null) return null;
         byte[] buffer = new byte[MAX];
-        if (mInputStream == null) {
-            throw new NullPointerException("is null");
-        }
         try {
             if (mInputStream.available() > 0 && mInputStream.read(buffer) > 0) {
 //                mInputStream.read(buffer);
@@ -121,8 +117,8 @@ public class SerialUtil {
      *
      * @param data 显示的16进制的字符串
      */
-    public synchronized void setData(byte[] data) throws NullPointerException {
-        if (mOutputStream == null) throw new NullPointerException("outputStream为空");
+    public synchronized void setData(byte[] data) {
+        if (mOutputStream == null) return;
         try {
             mOutputStream.write(data);
         } catch (IOException e) {

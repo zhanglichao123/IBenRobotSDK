@@ -57,7 +57,6 @@ public final class IBenSerialUtil {
             // mSerialUtil = new SerialUtil("/dev/ttyS0");// 旧板子
             mSerialUtil = new SerialUtil("/dev/ttyS1");//新开发版
         } catch (Exception e) {
-            mSerialUtil = null;
             e.printStackTrace();
         }
     }

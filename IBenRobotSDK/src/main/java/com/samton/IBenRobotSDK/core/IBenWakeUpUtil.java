@@ -61,7 +61,6 @@ public final class IBenWakeUpUtil {
             // mSerialUtil = new SerialUtil("/dev/ttyS3");//旧板子
             mSerialUtil = new SerialUtil("/dev/ttyS4");//新开发板子
         } catch (Exception e) {
-            mSerialUtil = null;
             e.printStackTrace();
         }
     }
