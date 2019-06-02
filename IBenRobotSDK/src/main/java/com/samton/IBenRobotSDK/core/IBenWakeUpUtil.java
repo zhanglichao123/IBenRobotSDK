@@ -9,6 +9,7 @@ import com.samton.serialport.SerialUtil;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
@@ -70,13 +71,15 @@ public final class IBenWakeUpUtil {
      *
      * @param callBack 回调接口
      */
-    public void setCallBack(@NonNull final IWakeUpCallBack callBack) {
+    public void setCallBack(@NonNull IWakeUpCallBack callBack) {
         this.callBack = callBack;
         // 清空计时器
         mCompositeDisposable.clear();
         DisposableObserver<Long> mReadObserver = getReadTimer();
         Observable.interval(0, 20, TimeUnit.MILLISECONDS)
-                .observeOn(Schedulers.io()).subscribe(mReadObserver);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mReadObserver);
         // 新加计时器
         mCompositeDisposable.add(mReadObserver);
     }
@@ -85,24 +88,8 @@ public final class IBenWakeUpUtil {
      * 加强第一个麦克风(冲向人的)
      */
     public void setBeam() {
-        String beamIndex = "BEAM0\n";
         if (mSerialUtil != null) {
-            mSerialUtil.setData(beamIndex.getBytes());
-        }
-    }
-
-    /**
-     * 手动唤醒
-     *
-     * @param isPassive 是否被动唤醒(用户点击音乐跳舞这种属于被动唤醒)
-     */
-    public void startWakeUp(boolean isPassive) {
-        // 手动开启唤醒功能并默认角度为0的麦克风进行增强录音
-        if (mSerialUtil != null) {
-            mSerialUtil.setData("BEAM0\r".getBytes());
-        }
-        if (callBack != null) {
-            callBack.onWakeUp(0, isPassive);
+            mSerialUtil.setData("BEAM0\n".getBytes());
         }
     }
 
@@ -110,13 +97,10 @@ public final class IBenWakeUpUtil {
      * 停止语音唤醒监听
      */
     public void stopWakeUp() {
-        // 手动开启唤醒功能并默认角度为0的麦克风进行增强录音
-        if (mSerialUtil != null)
-            mSerialUtil.setData("RESET\r".getBytes());
         // 置空回调
         callBack = null;
         // 清空回显定时器
-        // mCompositeDisposable.clear();
+        mCompositeDisposable.clear();
     }
 
     /**
@@ -126,31 +110,28 @@ public final class IBenWakeUpUtil {
         return new DisposableObserver<Long>() {
             @Override
             public void onNext(Long aLong) {
-                if (mSerialUtil == null) return;
+                if (mSerialUtil == null || callBack == null) return;
                 // 读取数据
                 byte[] data = mSerialUtil.getDataByte();
                 // 不为空的话进行回写
                 if (data != null) {
                     String result = new String(data);
-                    // LogUtils.e(result);
                     int index = result.indexOf("angle");
                     if (index > 0) {
                         result = result.substring(index + 6, index + 9).trim();
-                        if (callBack != null) {
-                            // 防止科大讯飞返回空字符串默认给角度值为0
-                            if (TextUtils.isEmpty(result)) {
-                                result = "0";
-                            }
-                            // 解析唤醒角度
-                            int angle;
-                            try {
-                                angle = Integer.valueOf(result);
-                            } catch (Throwable throwable) {
-                                angle = 0;
-                            }
-                            // 回调
-                            callBack.onWakeUp(angle, false);
+                        // 防止科大讯飞返回空字符串默认给角度值为0
+                        if (TextUtils.isEmpty(result)) {
+                            result = "0";
                         }
+                        // 解析唤醒角度
+                        int angle;
+                        try {
+                            angle = Integer.valueOf(result);
+                        } catch (Throwable throwable) {
+                            angle = 0;
+                        }
+                        // 回调
+                        callBack.onWakeUp(angle);
                     }
                 }
             }

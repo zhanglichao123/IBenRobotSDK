@@ -6,6 +6,7 @@ import com.samton.serialport.SerialUtil;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -67,15 +68,24 @@ public final class IBenSerialUtil {
      * @param callBack 回调
      */
     public void setCallBack(ISerialCallBack callBack) {
-        mCallBack = null;
         mCallBack = callBack;
         // 清空计时器
         mCompositeDisposable.clear();
         DisposableObserver<Long> mReadObserver = getReadTimer();
         Observable.interval(0, 20, TimeUnit.MILLISECONDS)
-                .observeOn(Schedulers.io()).subscribe(mReadObserver);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mReadObserver);
         // 新加计时器
         mCompositeDisposable.add(mReadObserver);
+    }
+
+    /**
+     * 移除回调监听
+     */
+    public void removeCallBack() {
+        mCallBack = null;
+        mCompositeDisposable.clear();
     }
 
     /**
