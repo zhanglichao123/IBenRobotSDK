@@ -1,5 +1,6 @@
 package com.samton.IBenRobotSDK.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,7 @@ public final class MessageBean {
     private int preachFlag;
 
     private DataBean data;
+
     public int getPreachFlag() {
         return preachFlag;
     }
@@ -30,7 +32,6 @@ public final class MessageBean {
     public void setPreachFlag(int preachFlag) {
         this.preachFlag = preachFlag;
     }
-
 
 
     public int getCommandFlag() {
@@ -42,6 +43,9 @@ public final class MessageBean {
     }
 
     public DataBean getData() {
+        if (data == null) {
+            data = new DataBean();
+        }
         return data;
     }
 
@@ -87,6 +91,9 @@ public final class MessageBean {
         }
 
         public List<AppMessageBean> getAppMessage() {
+            if (appMessage == null) {
+                appMessage = new ArrayList<>();
+            }
             return appMessage;
         }
 
@@ -100,7 +107,6 @@ public final class MessageBean {
              * informationJson : {"current":{"city":"北京","date":"2017-07-06","iname":"空气污染扩散指数","index":"优","temp":"25","temphigh":"25","templow":"23","weather":"大雨","week":"星期四","winddirect":"东风","windpower":"3级"},"daily":[{"date":"2017-07-06","day":{"img":"9","temphigh":"25","weather":"大雨","winddirect":"东风","windpower":"微风"},"night":{"img":"8","templow":"23","weather":"中雨","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:45","week":"星期四"},{"date":"2017-07-07","day":{"img":"2","temphigh":"31","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"23","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:54","sunset":"19:44","week":"星期五"},{"date":"2017-07-08","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"北风","windpower":"微风"},"sunrise":"04:55","sunset":"19:44","week":"星期六"},{"date":"2017-07-09","day":{"img":"1","temphigh":"34","weather":"多云","winddirect":"南风","windpower":"微风"},"night":{"img":"1","templow":"26","weather":"多云","winddirect":"南风","windpower":"微风"},"sunrise":"04:56","sunset":"19:44","week":"星期日"},{"date":"2017-07-10","day":{"img":"2","temphigh":"33","weather":"阴","winddirect":"南风","windpower":"微风"},"night":{"img":"2","templow":"25","weather":"阴","winddirect":"北风","windpower":"微风"},"sunrise":"04:56","sunset":"19:43","week":"星期一"},{"date":"2017-07-11","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"东南风","windpower":"微风"},"night":{"img":"0","templow":"24","weather":"晴","winddirect":"东南风","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期二"},{"date":"2017-07-12","day":{"img":"1","temphigh":"36","weather":"多云","winddirect":"","windpower":"微风"},"night":{"img":"1","templow":"25","weather":"多云","winddirect":"","windpower":"微风"},"sunrise":"07:30","sunset":"19:30","week":"星期三"}]}
              * isAnswer : true
              * message : 北京今天23℃~25℃ 裤。
-             * TODO 以下新增
              * relationId : 关联问题ID
              * relationName : 关联问题
              * relationWords : 第几轮问答标识
@@ -169,6 +175,9 @@ public final class MessageBean {
             }
 
             public Pointlist getPointlist() {
+                if (pointlist == null) {
+                    pointlist = new Pointlist();
+                }
                 return pointlist;
             }
 
@@ -217,6 +226,9 @@ public final class MessageBean {
             }
 
             public InformationJsonBean getInformationJson() {
+                if (informationJson == null) {
+                    informationJson = new InformationJsonBean();
+                }
                 return informationJson;
             }
 
@@ -241,6 +253,9 @@ public final class MessageBean {
             }
 
             public ArmSportCommandBean getArmSportCommand() {
+                if (armSportCommand == null) {
+                    armSportCommand = new ArmSportCommandBean();
+                }
                 return armSportCommand;
             }
 
@@ -249,6 +264,9 @@ public final class MessageBean {
             }
 
             public HeadSportCommandBean getHeadSportCommand() {
+                if (headSportCommand == null) {
+                    headSportCommand = new HeadSportCommandBean();
+                }
                 return headSportCommand;
             }
 
@@ -257,6 +275,9 @@ public final class MessageBean {
             }
 
             public BackSportCommandBean getBackSportCommand() {
+                if (backSportCommand == null) {
+                    backSportCommand = new BackSportCommandBean();
+                }
                 return backSportCommand;
             }
 

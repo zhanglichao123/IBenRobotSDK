@@ -2,6 +2,7 @@ package com.samton.IBenRobotSDK.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -293,6 +294,9 @@ public final class InitBean {
         }
 
         public List<String> getQuestionTip() {
+            if (questionTip == null) {
+                questionTip = new ArrayList<>();
+            }
             return questionTip;
         }
 
@@ -317,6 +321,9 @@ public final class InitBean {
         }
 
         public List<String> getAnthomaniacPwd() {
+            if (anthomaniacPwd == null) {
+                anthomaniacPwd = new ArrayList<>();
+            }
             return anthomaniacPwd;
         }
 
@@ -325,6 +332,9 @@ public final class InitBean {
         }
 
         public List<String> getHappyPwd() {
+            if (happyPwd == null) {
+                happyPwd = new ArrayList<>();
+            }
             return happyPwd;
         }
 
@@ -333,6 +343,9 @@ public final class InitBean {
         }
 
         public List<String> getSadPwd() {
+            if (sadPwd == null) {
+                sadPwd = new ArrayList<>();
+            }
             return sadPwd;
         }
 
@@ -341,6 +354,9 @@ public final class InitBean {
         }
 
         public List<String> getLevelPwd() {
+            if (levelPwd == null) {
+                levelPwd = new ArrayList<>();
+            }
             return levelPwd;
         }
 
@@ -349,6 +365,9 @@ public final class InitBean {
         }
 
         public List<String> getMovePwd() {
+            if (movePwd == null) {
+                movePwd = new ArrayList<>();
+            }
             return movePwd;
         }
 
@@ -357,6 +376,9 @@ public final class InitBean {
         }
 
         public List<String> getRightHandPwd() {
+            if (rightHandPwd == null) {
+                rightHandPwd = new ArrayList<>();
+            }
             return rightHandPwd;
         }
 
@@ -428,6 +450,9 @@ public final class InitBean {
         }
 
         public List<PositionPointsBean> getPositionPoints() {
+            if (positionPoints == null) {
+                positionPoints = new ArrayList<>();
+            }
             return positionPoints;
         }
 
@@ -448,6 +473,9 @@ public final class InitBean {
             private List<String> otherNames;
 
             public List<String> getOtherNames() {
+                if (otherNames == null) {
+                    otherNames = new ArrayList<>();
+                }
                 return otherNames;
             }
 
@@ -760,6 +788,9 @@ public final class InitBean {
         }
 
         public List<PreachItemListBean> getPreachItemList() {
+            if (preachItemList == null) {
+                preachItemList = new ArrayList<>();
+            }
             return preachItemList;
         }
 
@@ -1009,6 +1040,9 @@ public final class InitBean {
         }
 
         public List<PrintsBean> getPrints() {
+            if (prints == null) {
+                prints = new ArrayList<>();
+            }
             return prints;
         }
 
@@ -1064,6 +1098,9 @@ public final class InitBean {
             }
 
             public List<PrintItemsBean> getPrintItems() {
+                if (printItems == null) {
+                    printItems = new ArrayList<>();
+                }
                 return printItems;
             }
 
@@ -1615,6 +1652,9 @@ public final class InitBean {
     private List<String> wholeContent;//一体库
 
     public List<String> getNoContent() {
+        if (noContent == null) {
+            noContent = new ArrayList<>();
+        }
         return noContent;
     }
 
@@ -1623,6 +1663,9 @@ public final class InitBean {
     }
 
     public List<String> getIsContent() {
+        if (isContent == null) {
+            isContent = new ArrayList<>();
+        }
         return isContent;
     }
 
@@ -1631,6 +1674,9 @@ public final class InitBean {
     }
 
     public List<String> getWholeContent() {
+        if (wholeContent == null) {
+            wholeContent = new ArrayList<>();
+        }
         return wholeContent;
     }
 
@@ -1647,6 +1693,9 @@ public final class InitBean {
     }
 
     public List<String> getSounds() {
+        if (sounds == null) {
+            sounds = new ArrayList<>();
+        }
         return sounds;
     }
 
@@ -1655,6 +1704,9 @@ public final class InitBean {
     }
 
     public List<CarouselItemsBean> getCarouselItems() {
+        if (carouselItems == null) {
+            carouselItems = new ArrayList<>();
+        }
         return carouselItems;
     }
 
@@ -1663,6 +1715,9 @@ public final class InitBean {
     }
 
     public List<String> getFunctionManages() {
+        if (functionManages == null) {
+            functionManages = new ArrayList<>();
+        }
         return functionManages;
     }
 
@@ -1683,6 +1738,9 @@ public final class InitBean {
     }
 
     public List<String> getStatusBars() {
+        if (statusBars == null) {
+            statusBars = new ArrayList<>();
+        }
         return statusBars;
     }
 
