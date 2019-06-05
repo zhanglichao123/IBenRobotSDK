@@ -1,9 +1,7 @@
 package com.samton.IBenRobotSDK.core;
 
-import android.app.PendingIntent;
 import android.content.Context;
 
-import com.samton.IBenRobotSDK.data.ChatFlagBean;
 import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
 import com.samton.IBenRobotSDK.net.HttpRequest;
@@ -15,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
@@ -83,7 +79,7 @@ public final class IBenChatSDK {
      */
     public void initIMSDK(Context mContext) {
         // 初始化IM模块
-        IBenIMHelper.getInstance().init(mTag, mContext,callBack);
+        IBenIMHelper.getInstance().init(mTag, mContext, callBack);
     }
 
     /**
@@ -122,25 +118,19 @@ public final class IBenChatSDK {
                 .getRobotChatFlag(SPUtils.getInstance().getString(ROBOT_APP_KEY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<ChatFlagBean>() {
-                    @Override
-                    public void accept(@NonNull ChatFlagBean chatFlagBean) throws Exception {
-                        // 发送信息给人工客服客服
-                        if (chatFlagBean.getRs() == 1) {
-                            send2IM(chatFlagBean.getAccout(), msg);
-                        }
-                        // 发送消息给小笨
-                        else {
-                            send2IBen(msg, reMsg, reIndex);
-                        }
+                .subscribe(chatFlagBean -> {
+                    // 发送信息给人工客服客服
+                    if (chatFlagBean.getRs() == 1) {
+                        send2IM(chatFlagBean.getAccout(), msg);
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk tag sendMessage:" + throwable.toString());
-                        callBack.onSuccess(mTag, getDefaultMessageBean());
+                    // 发送消息给小笨
+                    else {
+                        send2IBen(msg, reMsg, reIndex);
                     }
+                }, throwable -> {
+                    callBack.onFailed(mTag, throwable.getMessage());
+                    LogUtils.d("sdk tag sendMessage:" + throwable.toString());
+                    callBack.onSuccess(mTag, getDefaultMessageBean());
                 });
     }
 
@@ -174,20 +164,14 @@ public final class IBenChatSDK {
                 .send2IBen(appKey, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<MessageBean>() {
-                    @Override
-                    public void accept(@NonNull MessageBean messageBean) throws Exception {
-                        // 成功回调
-                        callBack.onSuccess(mTag, messageBean);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        // 失败回调
-                        callBack.onFailed(mTag, throwable.getMessage());
-                        LogUtils.d("sdk send2IBen:" + throwable.toString());
-                        callBack.onSuccess(mTag, getDefaultMessageBean());
-                    }
+                .subscribe(messageBean -> {
+                    // 成功回调
+                    callBack.onSuccess(mTag, messageBean);
+                }, throwable -> {
+                    // 失败回调
+                    callBack.onFailed(mTag, throwable.getMessage());
+                    LogUtils.d("sdk send2IBen:" + throwable.toString());
+                    callBack.onSuccess(mTag, getDefaultMessageBean());
                 });
     }
 

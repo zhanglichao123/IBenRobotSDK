@@ -74,9 +74,9 @@ public class IBenPrintSDK {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 // 权宜之计，解决bug问题
-                try{
+                try {
                     binder = (IMyBinder) iBinder;
-                }catch (Throwable throwable){
+                } catch (Throwable throwable) {
                     LogUtils.e(throwable.getMessage());
                 }
                 // 初始化成功后直接连接打印机
@@ -135,7 +135,7 @@ public class IBenPrintSDK {
     /**
      * 获取打印机连接状态 异步
      *
-     * @param printCallBack  状态回调
+     * @param printCallBack 状态回调
      */
     public void checkLinkedState(final PrintCallBack printCallBack) {
         if (binder != null) {
@@ -182,12 +182,7 @@ public class IBenPrintSDK {
                 public void onfailed() {
                     binder.clearBuffer();
                 }
-            }, new ProcessData() {
-                @Override
-                public List<byte[]> processDataBeforeSend() {
-                    return bytes;
-                }
-            });
+            }, () -> bytes);
         }
 
     }

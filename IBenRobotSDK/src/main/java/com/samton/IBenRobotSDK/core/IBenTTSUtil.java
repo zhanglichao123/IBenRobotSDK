@@ -8,6 +8,7 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SynthesizerListener;
 import com.samton.IBenRobotSDK.interfaces.IBenTTSCallBack;
 import com.samton.IBenRobotSDK.media.TTSManager;
+import com.samton.IBenRobotSDK.utils.LogUtils;
 
 /**
  * <pre>
@@ -33,10 +34,6 @@ public final class IBenTTSUtil {
      */
     private IBenTTSCallBack callBack = null;
     /**
-     * 标识
-     */
-    private int mTag = -1;
-    /**
      * 合成回调监听。
      */
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
@@ -44,7 +41,7 @@ public final class IBenTTSUtil {
         @Override
         public void onSpeakBegin() {
             // showTip("开始播放");
-            callBack.onSpeakBegin(mTag);
+            callBack.onSpeakBegin();
         }
 
         @Override
@@ -65,11 +62,12 @@ public final class IBenTTSUtil {
         @Override
         public void onSpeakProgress(int percent, int beginPos, int endPos) {
             // 播放进度
+            LogUtils.i("当前TTS播报的起始进度为:" + beginPos + ",结束进度为:" + endPos + ",当前进度为:" + percent);
         }
 
         @Override
         public void onCompleted(SpeechError error) {
-            callBack.onCompleted(mTag, error);
+            callBack.onCompleted(error);
         }
 
         @Override
@@ -118,20 +116,6 @@ public final class IBenTTSUtil {
      * @param msg 需要合成语音的文字
      */
     public void startSpeaking(String msg, IBenTTSCallBack callBack) {
-        mTag = -1;
-        this.callBack = callBack;
-        mTTSManager.setParam();
-        mTTSManager.startSpeaking(msg, mTtsListener);
-    }
-
-    /**
-     * 开始合成语音
-     *
-     * @param tag 标识
-     * @param msg 需要合成语音的文字
-     */
-    public void startSpeaking(int tag, String msg, IBenTTSCallBack callBack) {
-        mTag = tag;
         this.callBack = callBack;
         mTTSManager.setParam();
         mTTSManager.startSpeaking(msg, mTtsListener);
@@ -178,20 +162,9 @@ public final class IBenTTSUtil {
     }
 
     /**
-     * 停止合成（某个标识）
-     */
-    public void stopSpeaking(int tag) {
-        if (tag == mTag && mTTSManager != null) {
-            mTTSManager.stopSpeaking();
-        }
-    }
-
-    /**
      * 在界面销毁中调用
      */
     public void recycle() {
-        // 重置标识
-        mTag = -1;
         // 回收资源
         if (mTTSManager != null) {
             mTTSManager.stopSpeaking();
