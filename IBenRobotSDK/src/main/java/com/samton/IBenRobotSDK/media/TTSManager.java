@@ -3,7 +3,6 @@ package com.samton.IBenRobotSDK.media;
 import android.content.Context;
 
 import com.iflytek.cloud.ErrorCode;
-import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
@@ -25,7 +24,7 @@ public final class TTSManager {
     /**
      * 上下文对象
      */
-    private Context mContext = null;
+    private Context mContext;
     /**
      * 语音合成对象
      */
@@ -50,20 +49,17 @@ public final class TTSManager {
     /**
      * 构造函数
      *
-     * @param mContext 上下文对象
+     * @param context 上下文对象
      */
-    public TTSManager(Context mContext) {
+    public TTSManager(Context context) {
         // 初始化上下文对象
-        this.mContext = mContext;
+        this.mContext = context;
         // 初始化
-        mTts = SpeechSynthesizer.createSynthesizer(mContext, new InitListener() {
-            @Override
-            public void onInit(int code) {
-                if (code != ErrorCode.SUCCESS) {
-                    LogUtils.d(">>>>>>>>语音合成初始化失败");
-                } else {
-                    LogUtils.d(">>>>>>>>语音合成初始化成功");
-                }
+        mTts = SpeechSynthesizer.createSynthesizer(context, code -> {
+            if (code != ErrorCode.SUCCESS) {
+                LogUtils.d(">>>>>>>>语音合成初始化失败");
+            } else {
+                LogUtils.d(">>>>>>>>语音合成初始化成功");
             }
         });
     }

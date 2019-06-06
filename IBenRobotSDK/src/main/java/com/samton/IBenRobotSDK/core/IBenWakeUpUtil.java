@@ -3,16 +3,13 @@ package com.samton.IBenRobotSDK.core;
 import android.text.TextUtils;
 
 import com.samton.IBenRobotSDK.interfaces.IWakeUpCallBack;
-import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.serialport.SerialUtil;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -35,13 +32,9 @@ public final class IBenWakeUpUtil {
      */
     private volatile static IBenWakeUpUtil instance = new IBenWakeUpUtil();
     /**
-     * 读写回显定时器
-     */
-    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
-    /**
      * 唤醒回调
      */
-    private IWakeUpCallBack callBack = null;
+    private Disposable mAngleSubscribe;
 
     /**
      * 获取唤醒工具单例
@@ -71,80 +64,54 @@ public final class IBenWakeUpUtil {
      *
      * @param callBack 回调接口
      */
-    public void setCallBack(@NonNull IWakeUpCallBack callBack) {
-        this.callBack = callBack;
-        // 清空计时器
-        mCompositeDisposable.clear();
-        DisposableObserver<Long> mReadObserver = getReadTimer();
-        Observable.interval(0, 20, TimeUnit.MILLISECONDS)
+    public void setCallBack(IWakeUpCallBack callBack) {
+        //先停止上一轮的唤醒
+        stopWakeUp();
+        mAngleSubscribe = Observable.interval(0, 20, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mReadObserver);
-        // 新加计时器
-        mCompositeDisposable.add(mReadObserver);
+                .subscribe(aLong -> {
+                    if (mSerialUtil == null || callBack == null) return;
+                    // 读取数据
+                    byte[] data = mSerialUtil.getDataByte();
+                    // 不为空的话进行回写
+                    if (data == null) return;
+                    String result = new String(data);
+                    int index = result.indexOf("angle");
+                    if (index < 1) return;
+                    result = result.substring(index + 6, index + 9).trim();
+                    // 防止科大讯飞返回空字符串默认给角度值为0
+                    if (TextUtils.isEmpty(result)) {
+                        result = "0";
+                    }
+                    // 解析唤醒角度
+                    int angle;
+                    try {
+                        angle = Integer.valueOf(result);
+                    } catch (Exception e) {
+                        angle = 0;
+                    }
+                    // 回调
+                    callBack.onWakeUp(angle);
+                });
     }
 
     /**
      * 加强第一个麦克风(冲向人的)
      */
     public void setBeam() {
-        if (mSerialUtil != null) {
-            mSerialUtil.setData("BEAM0\n".getBytes());
-        }
+        if (mSerialUtil == null) return;
+        mSerialUtil.setData("BEAM0\n".getBytes());
     }
 
     /**
      * 停止语音唤醒监听
      */
     public void stopWakeUp() {
-        // 置空回调
-        callBack = null;
         // 清空回显定时器
-        mCompositeDisposable.clear();
-    }
-
-    /**
-     * 创建定时回写线程
-     */
-    private DisposableObserver<Long> getReadTimer() {
-        return new DisposableObserver<Long>() {
-            @Override
-            public void onNext(Long aLong) {
-                if (mSerialUtil == null || callBack == null) return;
-                // 读取数据
-                byte[] data = mSerialUtil.getDataByte();
-                // 不为空的话进行回写
-                if (data != null) {
-                    String result = new String(data);
-                    int index = result.indexOf("angle");
-                    if (index > 0) {
-                        result = result.substring(index + 6, index + 9).trim();
-                        // 防止科大讯飞返回空字符串默认给角度值为0
-                        if (TextUtils.isEmpty(result)) {
-                            result = "0";
-                        }
-                        // 解析唤醒角度
-                        int angle;
-                        try {
-                            angle = Integer.valueOf(result);
-                        } catch (Throwable throwable) {
-                            angle = 0;
-                        }
-                        // 回调
-                        callBack.onWakeUp(angle);
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                LogUtils.e(e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-                LogUtils.e("onComplete");
-            }
-        };
+        if (mAngleSubscribe != null && !mAngleSubscribe.isDisposed()) {
+            mAngleSubscribe.dispose();
+            mAngleSubscribe = null;
+        }
     }
 }

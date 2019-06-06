@@ -1160,7 +1160,6 @@ public final class IBenMoveSDK {
         if (mLocationAction != null) {
             try {
                 ActionStatus currentStatus = mLocationAction.getStatus();
-                Log.i("123456789", "checkStatus:" + currentStatus + ":" + yaw);
                 if (currentStatus.equals(ActionStatus.FINISHED) || currentStatus.equals(ActionStatus.STOPPED)
                         || currentStatus.equals(ActionStatus.ERROR)) {
                     if (yaw == -99) {
@@ -1178,12 +1177,6 @@ public final class IBenMoveSDK {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-/*                if(yaw == -99){
-                    // 回调状态值
-                    callBack.onStateChange(ActionStatus.ERROR);
-                }else{
-                    rotateto(yaw,callBack);
-                }*/
                 callBack.onStateChange(ActionStatus.ERROR);
                 // 停止定位计时器
                 cancelLocationTimer();

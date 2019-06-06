@@ -16,10 +16,6 @@ import java.io.OutputStream;
  */
 public class SerialUtil {
     /**
-     * 串口对象
-     */
-    private SerialPort mSerialPort;
-    /**
      * 输入流(用于数据读取)
      */
     private InputStream mInputStream;
@@ -27,10 +23,6 @@ public class SerialUtil {
      * 输出流(用于数据写入)
      */
     private OutputStream mOutputStream;
-    /**
-     * 回写长度
-     */
-    private volatile int size = -1;
     /**
      * 缓冲区大小
      */
@@ -42,40 +34,12 @@ public class SerialUtil {
      * @param path 串口的物理地址
      */
     public SerialUtil(String path) {
-        mSerialPort = new SerialPort();
-        mSerialPort.open(new File(path), SerialPort.BAUDRATE.B115200, SerialPort.STOPB.B1
+        //串口对象
+        SerialPort serialPort = new SerialPort();
+        serialPort.open(new File(path), SerialPort.BAUDRATE.B115200, SerialPort.STOPB.B1
                 , SerialPort.DATAB.CS8, SerialPort.PARITY.NONE, SerialPort.FLOWCON.NONE);
-        mInputStream = mSerialPort.getInputStream();
-        mOutputStream = mSerialPort.getOutputStream();
-    }
-
-    /**
-     * 取得byte的长度
-     *
-     * @return 长度
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * 串口读数据
-     *
-     * @return 回写的byte数组
-     */
-    public synchronized byte[] getData() {
-        if (mInputStream == null) return null;
-        //上锁，每次只能一个线程在取得数据
-        try {
-            byte[] buffer = new byte[MAX];
-            //一次最多可读Max的长度
-            size = mInputStream.read(buffer);
-            if (size > 0) return buffer;
-            else return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        mInputStream = serialPort.getInputStream();
+        mOutputStream = serialPort.getOutputStream();
     }
 
     /**
@@ -93,7 +57,7 @@ public class SerialUtil {
             } else {
                 return null;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

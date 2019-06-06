@@ -8,7 +8,6 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SynthesizerListener;
 import com.samton.IBenRobotSDK.interfaces.IBenTTSCallBack;
 import com.samton.IBenRobotSDK.media.TTSManager;
-import com.samton.IBenRobotSDK.utils.LogUtils;
 
 /**
  * <pre>
@@ -32,42 +31,64 @@ public final class IBenTTSUtil {
     /**
      * 语音回调接口
      */
-    private IBenTTSCallBack callBack = null;
+    private IBenTTSCallBack mCallBack = null;
     /**
      * 合成回调监听。
      */
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
 
+        /**
+         * 开始播报
+         */
         @Override
         public void onSpeakBegin() {
-            // showTip("开始播放");
-            callBack.onSpeakBegin();
+            if (mCallBack != null) {
+                mCallBack.onSpeakBegin();
+            }
         }
 
+        /**
+         * 合成进度
+         * @param percent 当前进度
+         * @param beginPos 开始进度
+         * @param endPos 结束进度
+         * @param info 附加信息
+         */
         @Override
         public void onBufferProgress(int percent, int beginPos, int endPos, String info) {
-            // 合成进度
         }
 
+        /**
+         * 暂停播放
+         */
         @Override
         public void onSpeakPaused() {
-            //  showTip("暂停播放");
         }
 
+        /**
+         * 继续播放
+         */
         @Override
         public void onSpeakResumed() {
-            // showTip("继续播放");
         }
 
+        /**
+         * 播放进度
+         * @param percent 当前进度
+         * @param beginPos 开始进度
+         * @param endPos 结束进度
+         */
         @Override
         public void onSpeakProgress(int percent, int beginPos, int endPos) {
-            // 播放进度
-            LogUtils.i("当前TTS播报的起始进度为:" + beginPos + ",结束进度为:" + endPos + ",当前进度为:" + percent);
         }
 
+        /**
+         * 播报结束
+         * @param error 是否有错误
+         */
         @Override
         public void onCompleted(SpeechError error) {
-            callBack.onCompleted(error);
+            mCallBack.onCompleted(error);
         }
 
         @Override
@@ -104,9 +125,9 @@ public final class IBenTTSUtil {
     /**
      * 初始化
      */
-    public void init(Context mContext) {
+    public void init(Context context) {
         if (mTTSManager == null) {
-            mTTSManager = new TTSManager(mContext);
+            mTTSManager = new TTSManager(context.getApplicationContext());
         }
     }
 
@@ -116,7 +137,7 @@ public final class IBenTTSUtil {
      * @param msg 需要合成语音的文字
      */
     public void startSpeaking(String msg, IBenTTSCallBack callBack) {
-        this.callBack = callBack;
+        this.mCallBack = callBack;
         mTTSManager.setParam();
         mTTSManager.startSpeaking(msg, mTtsListener);
     }
@@ -127,11 +148,7 @@ public final class IBenTTSUtil {
      * @return 播放状态
      */
     public boolean isSpeaking() {
-        boolean result = false;
-        if (mTTSManager != null) {
-            result = mTTSManager.isSpeaking();
-        }
-        return result;
+        return mTTSManager != null && mTTSManager.isSpeaking();
     }
 
     /**
@@ -170,7 +187,7 @@ public final class IBenTTSUtil {
             mTTSManager.stopSpeaking();
             mTTSManager.destroy();
             // 清空回调函数
-            callBack = null;
+            mCallBack = null;
         }
     }
 

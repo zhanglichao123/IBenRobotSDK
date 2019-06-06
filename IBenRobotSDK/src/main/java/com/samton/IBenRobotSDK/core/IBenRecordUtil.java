@@ -12,6 +12,7 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.util.UserWords;
 import com.samton.IBenRobotSDK.interfaces.IBenRecordCallBack;
 import com.samton.IBenRobotSDK.media.RecordManager;
+import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.SPUtils;
 
 import org.json.JSONArray;
@@ -57,10 +58,6 @@ public final class IBenRecordUtil {
      */
     private IBenRecordCallBack mCallBack = null;
     /**
-     * 标识
-     */
-    private int mTag = -1;
-    /**
      * 科大讯飞识别监听
      */
     private RecognizerListener mRecognizerListener = new RecognizerListener() {
@@ -68,7 +65,7 @@ public final class IBenRecordUtil {
         public void onVolumeChanged(int i, byte[] bytes) {
             // 当前正在说话 i = 音量大小
             if (mCallBack != null) {
-                mCallBack.onVolumeChanged(mTag, i, bytes);
+                mCallBack.onVolumeChanged(i, bytes);
             }
         }
 
@@ -76,7 +73,7 @@ public final class IBenRecordUtil {
         public void onBeginOfSpeech() {
             // 开始说话
             if (mCallBack != null) {
-                mCallBack.onBeginOfSpeech(mTag);
+                mCallBack.onBeginOfSpeech();
             }
         }
 
@@ -84,7 +81,7 @@ public final class IBenRecordUtil {
         public void onEndOfSpeech() {
             // 结束说话
             if (mCallBack != null) {
-                mCallBack.onEndOfSpeech(mTag);
+                mCallBack.onEndOfSpeech();
             }
         }
 
@@ -93,28 +90,27 @@ public final class IBenRecordUtil {
             // 解析识别结果
             doResult(recognizerResult);
             // 最终识别结果
-            if (isLast) {
-                String result;
-                if (mStringBuilder != null) {
-                    result = mStringBuilder.toString().trim();
-                    if (TextUtils.isEmpty(result)) {
-                        mCallBack.onError(mTag, "识别结果为空");
+            if (mStringBuilder != null) {
+                LogUtils.d("当前的拾音为:" + mStringBuilder.toString().trim());
+            }
+            if (isLast && mStringBuilder != null) {
+                String result = mStringBuilder.toString().trim();
+                if (TextUtils.isEmpty(result)) {
+                    mCallBack.onError("识别结果为空");
+                } else {
+                    if (!"。".equals(result)) {
+                        mCallBack.onResult(result);
                     } else {
-                        if (!"。".equals(result)) {
-                            mCallBack.onResult(mTag, result);
-                        } else {
-                            mCallBack.onError(mTag, "识别结果为空");
-                        }
+                        mCallBack.onError("识别结果为空");
                     }
-                    mStringBuilder.delete(0, mStringBuilder.length());
                 }
-
+                mStringBuilder.delete(0, mStringBuilder.length());
             }
         }
 
         @Override
         public void onError(SpeechError speechError) {
-            mCallBack.onError(mTag, speechError.getErrorCode() + "");
+            mCallBack.onError(speechError.getErrorCode() + "");
         }
 
         @Override
@@ -172,25 +168,8 @@ public final class IBenRecordUtil {
      */
     public void startRecognize() {
         // 设置此次的标识
-        mTag = -1;
         // 清空之前的识别结果
         map = new LinkedHashMap<>();
-        // map.clear();
-        mRecordManager.setParam();
-        mRecordManager.startListener(mRecognizerListener);
-    }
-
-    /**
-     * 开始识别
-     *
-     * @param tag 标识
-     */
-    public void startRecognize(int tag) {
-        // 设置此次的标识
-        mTag = tag;
-        // 清空之前的识别结果
-        map = new LinkedHashMap<>();
-        // map.clear();
         mRecordManager.setParam();
         mRecordManager.startListener(mRecognizerListener);
     }
@@ -201,7 +180,7 @@ public final class IBenRecordUtil {
      * @return 是否在录音状态
      */
     public boolean isListening() {
-        return mRecordManager.isListening();
+        return mRecordManager != null && mRecordManager.isListening();
     }
 
     /**
@@ -209,7 +188,9 @@ public final class IBenRecordUtil {
      */
     public void stopRecognize() {
         // 结束语音识别
-        mRecordManager.cancel();
+        if (mRecordManager != null) {
+            mRecordManager.cancel();
+        }
     }
 
     /**
@@ -217,7 +198,6 @@ public final class IBenRecordUtil {
      */
     public void recycle() {
         // 重置标识
-        mTag = -1;
         // 回收科大讯飞录音
         if (mRecordManager != null) {
             mRecordManager.cancel();

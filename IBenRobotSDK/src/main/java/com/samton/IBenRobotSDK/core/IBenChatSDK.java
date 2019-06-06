@@ -6,13 +6,13 @@ import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
 import com.samton.IBenRobotSDK.net.HttpRequest;
 import com.samton.IBenRobotSDK.net.HttpUtil;
-import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.SPUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
@@ -35,11 +35,21 @@ public final class IBenChatSDK {
     /**
      * 信息回调
      */
-    private IBenMsgCallBack callBack = null;
+    private IBenMsgCallBack mCallBack = null;
     /**
-     * 标识
+     * 获取IBenChat状态
      */
-    private int mTag = -1;
+    private Disposable mGetChatFlagSubscribe;
+    /**
+     * 发送消息给服务器
+     */
+    private Disposable mSendIBenSubscribe;
+
+    /**
+     * 私有构造函数
+     */
+    private IBenChatSDK() {
+    }
 
     /**
      * 获取聊天SDK单例
@@ -58,28 +68,55 @@ public final class IBenChatSDK {
     }
 
     /**
-     * 私有构造函数
-     */
-    private IBenChatSDK() {
-    }
-
-    /**
-     * 初始化SDK
-     *
-     * @param callBack 回调函数
-     */
-    public void initSDK(IBenMsgCallBack callBack) {
-        this.callBack = callBack;
-    }
-
-    /**
      * 初始化IM模块
      *
-     * @param mContext 上下文对象
+     * @param context 上下文对象
      */
-    public void initIMSDK(Context mContext) {
+    public void initIMSDK(Context context) {
         // 初始化IM模块
-        IBenIMHelper.getInstance().init(mTag, mContext, callBack);
+        IBenIMHelper.getInstance().init(context.getApplicationContext());
+    }
+
+    /**
+     * 设置消息回调监听
+     *
+     * @param callBack 消息回调
+     */
+    public void setCallBack(IBenMsgCallBack callBack) {
+        mCallBack = callBack;
+        IBenIMHelper.getInstance().setCallBack(mCallBack);
+    }
+
+    /**
+     * 移除消息回调监听
+     */
+    public void removeCallBack() {
+        cancelHttp();
+        mCallBack = null;
+        IBenIMHelper.getInstance().removeCallBack();
+    }
+
+    /**
+     * 取消所有的网络请求
+     */
+    private void cancelHttp() {
+        if (mGetChatFlagSubscribe != null && !mGetChatFlagSubscribe.isDisposed()) {
+            mGetChatFlagSubscribe.dispose();
+            mGetChatFlagSubscribe = null;
+        }
+        if (mSendIBenSubscribe != null && !mSendIBenSubscribe.isDisposed()) {
+            mSendIBenSubscribe.dispose();
+            mSendIBenSubscribe = null;
+        }
+    }
+
+    /**
+     * 与小笨机器人聊天
+     *
+     * @param msg 要发送的信息
+     */
+    public void sendMessage(String msg) {
+        sendMessage(msg, "");
     }
 
     /**
@@ -100,51 +137,19 @@ public final class IBenChatSDK {
      * @param reMsg 返回的关联问题
      */
     public void sendMessage(String msg, String reMsg, String reIndex) {
-        // 标识位赋值
-        sendMessage(-1, msg, reMsg, reIndex);
-    }
-
-    /**
-     * 与小笨机器人聊天
-     *
-     * @param tag   标识
-     * @param msg   要发送的信息
-     * @param reMsg 返回的关联问题
-     */
-    public void sendMessage(final int tag, final String msg, final String reMsg, final String reIndex) {
-        // 标识位赋值
-        mTag = tag;
-        HttpUtil.getInstance().create(HttpRequest.class)
+        cancelHttp();
+        mGetChatFlagSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
                 .getRobotChatFlag(SPUtils.getInstance().getString(ROBOT_APP_KEY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chatFlagBean -> {
-                    // 发送信息给人工客服客服
                     if (chatFlagBean.getRs() == 1) {
-                        send2IM(chatFlagBean.getAccout(), msg);
-                    }
-                    // 发送消息给小笨
-                    else {
+                        // 发送给人工的消息
+                        IBenIMHelper.getInstance().sendTxtMsg(chatFlagBean.getAccout(), msg);
+                    } else {// 发送消息给小笨
                         send2IBen(msg, reMsg, reIndex);
                     }
-                }, throwable -> {
-                    callBack.onFailed(mTag, throwable.getMessage());
-                    LogUtils.d("sdk tag sendMessage:" + throwable.toString());
-                    callBack.onSuccess(mTag, getDefaultMessageBean());
-                });
-    }
-
-    /**
-     * 发送信息给人工客服客服
-     *
-     * @param account 人工客服账号
-     * @param msg     要发送的消息
-     */
-    public void send2IM(String account, String msg) {
-        // 回调状态QA为false
-        callBack.onStateChange(mTag, false);
-        // 发送给人工的消息
-        IBenIMHelper.getInstance().sendTxtMsg(mTag, account, msg);
+                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
     /**
@@ -154,33 +159,27 @@ public final class IBenChatSDK {
      * @param reMsg 返回的关联问题
      */
     private void send2IBen(String msg, String reMsg, String reIndex) {
-        // 回调状态QA为true
-        callBack.onStateChange(mTag, true);
         // APP_KEY
         String appKey = SPUtils.getInstance().getString(ROBOT_APP_KEY);
         // 当前时间
         String time = String.valueOf(System.currentTimeMillis());
-        HttpUtil.getInstance().create(HttpRequest.class)
+        cancelHttp();
+        mSendIBenSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
                 .send2IBen(appKey, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(messageBean -> {
                     // 成功回调
-                    callBack.onSuccess(mTag, messageBean);
-                }, throwable -> {
-                    // 失败回调
-                    callBack.onFailed(mTag, throwable.getMessage());
-                    LogUtils.d("sdk send2IBen:" + throwable.toString());
-                    callBack.onSuccess(mTag, getDefaultMessageBean());
-                });
+                    mCallBack.onSuccess(messageBean);
+                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
     /**
      * 构建 默认的发送消息 请求失败的消息
      *
-     * @return
+     * @return 返回请求失败的实体类
      */
-    public MessageBean getDefaultMessageBean() {
+    private MessageBean getDefaultMessageBean() {
         MessageBean messageBean = new MessageBean();
         MessageBean.DataBean dataBean = new MessageBean.DataBean();
         MessageBean.DataBean.AppMessageBean appMessageBean = new MessageBean.DataBean.AppMessageBean();

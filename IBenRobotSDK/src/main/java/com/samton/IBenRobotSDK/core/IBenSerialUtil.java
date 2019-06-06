@@ -7,8 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -31,13 +30,9 @@ public final class IBenSerialUtil {
      */
     private volatile static IBenSerialUtil instance = new IBenSerialUtil();
     /**
-     * 读写回显定时器
-     */
-    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
-    /**
      * 串口回调
      */
-    private ISerialCallBack mCallBack = null;
+    private Disposable mReadSubscribe;
 
     /**
      * 获取串口工具单例
@@ -68,24 +63,35 @@ public final class IBenSerialUtil {
      * @param callBack 回调
      */
     public void setCallBack(ISerialCallBack callBack) {
-        mCallBack = callBack;
         // 清空计时器
-        mCompositeDisposable.clear();
-        DisposableObserver<Long> mReadObserver = getReadTimer();
-        Observable.interval(0, 20, TimeUnit.MILLISECONDS)
+        removeCallBack();
+        mReadSubscribe = Observable.interval(0, 20, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mReadObserver);
-        // 新加计时器
-        mCompositeDisposable.add(mReadObserver);
+                .subscribe(aLong -> {
+                    if (mSerialUtil == null || callBack == null) return;
+                    // 读取数据
+                    byte[] data = mSerialUtil.getDataByte();
+                    // 不为空的话进行回写
+                    if (data != null) {
+                        String result = new String(data);
+                        int startIndex = result.indexOf("{");
+                        int endIndex = result.indexOf("}");
+                        if (startIndex != -1 && endIndex != -1) {
+                            callBack.onReadData(result);
+                        }
+                    }
+                });
     }
 
     /**
      * 移除回调监听
      */
     public void removeCallBack() {
-        mCallBack = null;
-        mCompositeDisposable.clear();
+        if (mReadSubscribe != null && !mReadSubscribe.isDisposed()) {
+            mReadSubscribe.dispose();
+            mReadSubscribe = null;
+        }
     }
 
     /**
@@ -96,50 +102,6 @@ public final class IBenSerialUtil {
     public void sendData(String msg) {
         if (mSerialUtil != null)
             mSerialUtil.setData(msg.getBytes());
-    }
-
-    /**
-     * 向串口写数据
-     *
-     * @param position 位置L,R,H
-     * @param angle    角度0~270
-     * @param speed    速度001-700
-     */
-    public void sendData(String position, String angle, String speed) {
-        String data = "{S" + position + angle + speed + "}";
-        if (mSerialUtil != null)
-            mSerialUtil.setData(data.getBytes());
-    }
-
-    /**
-     * 创建定时回写线程
-     */
-    private DisposableObserver<Long> getReadTimer() {
-        return new DisposableObserver<Long>() {
-            @Override
-            public void onNext(Long aLong) {
-                if (mSerialUtil == null) return;
-                // 读取数据
-                byte[] data = mSerialUtil.getDataByte();
-                // 不为空的话进行回写
-                if (data != null) {
-                    String result = new String(data);
-                    int startIndex = result.indexOf("{");
-                    int endIndex = result.indexOf("}");
-                    if (startIndex != -1 && endIndex != -1) {
-                        mCallBack.onReadData(result);
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        };
     }
 
 }
