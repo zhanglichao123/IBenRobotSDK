@@ -42,23 +42,6 @@ public class SensorUtil {
      * @param path 串口的物理地址
      */
     public SensorUtil(String path) {
-//        try {
-//            mSerialPort = new SerialPort(new File(path), baudRate, flags);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        if (mSerialPort != null) {
-//            // 设置读、写
-//            mInputStream = mSerialPort.getInputStream();
-//            mOutputStream = mSerialPort.getOutputStream();
-//        } else {
-//            throw new NullPointerException("串口设置有误");
-//        }
-//        mSerialPort = new SerialPort();
-//        mSerialPort.open(new File(path), SerialPort.BAUDRATE.B9600, SerialPort.STOPB.B1
-//                , SerialPort.DATAB.CS8, SerialPort.PARITY.NONE, SerialPort.FLOWCON.NONE);
-//        mInputStream = mSerialPort.getInputStream();
-//        mOutputStream = mSerialPort.getOutputStream();
         mSerialPort = new SerialPort();
         mSerialPort.open(new File(path), SerialPort.BAUDRATE.B9600, SerialPort.STOPB.B1
                 , SerialPort.DATAB.CS8, SerialPort.PARITY.NONE, SerialPort.FLOWCON.NONE);
@@ -103,14 +86,11 @@ public class SensorUtil {
      * @return 回显的数组
      * @throws NullPointerException 空指针异常
      */
-    public synchronized byte[] getDataByte() throws NullPointerException {
+    public synchronized byte[] getDataByte() {
+        if (mInputStream == null) return null;
         byte[] buffer = new byte[17];
-        if (mInputStream == null) {
-            throw new NullPointerException("is null");
-        }
         try {
             if (mInputStream.available() > 0 && mInputStream.read(buffer) > 0) {
-//                mInputStream.read(buffer);
                 return buffer;
             } else {
                 return null;
@@ -126,8 +106,8 @@ public class SensorUtil {
      *
      * @param data 显示的16进制的字符串
      */
-    public synchronized void setData(byte[] data) throws NullPointerException {
-        if (mOutputStream == null) throw new NullPointerException("outputStream为空");
+    public synchronized void setData(byte[] data) {
+        if (mOutputStream == null) return;
         try {
             mOutputStream.write(data);
         } catch (IOException e) {

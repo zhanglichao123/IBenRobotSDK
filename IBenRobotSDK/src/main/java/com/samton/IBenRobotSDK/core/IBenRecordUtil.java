@@ -115,10 +115,6 @@ public final class IBenRecordUtil {
         @Override
         public void onError(SpeechError speechError) {
             mCallBack.onError(mTag, speechError.getErrorCode() + "");
-//            // 错误码为10118代表没有说话20002代表网络超时
-//            if (speechError.getErrorCode() == 10118 || speechError.getErrorCode() == 20002) {
-//                mCallBack.onConnectFailed(speechError.getMessage());
-//            }
         }
 
         @Override
@@ -289,7 +285,7 @@ public final class IBenRecordUtil {
      * @param hotWords
      * @param listener
      */
-    public int updateLexicon(String name, ArrayList hotWords, LexiconListener listener) {
+    public int updateLexicon(String name, ArrayList<String> hotWords, LexiconListener listener) {
         if (mRecordManager == null || hotWords == null || hotWords.size() <= 0) {
             return ErrorCode.MSP_ERROR_FAIL;
         }

@@ -6,7 +6,6 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.samton.IBenRobotSDK.data.Constants;
-import com.samton.IBenRobotSDK.utils.BaseIoSubscriber;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
 import com.samton.IBenRobotSDK.utils.FileUtils;
 import com.samton.IBenRobotSDK.utils.ImageUtils;
@@ -16,14 +15,6 @@ import com.slamtec.slamware.action.ActionStatus;
 import com.slamtec.slamware.action.IAction;
 import com.slamtec.slamware.action.IMoveAction;
 import com.slamtec.slamware.action.MoveDirection;
-import com.slamtec.slamware.exceptions.ConnectionFailException;
-import com.slamtec.slamware.exceptions.ConnectionTimeOutException;
-import com.slamtec.slamware.exceptions.InvalidArgumentException;
-import com.slamtec.slamware.exceptions.OperationFailException;
-import com.slamtec.slamware.exceptions.ParseInvalidException;
-import com.slamtec.slamware.exceptions.RequestFailException;
-import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
-import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.geometry.PointF;
 import com.slamtec.slamware.geometry.Size;
 import com.slamtec.slamware.robot.CompositeMap;
@@ -49,16 +40,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -124,10 +112,6 @@ public final class IBenMoveSDK {
      */
     private int mPort = 0;
     /**
-     * 线程池
-     */
-    private ExecutorService mThreadPool;
-    /**
      * 动作接口
      */
     private IMoveAction moveAction;
@@ -140,8 +124,6 @@ public final class IBenMoveSDK {
      * 私有构造
      */
     private IBenMoveSDK() {
-        // 初始化线程池
-        mThreadPool = Executors.newFixedThreadPool(10);
     }
 
     /**
@@ -222,48 +204,40 @@ public final class IBenMoveSDK {
         // 判断ip和端口是否合法
         if (mIp == null || mIp.isEmpty() || mPort <= 0 || mPort > 65535) {
             mCallBack.onConnectFailed();
-        }
-        // 合法的话连接机器人
-        else {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        // 设置机器人连接监听
-                        mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
-                        // 获取机器人电量
-                        LogUtils.e("当前机器人电量>>>" + mRobotPlatform.getBatteryPercentage());
-                        // 发射命令-告知观察者连接成功
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+        } else {// 合法的话连接机器人
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    // 设置机器人连接监听
+                    mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
+                    // 获取机器人电量
+                    LogUtils.e("当前机器人电量>>>" + mRobotPlatform.getBatteryPercentage());
+                    // 发射命令-告知观察者连接成功
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.single()).observeOn(Schedulers.single()).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    isConnecting = false;
-                    if (aBoolean) {
-                        // 如果存在重连的话取消
-                        cancelReconnectTimer();
-                        // 标识位重置
-                        isConnected = true;
-                        // 回调机器人连接成功
-                        mCallBack.onConnectSuccess();
-                    } else {
-                        isConnected = false;
-                        mCallBack.onConnectFailed();
-                        // 重连
-                        startReconnectTimer();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    isConnecting = false;
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        isConnecting = false;
+                        if (aBoolean) {
+                            // 如果存在重连的话取消
+                            cancelReconnectTimer();
+                            // 标识位重置
+                            isConnected = true;
+                            // 回调机器人连接成功
+                            mCallBack.onConnectSuccess();
+                        } else {
+                            isConnected = false;
+                            mCallBack.onConnectFailed();
+                            // 重连
+                            startReconnectTimer();
+                        }
+                    }, throwable -> {
+                        isConnecting = false;
+                        onRequestError();
+                    });
         }
     }
 
@@ -282,29 +256,21 @@ public final class IBenMoveSDK {
     public void disconnectRobot() {
         // 判断机器人控制SDK是否为空
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.disconnect();
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.disconnect();
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.single()).observeOn(Schedulers.single()).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -350,37 +316,29 @@ public final class IBenMoveSDK {
      */
     public void getBatteryInfo(@NonNull final GetBatteryCallBack callBack) {
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        JSONObject jsonObject = new JSONObject();
-                        int percent = mRobotPlatform.getBatteryPercentage();
-                        boolean isCharging = mRobotPlatform.getBatteryIsCharging();
-                        jsonObject.put("batteryPercent", percent);
-                        jsonObject.put("isCharging", isCharging);
-                        mBatteryInfo = jsonObject.toString();
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    int percent = mRobotPlatform.getBatteryPercentage();
+                    boolean isCharging = mRobotPlatform.getBatteryIsCharging();
+                    jsonObject.put("batteryPercent", percent);
+                    jsonObject.put("isCharging", isCharging);
+                    mBatteryInfo = jsonObject.toString();
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                        callBack.onFailed();
-                    } else {
-                        callBack.onSuccess(mBatteryInfo);
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                            callBack.onFailed();
+                        } else {
+                            callBack.onSuccess(mBatteryInfo);
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
             callBack.onFailed();
@@ -401,29 +359,21 @@ public final class IBenMoveSDK {
         cancelAllActions();
         final MoveDirection moveDirection = direction;
         if (moveDirection != null && mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.moveBy(moveDirection);
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.moveBy(moveDirection);
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -463,21 +413,7 @@ public final class IBenMoveSDK {
             // 开启运动
             try {
                 mRobotPlatform.moveTo(location);
-            } catch (RequestFailException e) {
-                e.printStackTrace();
-            } catch (ConnectionFailException e) {
-                e.printStackTrace();
-            } catch (ConnectionTimeOutException e) {
-                e.printStackTrace();
-            } catch (UnauthorizedRequestException e) {
-                e.printStackTrace();
-            } catch (UnsupportedCommandException e) {
-                e.printStackTrace();
-            } catch (ParseInvalidException e) {
-                e.printStackTrace();
-            } catch (InvalidArgumentException e) {
-                e.printStackTrace();
-            } catch (OperationFailException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -499,29 +435,21 @@ public final class IBenMoveSDK {
         float tempAngle = (float) (angle / 180 * Math.PI);
         final Rotation rotation = new Rotation(tempAngle);
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.rotate(rotation);
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.rotate(rotation);
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -539,29 +467,21 @@ public final class IBenMoveSDK {
         }
         cancelAllActions();
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.rotate(rotation);
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.rotate(rotation);
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -580,29 +500,21 @@ public final class IBenMoveSDK {
         cancelAllActions();
         final Rotation rotation = new Rotation(yaw);
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.rotate(rotation);
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.rotate(rotation);
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -618,28 +530,11 @@ public final class IBenMoveSDK {
         if (mRobotPlatform != null) {
             try {
                 action = mRobotPlatform.rotate(rotation);
-            } catch (RequestFailException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-            } catch (ConnectionFailException e) {
-                e.printStackTrace();
-            } catch (ConnectionTimeOutException e) {
-                e.printStackTrace();
-            } catch (UnauthorizedRequestException e) {
-                e.printStackTrace();
-            } catch (UnsupportedCommandException e) {
-                e.printStackTrace();
-            } catch (ParseInvalidException e) {
-                e.printStackTrace();
-            } catch (InvalidArgumentException e) {
-                e.printStackTrace();
-            } catch (OperationFailException e) {
-                e.printStackTrace();
-            } finally {
-                return action;
             }
-        } else {
-            return action;
         }
+        return action;
     }
 
     /**
@@ -650,32 +545,24 @@ public final class IBenMoveSDK {
         cancelMoveTimer();
         cancelLocationTimer();
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    IMoveAction moveAction = mRobotPlatform.getCurrentAction();
-                    try {
-                        if (moveAction != null) {
-                            moveAction.cancel();
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                IMoveAction moveAction = mRobotPlatform.getCurrentAction();
+                try {
+                    if (moveAction != null) {
+                        moveAction.cancel();
+                    }
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
+                }
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
                         }
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
-                }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -731,29 +618,21 @@ public final class IBenMoveSDK {
         }
         if (pose != null) {
             if (mRobotPlatform != null) {
-                Observable.create(new ObservableOnSubscribe<Boolean>() {
-                    @Override
-                    public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                        try {
-                            mRobotPlatform.setPose(pose);
-                            e.onNext(true);
-                        } catch (Throwable throwable) {
-                            e.onNext(false);
-                        }
+                Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                    try {
+                        mRobotPlatform.setPose(pose);
+                        e.onNext(true);
+                    } catch (Throwable throwable) {
+                        e.onNext(false);
                     }
-                }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                    @Override
-                    public void accept(@NonNull Boolean aBoolean) throws Exception {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        onRequestError();
-                    }
-                });
+                })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(aBoolean -> {
+                            if (!aBoolean) {
+                                onRequestError();
+                            }
+                        }, throwable -> onRequestError());
             } else {
                 onRequestError();
             }
@@ -777,32 +656,29 @@ public final class IBenMoveSDK {
             // 首先停止所有动作
             cancelAllActions();
             // 然后执行行走至定点操作
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        if (location != null) {
-                            // 脱桩操作
-                            if (isHome()) {
-                                moveByDirection(MoveDirection.FORWARD, 300, btnState);
-                                SystemClock.sleep(1000);
-                                cancelAllActions();
-                                SystemClock.sleep(500);
-                            }
-                            MoveOption option = new MoveOption();
-                            option.setSpeedRatio(0.4);
-                            option.setWithYaw(true);
-                            // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
-                            e.onNext(true);
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    if (location != null) {
+                        // 脱桩操作
+                        if (isHome()) {
+                            moveByDirection(MoveDirection.FORWARD, 300, btnState);
+                            SystemClock.sleep(1000);
+                            cancelAllActions();
+                            SystemClock.sleep(500);
                         }
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
+                        MoveOption option = new MoveOption();
+                        option.setSpeedRatio(0.4);
+                        option.setWithYaw(true);
+                        // 执行行走指令
+                        mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
+                        e.onNext(true);
                     }
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
             })
-                    .subscribeOn(Schedulers.from(mThreadPool))
-                    .observeOn(Schedulers.from(mThreadPool))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Boolean>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable disposable) {
@@ -851,34 +727,31 @@ public final class IBenMoveSDK {
             // 首先停止所有动作
             cancelAllActions();
             // 然后执行行走至定点操作
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        if (location != null) {
-                            // 脱桩操作
-                            if (isHome()) {
-                                moveByDirection(MoveDirection.FORWARD, 300, btnState);
-                                SystemClock.sleep(1000);
-                                cancelAllActions();
-                                SystemClock.sleep(500);
-                            }
-                            MoveOption option = new MoveOption();
-                            option.setSpeedRatio(0.4);
-                            option.setWithYaw(false);
-                            option.setPrecise(true);
-                            option.setMilestone(true);
-                            // 执行行走指令
-                            mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
-                            e.onNext(true);
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    if (location != null) {
+                        // 脱桩操作
+                        if (isHome()) {
+                            moveByDirection(MoveDirection.FORWARD, 300, btnState);
+                            SystemClock.sleep(1000);
+                            cancelAllActions();
+                            SystemClock.sleep(500);
                         }
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
+                        MoveOption option = new MoveOption();
+                        option.setSpeedRatio(0.4);
+                        option.setWithYaw(false);
+                        option.setPrecise(true);
+                        option.setMilestone(true);
+                        // 执行行走指令
+                        mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
+                        e.onNext(true);
                     }
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
             })
-                    .subscribeOn(Schedulers.from(mThreadPool))
-                    .observeOn(Schedulers.from(mThreadPool))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Boolean>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable disposable) {
@@ -915,29 +788,21 @@ public final class IBenMoveSDK {
      */
     public void clearAllWalls() {
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                    try {
-                        mRobotPlatform.clearWalls();
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    mRobotPlatform.clearWalls();
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.single()).observeOn(Schedulers.single()).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    if (!aBoolean) {
-                        onRequestError();
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                }
-            });
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        }
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
         }
@@ -992,68 +857,62 @@ public final class IBenMoveSDK {
      * @param callBack 回调函数
      */
     public void saveMap(final String mapName, final MapCallBack callBack) {
-        Observable.create(new ObservableOnSubscribe<Boolean>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
-                try {
-                    // 获取底盘的Map对象
-                    Map map = getMap();
-                    if (map != null) {
-                        // 判断目录是否存在不存在的话创建
-                        FileUtils.createOrExistsDir(Constants.MAP_PATH);
-                        // 文件输出流对象
-                        FileOutputStream fos = new FileOutputStream(Constants.MAP_PATH + "/" + mapName);
-                        // 对象输出流(写入)
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
-                        // 写入Origin对象
-                        oos.writeFloat(map.getOrigin().getX());
-                        oos.writeFloat(map.getOrigin().getY());
-                        // 写入Dimension对象
-                        oos.writeInt(map.getDimension().getWidth());
-                        oos.writeInt(map.getDimension().getHeight());
-                        // 写入Resolution对象
-                        oos.writeFloat(map.getResolution().getX());
-                        oos.writeFloat(map.getResolution().getY());
-                        // 写入时间戳对象
-                        oos.writeLong(map.getTimestamp());
-                        // 写入真实地图对象
-                        oos.writeObject(map.getData());
-                        // oos.write(map.getData());
-                        // 关闭流并且刷新操作
-                        oos.close();
-                        // 生成缩略图
-                        FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
-                        // 写入BMP图像
-                        int width = map.getDimension().getWidth();
-                        int height = map.getDimension().getHeight();
-                        Bitmap bitmap = createImage(map.getData(), width, height);
-                        byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
-                        FileIOUtils.writeFileFromBytesByStream(
-                                FileUtils.getFileByPath(
-                                        Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
-                    } else {
-                        e.onNext(false);
-                    }
-                    e.onNext(true);
-                } catch (Throwable throwable) {
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            try {
+                // 获取底盘的Map对象
+                Map map = getMap();
+                if (map != null) {
+                    // 判断目录是否存在不存在的话创建
+                    FileUtils.createOrExistsDir(Constants.MAP_PATH);
+                    // 文件输出流对象
+                    FileOutputStream fos = new FileOutputStream(Constants.MAP_PATH + "/" + mapName);
+                    // 对象输出流(写入)
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    // 写入Origin对象
+                    oos.writeFloat(map.getOrigin().getX());
+                    oos.writeFloat(map.getOrigin().getY());
+                    // 写入Dimension对象
+                    oos.writeInt(map.getDimension().getWidth());
+                    oos.writeInt(map.getDimension().getHeight());
+                    // 写入Resolution对象
+                    oos.writeFloat(map.getResolution().getX());
+                    oos.writeFloat(map.getResolution().getY());
+                    // 写入时间戳对象
+                    oos.writeLong(map.getTimestamp());
+                    // 写入真实地图对象
+                    oos.writeObject(map.getData());
+                    // oos.write(map.getData());
+                    // 关闭流并且刷新操作
+                    oos.close();
+                    // 生成缩略图
+                    FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+                    // 写入BMP图像
+                    int width = map.getDimension().getWidth();
+                    int height = map.getDimension().getHeight();
+                    Bitmap bitmap = createImage(map.getData(), width, height);
+                    byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
+                    FileIOUtils.writeFileFromBytesByStream(
+                            FileUtils.getFileByPath(
+                                    Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
+                } else {
                     e.onNext(false);
                 }
+                e.onNext(true);
+            } catch (Throwable throwable) {
+                e.onNext(false);
             }
-        }).subscribe(new BaseIoSubscriber<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                if (aBoolean) {
-                    callBack.onSuccess();
-                } else {
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                    if (aBoolean) {
+                        callBack.onSuccess();
+                    } else {
+                        callBack.onFailed();
+                    }
+                }, throwable -> {
                     callBack.onFailed();
-                }
-            }
-
-            @Override
-            public void onFailed(Throwable e) {
-                callBack.onFailed();
-            }
-        });
+                });
     }
 
     /**
@@ -1064,50 +923,42 @@ public final class IBenMoveSDK {
      * @param callBack 回调函数
      */
     public void saveMap(final String mapName, boolean isNewMap, final MapCallBack callBack) {
-        Observable.create(new ObservableOnSubscribe<Boolean>() {
-            @Override
-            public void subscribe(ObservableEmitter<Boolean> e) {
-                try {
-                    // 生成保存路径
-                    String path = Constants.MAP_PATH + "/" + mapName;
-                    // 获取完全版地图并保存到指定路径中
-                    CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
-                    CompositeMapHelper mapHelper = new CompositeMapHelper();
-                    mapHelper.saveFile(path, compositeMap);
-                    // 生成缩略图
-                    FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
-                    // 写入BMP图像
-                    for (MapLayer layer : compositeMap.getMaps()) {
-                        if (layer instanceof GridMap) {
-                            GridMap map = ((GridMap) layer);
-                            int width = map.getDimension().getWidth();
-                            int height = map.getDimension().getHeight();
-                            Bitmap bitmap = createImage(map.getMapData(), width, height);
-                            byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
-                            FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
-                                    Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
-                        }
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            try {
+                // 生成保存路径
+                String path = Constants.MAP_PATH + "/" + mapName;
+                // 获取完全版地图并保存到指定路径中
+                CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
+                CompositeMapHelper mapHelper = new CompositeMapHelper();
+                mapHelper.saveFile(path, compositeMap);
+                // 生成缩略图
+                FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+                // 写入BMP图像
+                for (MapLayer layer : compositeMap.getMaps()) {
+                    if (layer instanceof GridMap) {
+                        GridMap map = ((GridMap) layer);
+                        int width = map.getDimension().getWidth();
+                        int height = map.getDimension().getHeight();
+                        Bitmap bitmap = createImage(map.getMapData(), width, height);
+                        byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
+                        FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
+                                Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
                     }
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
                 }
+                e.onNext(true);
+            } catch (Throwable throwable) {
+                e.onNext(false);
             }
-        }).subscribe(new BaseIoSubscriber<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                if (aBoolean) {
-                    callBack.onSuccess();
-                } else {
-                    callBack.onFailed();
-                }
-            }
-
-            @Override
-            public void onFailed(Throwable e) {
-                callBack.onFailed();
-            }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                    if (aBoolean) {
+                        callBack.onSuccess();
+                    } else {
+                        callBack.onFailed();
+                    }
+                }, throwable -> callBack.onFailed());
     }
 
     /**
@@ -1125,14 +976,6 @@ public final class IBenMoveSDK {
             int temp = 0x7f + buffer[i];
             rawData[i] = Color.rgb(temp, temp, temp);
         }
-//        Bitmap result = Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
-//        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(result);
-//        Bitmap temp = ImageUtils.getBitmap(android.R.mipmap.sym_def_app_icon);
-//        canvas.drawBitmap(temp, 0, 0, null);
-//        canvas.save();
-//        canvas.restore();
-//        return result;
         return Bitmap.createBitmap(rawData, width, height, Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);
     }
 
@@ -1155,74 +998,65 @@ public final class IBenMoveSDK {
      * @param callBack    回调函数
      */
     public void loadMap(final String mapNamePath, final boolean isNewMap, final Pose currentPose, final MapCallBack callBack) {
-        Observable.create(new ObservableOnSubscribe<Boolean>() {
-            @Override
-            public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
-                try {
-                    // 新地图加载逻辑
-                    if (isNewMap) {
-                        // 地图加载帮助对象
-                        CompositeMapHelper helper = new CompositeMapHelper();
-                        CompositeMap map = helper.loadFile(mapNamePath);
-                        // 地图不为空的话加载地图
-                        if (mRobotPlatform != null && map != null) {
-                            mRobotPlatform.setCompositeMap(map, currentPose == null ? new Pose() : currentPose);
-                            e.onNext(true);
-                        } else {
-                            e.onNext(false);
-                        }
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            try {
+                // 新地图加载逻辑
+                if (isNewMap) {
+                    // 地图加载帮助对象
+                    CompositeMapHelper helper = new CompositeMapHelper();
+                    CompositeMap map = helper.loadFile(mapNamePath);
+                    // 地图不为空的话加载地图
+                    if (mRobotPlatform != null && map != null) {
+                        mRobotPlatform.setCompositeMap(map, currentPose == null ? new Pose() : currentPose);
+                        e.onNext(true);
+                    } else {
+                        e.onNext(false);
                     }
-                    // 旧地图加载逻辑
-                    else {
-                        // 获取地图文件
-                        File file = new File(mapNamePath);
-                        // 地图文件不存在直接返回
-                        if (!FileUtils.isFileExists(file)) {
-                            e.onNext(false);
-                        }
-                        // 地图文件存在才继续做事情
-                        else {
-                            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file.getAbsolutePath()));
-                            // 生成Origin对象
-                            float ox = ois.readFloat();
-                            float oy = ois.readFloat();
-                            PointF origin = new PointF(ox, oy);
-                            // 生成Dimension对象
-                            int width = ois.readInt();
-                            int height = ois.readInt();
-                            Size size = new Size(width, height);
-                            // 生成Resolution对象
-                            float rx = ois.readFloat();
-                            float ry = ois.readFloat();
-                            PointF resolution = new PointF(rx, ry);
-                            // 赋值时间戳
-                            long timeStamp = ois.readLong();
-                            // 生成二进制数组
-                            byte[] data = (byte[]) ois.readObject();
-                            // 生成地图对象
-                            Map map = new Map(origin, size, resolution, timeStamp, data);
-                            // 设置地图
-                            setMap(map);
-                            // 关闭流
-                            ois.close();
-                            e.onNext(true);
-                        }
-                    }
-                } catch (Throwable throwable) {
-                    e.onNext(false);
                 }
+                // 旧地图加载逻辑
+                else {
+                    // 获取地图文件
+                    File file = new File(mapNamePath);
+                    // 地图文件不存在直接返回
+                    if (!FileUtils.isFileExists(file)) {
+                        e.onNext(false);
+                    }
+                    // 地图文件存在才继续做事情
+                    else {
+                        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file.getAbsolutePath()));
+                        // 生成Origin对象
+                        float ox = ois.readFloat();
+                        float oy = ois.readFloat();
+                        PointF origin = new PointF(ox, oy);
+                        // 生成Dimension对象
+                        int width = ois.readInt();
+                        int height = ois.readInt();
+                        Size size = new Size(width, height);
+                        // 生成Resolution对象
+                        float rx = ois.readFloat();
+                        float ry = ois.readFloat();
+                        PointF resolution = new PointF(rx, ry);
+                        // 赋值时间戳
+                        long timeStamp = ois.readLong();
+                        // 生成二进制数组
+                        byte[] data = (byte[]) ois.readObject();
+                        // 生成地图对象
+                        Map map = new Map(origin, size, resolution, timeStamp, data);
+                        // 设置地图
+                        setMap(map);
+                        // 关闭流
+                        ois.close();
+                        e.onNext(true);
+                    }
+                }
+            } catch (Throwable throwable) {
+                e.onNext(false);
             }
-        }).subscribe(new BaseIoSubscriber<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                callBack.onSuccess();
-            }
-
-            @Override
-            public void onFailed(Throwable e) {
-                callBack.onFailed();
-            }
-        });
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> callBack.onSuccess(),
+                        throwable -> callBack.onFailed());
     }
 
 
@@ -1371,57 +1205,42 @@ public final class IBenMoveSDK {
             return;
         }
         final Rotation rotation = new Rotation(yaw);
-        Log.i("123456789", "rotateto:" + yaw);
         if (mRobotPlatform != null) {
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
+            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                try {
+                    moveAction = mRobotPlatform.rotateTo(rotation);
                     try {
-                        moveAction = mRobotPlatform.rotateTo(rotation);
-                        Log.i("123456789", "rotateto:end");
-                        try {
-                            Thread.sleep(4000);
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
-                        }
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
+                        Thread.sleep(4000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
                     }
+                    e.onNext(true);
+                } catch (Throwable throwable) {
+                    e.onNext(false);
                 }
-            }).subscribeOn(Schedulers.from(mThreadPool)).observeOn(Schedulers.from(mThreadPool)).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(@NonNull Boolean aBoolean) throws Exception {
-                    Log.i("123456789", "rotateto:accept:" + aBoolean);
-                    if (!aBoolean) {
-                        onRequestError();
-                    } else {
-                        while (true) {
-                            if (moveAction != null) {
-                                ActionStatus status = moveAction.getStatus();
-                                Log.i("987654321", "rotateto:moveAction :" + status);
-                                if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
-                                        || status.equals(ActionStatus.ERROR)) {
-                                    callBack.onStateChange(status);
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> {
+                        if (!aBoolean) {
+                            onRequestError();
+                        } else {
+                            while (true) {
+                                if (moveAction != null) {
+                                    ActionStatus status = moveAction.getStatus();
+                                    if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
+                                            || status.equals(ActionStatus.ERROR)) {
+                                        callBack.onStateChange(status);
+                                        break;
+                                    }
+                                } else {
                                     break;
                                 }
-                            } else {
-                                Log.i("123456789", "rotateto:moveAction is null");
-                                break;
                             }
                         }
-                    }
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(@NonNull Throwable throwable) throws Exception {
-                    onRequestError();
-                    Log.i("123456789", "Consumer:error");
-                }
-            });
+                    }, throwable -> onRequestError());
         } else {
             onRequestError();
-            Log.i("123456789", "rotateto:error");
         }
     }
 
@@ -1444,14 +1263,7 @@ public final class IBenMoveSDK {
                 public void run() {
                     try {
                         mRobotPlatform.moveBy(direction);
-                    } catch (RequestFailException
-                            | ConnectionFailException
-                            | ConnectionTimeOutException
-                            | UnauthorizedRequestException
-                            | ParseInvalidException
-                            | InvalidArgumentException
-                            | OperationFailException
-                            | UnsupportedCommandException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -1521,13 +1333,7 @@ public final class IBenMoveSDK {
         }
         try {
             return mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
-        } catch (RequestFailException
-                | ConnectionFailException
-                | UnauthorizedRequestException
-                | ConnectionTimeOutException
-                | InvalidArgumentException
-                | UnsupportedCommandException
-                | ParseInvalidException e) {
+        } catch (Exception e) {
             LogUtils.e("判断底盘急停按钮是否开启：" + e.toString());
             return true;
         }
@@ -1550,13 +1356,7 @@ public final class IBenMoveSDK {
                     return false;
                 }
                 return status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
-            } catch (RequestFailException
-                    | ConnectionFailException
-                    | UnauthorizedRequestException
-                    | ConnectionTimeOutException
-                    | InvalidArgumentException
-                    | UnsupportedCommandException
-                    | ParseInvalidException e) {
+            } catch (Exception e) {
                 return false;
             }
         }

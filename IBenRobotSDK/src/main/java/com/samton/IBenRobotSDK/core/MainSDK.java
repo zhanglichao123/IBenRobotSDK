@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
 import com.iflytek.cloud.SpeechUtility;
-import com.samton.IBenRobotSDK.data.ActiveBean;
 import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpRequest;
@@ -16,8 +15,7 @@ import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.samton.IBenRobotSDK.data.Constants.APP_ID;
@@ -113,25 +111,19 @@ public final class MainSDK {
         HttpUtil.getInstance().create(HttpRequest.class)
                 .activeRobot(SPUtils.getInstance().getString(ROBOT_APP_KEY))
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(new Consumer<ActiveBean>() {
-                    @Override
-                    public void accept(@NonNull ActiveBean initBean) throws Exception {
-                        // 初始化成功
-                        if (initBean.getRs() != -1) {
-                            // 成功回调
-                            callBack.onSuccess();
-                        } else {
-                            // 失败回调
-                            callBack.onFailed(initBean.getData().getErrorMsg());
-                        }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(initBean -> {
+                    // 初始化成功
+                    if (initBean.getRs() != -1) {
+                        // 成功回调
+                        callBack.onSuccess();
+                    } else {
+                        // 失败回调
+                        callBack.onFailed(initBean.getData().getErrorMsg());
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        // 初始化失败
-                        callBack.onFailed(throwable.getMessage());
-                    }
+                }, throwable -> {
+                    // 初始化失败
+                    callBack.onFailed(throwable.getMessage());
                 });
     }
 

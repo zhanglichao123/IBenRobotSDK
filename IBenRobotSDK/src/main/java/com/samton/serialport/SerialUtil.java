@@ -42,18 +42,6 @@ public class SerialUtil {
      * @param path 串口的物理地址
      */
     public SerialUtil(String path) {
-//        try {
-//            mSerialPort = new SerialPort(new File(path), baudRate, flags);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        if (mSerialPort != null) {
-//            // 设置读、写
-//            mInputStream = mSerialPort.getInputStream();
-//            mOutputStream = mSerialPort.getOutputStream();
-//        } else {
-//            throw new NullPointerException("串口设置有误");
-//        }
         mSerialPort = new SerialPort();
         mSerialPort.open(new File(path), SerialPort.BAUDRATE.B115200, SerialPort.STOPB.B1
                 , SerialPort.DATAB.CS8, SerialPort.PARITY.NONE, SerialPort.FLOWCON.NONE);
@@ -101,7 +89,6 @@ public class SerialUtil {
         byte[] buffer = new byte[MAX];
         try {
             if (mInputStream.available() > 0 && mInputStream.read(buffer) > 0) {
-//                mInputStream.read(buffer);
                 return buffer;
             } else {
                 return null;

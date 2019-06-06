@@ -1,7 +1,6 @@
 package com.samton.IBenRobotSDK.core;
 
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -16,13 +15,11 @@ import com.yuntongxun.ecsdk.ECDevice;
 import com.yuntongxun.ecsdk.ECError;
 import com.yuntongxun.ecsdk.ECInitParams;
 import com.yuntongxun.ecsdk.ECMessage;
-import com.yuntongxun.ecsdk.ECVoIPCallManager;
 import com.yuntongxun.ecsdk.OnChatReceiveListener;
-import com.yuntongxun.ecsdk.VideoRatio;
-import com.yuntongxun.ecsdk.VoipMediaChangedInfo;
 import com.yuntongxun.ecsdk.im.ECMessageNotify;
 import com.yuntongxun.ecsdk.im.ECTextMessageBody;
 import com.yuntongxun.ecsdk.im.group.ECGroupNoticeMessage;
+
 import java.util.List;
 
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
@@ -40,10 +37,7 @@ import static com.samton.IBenRobotSDK.data.Constants.YTX_APP_TOKEN;
  * </pre>
  */
 
-final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatReceiveListener{
-    //    /**
-//     * 单例
-//     */
+final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatReceiveListener {
     private static IBenIMHelper instance = null;
     /**
      * 登录参数
@@ -110,12 +104,12 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
     public void init(int tag, final Context mContext, final IBenMsgCallBack mCallBack) {
         mTag = tag;
         this.mCallBack = mCallBack;
-       // if (!isInit) {
+        // if (!isInit) {
         if (!ECDevice.isInitialized()) {
             ECDevice.initial(mContext.getApplicationContext(), new ECDevice.InitListener() {
                 @Override
                 public void onError(Exception e) {
-                    LogUtils.e("容联初始化失败---"+e.getMessage());
+                    LogUtils.e("容联初始化失败---" + e.getMessage());
                 }
 
                 @Override
@@ -129,36 +123,6 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
             });
         }
     }
-
-    /**
-     * 发送消息到IM
-     *
-     * @param receiver 消息接受者
-     * @param sendMsg  要发送的信息
-     */
-/*    void sendTxtMsg(String receiver, String sendMsg) {
-        // 组建一个待发送的ECMessage
-        ECMessage ecMessage = ECMessage.createECMessage(ECMessage.Type.TXT);
-        // 设置消息接受者
-        ecMessage.setTo(receiver);
-        // 创建一个文本消息体，并添加到消息对象中
-        ECTextMessageBody msgBody = new ECTextMessageBody(sendMsg);
-        // 将消息体存放到ECMessage中
-        ecMessage.setBody(msgBody);
-        // 调用SDK发送接口发送消息到服务器
-        ECChatManager ecChatManager = ECDevice.getECChatManager();
-        ecChatManager.sendMessage(ecMessage, new ECChatManager.OnSendMessageListener() {
-            @Override
-            public void onSendMessageComplete(ECError ecError, ECMessage ecMessage) {
-
-            }
-
-            @Override
-            public void onProgress(String s, int i, int i1) {
-
-            }
-        });
-    }*/
 
     /**
      * 发送消息到IM
@@ -266,8 +230,8 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         mInitParams = ECInitParams.createParams();
         mInitParams.reset();
         // 用户ID
-         mInitParams.setUserid(SPUtils.getInstance().getString(ROBOT_APP_KEY));
-       // mInitParams.setUserid("17600399273222");
+        mInitParams.setUserid(SPUtils.getInstance().getString(ROBOT_APP_KEY));
+        // mInitParams.setUserid("17600399273222");
         mInitParams.setAppKey(YTX_APP_ID);
         mInitParams.setToken(YTX_APP_TOKEN);
         mInitParams.setAuthType(ECInitParams.LoginAuthType.NORMAL_AUTH);

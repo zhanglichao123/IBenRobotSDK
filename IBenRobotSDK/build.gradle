@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "4.0"
 
@@ -22,6 +22,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //支持java8
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 repositories {
@@ -31,34 +36,36 @@ repositories {
 }
 dependencies {
     // 导入jar包
-    provided fileTree(include: ['*.jar'], dir: 'libs')
+    compileOnly fileTree(include: ['*.jar'], dir: 'libs')
     // 必要支持
-    provided 'com.android.support:appcompat-v7:25.3.1'
-    provided 'com.android.support:support-v4:25.3.1'
-    provided 'com.android.support:design:25.3.1'
+    compileOnly 'com.android.support:appcompat-v7:26.1.0'
+    compileOnly 'com.android.support:support-v4:26.1.0'
+    compileOnly 'com.android.support:design:26.1.0'
     // Face++
-    provided(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
-    provided(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
+    compileOnly(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
+    compileOnly(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
     // MYNTEYE
-    provided(name: 'mynteye_d_android_sdk-release_1.2.4.5_20190426105744', ext: 'aar')
+    compileOnly(name: 'mynteye_d_android_sdk-release_1.2.4.5_20190426105744', ext: 'aar')
     // RxJava
-    provided 'io.reactivex.rxjava2:rxjava:2.1.0'
-    provided 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compileOnly 'io.reactivex.rxjava2:rxjava:2.1.0'
+    compileOnly 'io.reactivex.rxjava2:rxandroid:2.0.1'
     // Glide
-    provided 'com.github.bumptech.glide:glide:3.7.0'
+    compileOnly 'com.github.bumptech.glide:glide:3.7.0'
     // Retrofit
-    provided 'com.squareup.retrofit2:retrofit:2.3.0'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.3.0'
     // Retrofit通过GSON将结果转换为Bean对象
-    provided 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compileOnly 'com.squareup.retrofit2:converter-gson:2.3.0'
     // 让Retrofit支持RxJava
-    provided 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    compileOnly 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
 }
+
+//打包指令:./gradlew releaseJar
 
 task releaseJar(type: Copy) {
     //SDK-jar名称
     String JAR_NAME = 'IBenRobotSDK_' + android.defaultConfig.versionName + '.jar'
     //设置拷贝的文件目录
-    from('build/intermediates/bundles/debug/classes.jar')
+    from('build/intermediates/packaged-classes/debug/classes.jar')
     //jar包存放的文件目录
     into('build/outputs/')
     //include ,exclude参数来设置过滤，也可以直接写在from()的文件路径里
@@ -66,6 +73,7 @@ task releaseJar(type: Copy) {
     //重命名
     rename('classes.jar', JAR_NAME)
 }
+
 android.libraryVariants.all {
     it.generateBuildConfig.enabled = false
 }
