@@ -233,7 +233,7 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         if (ecConnectState == ECDevice.ECConnectState.CONNECT_FAILED) {
             Log.e("登入容联账号", "失败重新登入");
             // 登录
-            login();
+//            login();
         } else if (ecConnectState == ECDevice.ECConnectState.CONNECT_SUCCESS) {
             // 初始化人工消息回调函数
             initIMCallBack();//接收消息的后调
