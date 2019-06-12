@@ -54,7 +54,6 @@ public final class InitBean {
     private int carouselGroupId;
     private int workModeid;
     private CleverPreachBean cleverPreach;
-    private int preachTimbreId;//宣讲音色
     private String accout;//容联云账号
 
     public String getAccout() {
@@ -63,14 +62,6 @@ public final class InitBean {
 
     public void setAccout(String accout) {
         this.accout = accout;
-    }
-
-    public int getPreachTimbreId() {
-        return preachTimbreId;
-    }
-
-    public void setPreachTimbreId(int preachTimbreId) {
-        this.preachTimbreId = preachTimbreId;
     }
 
     public int getWorkModeid() {
@@ -1782,6 +1773,7 @@ public final class InitBean {
 
         private String robName;
         private int timbreId;
+        private int preachTimbreId;
         private int wakeFlag;
         private String moveMsg;
         private String thirtyDownMsg;
@@ -1813,6 +1805,14 @@ public final class InitBean {
 
         public void setTimbreId(int timbreId) {
             this.timbreId = timbreId;
+        }
+
+        public int getPreachTimbreId() {
+            return preachTimbreId;
+        }
+
+        public void setPreachTimbreId(int preachTimbreId) {
+            this.preachTimbreId = preachTimbreId;
         }
 
         public int getWakeFlag() {
