@@ -6,7 +6,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
-import android.hardware.Camera;
 
 import java.io.ByteArrayOutputStream;
 
@@ -21,22 +20,24 @@ public class CameraToBitmap {
     public CameraToBitmap() {
     }
 
+    public static Bitmap decodeToBitMap(byte[] date) {
+        return decodeToBitMap(date, 480, 640);
+    }
+
     /**
      * 将相机的ByteArray解析为Bitmap
      *
-     * @param data    ByteArray
-     * @param _camera Camera对象
+     * @param data ByteArray
      * @return 解析成功的Bitmap
      */
-    public static Bitmap decodeToBitMap(byte[] data, Camera _camera) {
-        if (data == null || _camera == null) {
+    public static Bitmap decodeToBitMap(byte[] data, int width, int height) {
+        if (data == null) {
             return null;
         }
-        Camera.Size size = _camera.getParameters().getPreviewSize();
         try {
-            YuvImage image = new YuvImage(data, ImageFormat.NV21, size.width, size.height, null);
+            YuvImage image = new YuvImage(data, ImageFormat.NV21, width, height, null);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            image.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, stream);
+            image.compressToJpeg(new Rect(0, 0, width, height), 80, stream);
             Bitmap bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size());
             stream.close();
             return bmp;
@@ -49,7 +50,7 @@ public class CameraToBitmap {
     /**
      * 旋转图片
      *
-     * @param bmp    需要旋转的图片
+     * @param bmp 需要旋转的图片
      * @return 旋转过后的图片
      */
     public static Bitmap rotateMyBitmap(Bitmap bmp) {
