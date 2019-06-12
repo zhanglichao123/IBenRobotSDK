@@ -21,7 +21,7 @@ public class CameraToBitmap {
     }
 
     public static Bitmap decodeToBitMap(byte[] date) {
-        return decodeToBitMap(date, 480, 640);
+        return decodeToBitMap(date, 640, 480);
     }
 
     /**
