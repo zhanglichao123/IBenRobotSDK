@@ -252,6 +252,7 @@ public final class InitBean {
          */
 
         private String fristMsg;
+        private String repeatMsg;
         private String contentReply;
         private List<String> anthomaniacPwd;
         private List<String> happyPwd;
@@ -259,6 +260,14 @@ public final class InitBean {
         private List<String> levelPwd;
         private List<String> movePwd;
         private List<String> rightHandPwd;
+
+        public String getRepeatMsg() {
+            return repeatMsg;
+        }
+
+        public void setRepeatMsg(String repeatMsg) {
+            this.repeatMsg = repeatMsg;
+        }
 
         public String getLeftHeadImg() {
             return leftHeadImg;
