@@ -1,9 +1,10 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.SystemClock;
-import android.util.Log;
+import android.text.TextUtils;
 
 import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
@@ -15,8 +16,6 @@ import com.slamtec.slamware.action.ActionStatus;
 import com.slamtec.slamware.action.IAction;
 import com.slamtec.slamware.action.IMoveAction;
 import com.slamtec.slamware.action.MoveDirection;
-import com.slamtec.slamware.geometry.PointF;
-import com.slamtec.slamware.geometry.Size;
 import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.DockingStatus;
 import com.slamtec.slamware.robot.GridMap;
@@ -33,19 +32,11 @@ import com.slamtec.slamware.sdp.CompositeMapHelper;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -63,62 +54,23 @@ public final class IBenMoveSDK {
     /**
      * 单例
      */
-    private static IBenMoveSDK instance = null;
+    private static IBenMoveSDK mInstance = null;
     /**
      * 思岚SDK平台对象
      */
     private SlamwareCorePlatform mRobotPlatform;
     /**
-     * 定位计时器
+     * 点位的Disposable
      */
-    private Timer mLocationTimer;
-    private TimerTask mLocationTask;
+    private Disposable mLocationSubscribe;
     /**
-     * 移动计时器
+     * 重连的Disposable
      */
-    private Timer mMoveTimer;
-    private TimerTask mMoveTask;
+    private Disposable mConnectSubscribe;
     /**
-     * 重连计时器
+     * 移动的Disposable
      */
-    private Timer mReconnectTimer;
-    private TimerTask mReconnectTask;
-    /**
-     * 定位动作
-     */
-    private IAction mLocationAction;
-    /**
-     * 是否已经连接机器人
-     */
-    private boolean isConnected = false;
-    /**
-     * 是否正在连接机器人
-     */
-    private volatile boolean isConnecting = false;
-    /**
-     * 电池电量信息
-     */
-    private String mBatteryInfo = null;
-    /**
-     * 机器人状态回调接口
-     */
-    private ConnectCallBack mCallBack;
-    /**
-     * 记录IP
-     */
-    private String mIp = "";
-    /**
-     * 记录端口
-     */
-    private int mPort = 0;
-    /**
-     * 动作接口
-     */
-    private IMoveAction moveAction;
-    /**
-     * 回到充电桩监听轮询
-     */
-    private Timer toDockTimer = null;
+    private Disposable mMoveSubscribe;
 
     /**
      * 私有构造
@@ -132,61 +84,14 @@ public final class IBenMoveSDK {
      * @return 机器人移动SDK单例
      */
     public static IBenMoveSDK getInstance() {
-        if (instance == null) {
+        if (mInstance == null) {
             synchronized (IBenMoveSDK.class) {
-                if (instance == null) {
-                    instance = new IBenMoveSDK();
+                if (mInstance == null) {
+                    mInstance = new IBenMoveSDK();
                 }
             }
         }
-        return instance;
-    }
-
-    /**
-     * 回充电桩
-     */
-    public void goHome(MoveCallBack callBack, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        if (mRobotPlatform != null) {
-            // 停止当前所有动作
-            cancelAllActions();
-            // 沉睡0.3秒
-            SystemClock.sleep(300);
-            try {
-                // 让机器人回充电桩
-                mLocationAction = mRobotPlatform.goHome();
-                // 创建回桩状态定时器
-                startLocationTimer(-99, callBack, btnState);
-            } catch (Throwable throwable) {
-                onRequestError();
-            }
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 请求失败
-     */
-    private void onRequestError() {
-        if (isConnected) {
-            cancelAllActions();
-        }
-        if (null != mCallBack) {
-            mCallBack.onConnectFailed();
-        }
-    }
-
-    /**
-     * 获取机器人连接状态
-     *
-     * @return 机器人连接状态
-     */
-    public boolean isConnected() {
-        return isConnected;
+        return mInstance;
     }
 
     /**
@@ -196,84 +101,75 @@ public final class IBenMoveSDK {
      * @param port     端口
      * @param callBack 连接回调
      */
-    public void connectRobot(final String ip, final int port, @NonNull final ConnectCallBack callBack) {
-        isConnecting = true;
-        mCallBack = callBack;
-        mIp = ip;
-        mPort = port;
+    @SuppressLint("CheckResult")
+    public void connectRobot(String ip, int port, ConnectCallBack callBack) {
+        if (callBack == null) return;
         // 判断ip和端口是否合法
-        if (mIp == null || mIp.isEmpty() || mPort <= 0 || mPort > 65535) {
-            mCallBack.onConnectFailed();
-        } else {// 合法的话连接机器人
+        if (TextUtils.isEmpty(ip) || port <= 0 || port > 65535) {
+            callBack.onConnectFailed();
+        } else {
             Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    // 设置机器人连接监听
-                    mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
-                    // 获取机器人电量
-                    LogUtils.e("当前机器人电量>>>" + mRobotPlatform.getBatteryPercentage());
-                    // 发射命令-告知观察者连接成功
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
+                // 设置机器人连接监听
+                mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
+                // 获取机器人电量
+                LogUtils.e("当前机器人电量>>>" + mRobotPlatform.getBatteryPercentage());
+                e.onNext(true);
             })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(aBoolean -> {
-                        isConnecting = false;
-                        if (aBoolean) {
-                            // 如果存在重连的话取消
-                            cancelReconnectTimer();
-                            // 标识位重置
-                            isConnected = true;
-                            // 回调机器人连接成功
-                            mCallBack.onConnectSuccess();
-                        } else {
-                            isConnected = false;
-                            mCallBack.onConnectFailed();
-                            // 重连
-                            startReconnectTimer();
-                        }
+                        // 回调机器人连接成功
+                        callBack.onConnectSuccess();
+                        // 取消重连计时器
+                        cancelReconnectTimer();
                     }, throwable -> {
-                        isConnecting = false;
-                        onRequestError();
+                        callBack.onConnectFailed();
+                        // 这里进行三秒重连
+                        startReconnectTimer(ip, port, callBack);
                     });
         }
     }
 
     /**
-     * 重连机器人
+     * 开启重连计时器
      */
-    public void reconnect() {
-        if (!isConnecting) {
-            startReconnectTimer();
+    private void startReconnectTimer(String ip, int port, ConnectCallBack callBack) {
+        // 取消重连计时器
+        cancelReconnectTimer();
+        //开始三秒后进行重连
+        mConnectSubscribe = Observable.timer(3000, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> connectRobot(ip, port, callBack));
+    }
+
+    /**
+     * 取消重连计时器
+     */
+    private void cancelReconnectTimer() {
+        if (mConnectSubscribe != null && !mConnectSubscribe.isDisposed()) {
+            mConnectSubscribe.dispose();
+            mConnectSubscribe = null;
         }
     }
 
     /**
      * 断开机器人连接
      */
-    public void disconnectRobot() {
+    @SuppressLint("CheckResult")
+    public void disConnectRobot() {
         // 判断机器人控制SDK是否为空
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.disconnect();
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
+        if (mRobotPlatform == null) return;
+        // 取消重连计时器
+        cancelReconnectTimer();
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            mRobotPlatform.disconnect();
+            e.onNext(true);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> LogUtils.d("disconnectRobot"),
+                        Throwable::printStackTrace);
     }
 
     /**
@@ -282,15 +178,11 @@ public final class IBenMoveSDK {
      * @param isUpdate 是或者否
      */
     public void setMapUpdate(boolean isUpdate) {
-        if (mRobotPlatform != null) {
-            try {
-                mRobotPlatform.setMapUpdate(isUpdate);
-            } catch (Throwable throwable) {
-                onRequestError();
-            }
-
-        } else {
-            onRequestError();
+        if (mRobotPlatform == null) return;
+        try {
+            mRobotPlatform.setMapUpdate(isUpdate);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -298,14 +190,11 @@ public final class IBenMoveSDK {
      * 清除地图
      */
     public void removeMap() {
-        if (mRobotPlatform != null) {
-            try {
-                mRobotPlatform.clearMap();
-            } catch (Throwable throwable) {
-                onRequestError();
-            }
-        } else {
-            onRequestError();
+        if (mRobotPlatform == null) return;
+        try {
+            mRobotPlatform.clearMap();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -314,258 +203,21 @@ public final class IBenMoveSDK {
      *
      * @param callBack 电池信息回调
      */
-    public void getBatteryInfo(@NonNull final GetBatteryCallBack callBack) {
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    int percent = mRobotPlatform.getBatteryPercentage();
-                    boolean isCharging = mRobotPlatform.getBatteryIsCharging();
-                    jsonObject.put("batteryPercent", percent);
-                    jsonObject.put("isCharging", isCharging);
-                    mBatteryInfo = jsonObject.toString();
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                            callBack.onFailed();
-                        } else {
-                            callBack.onSuccess(mBatteryInfo);
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-            callBack.onFailed();
-            mBatteryInfo = "";
-        }
-    }
-
-    /**
-     * 根据方向进行移动
-     *
-     * @param direction 方向
-     */
-    public void moveByDirection(MoveDirection direction, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        final MoveDirection moveDirection = direction;
-        if (moveDirection != null && mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.moveBy(moveDirection);
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
-
-    }
-
-    /**
-     * 根据方向进行移动和间隔持续移动
-     *
-     * @param direction 方向
-     * @param period    间隔
-     */
-    public void moveByDirection(MoveDirection direction, long period, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        if (direction != null && mRobotPlatform != null) {
-            // 开启运动计时器，定时移动
-            startMoveTimer(direction, period);
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 根据方向进行移动和距离移动
-     */
-    public void moveToLication(Location location, MoveCallBack callBack, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        if (location != null && mRobotPlatform != null) {
-            // 开启运动
-            try {
-                mRobotPlatform.moveTo(location);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 旋转机器人
-     *
-     * @param angle 需要旋转的角度
-     */
-    public void rotate(double angle, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        float tempAngle = (float) (angle / 180 * Math.PI);
-        final Rotation rotation = new Rotation(tempAngle);
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.rotate(rotation);
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 旋转机器人
-     *
-     * @param rotation 角度
-     */
-    public void rotate(final Rotation rotation, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.rotate(rotation);
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 根据偏移量转动角度
-     *
-     * @param yaw 偏移量
-     */
-    public void rotate(final float yaw, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        cancelAllActions();
-        final Rotation rotation = new Rotation(yaw);
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.rotate(rotation);
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
-    }
-
-    public IMoveAction rotate2(float yaw, StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return null;
-        }
-        Rotation rotation = new Rotation(yaw);
-        IMoveAction action = null;
-        if (mRobotPlatform != null) {
-            try {
-                action = mRobotPlatform.rotate(rotation);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return action;
-    }
-
-    /**
-     * 停止所有动作
-     */
-    public void cancelAllActions() {
-        // 取消所有的计时任务
-        cancelMoveTimer();
-        cancelLocationTimer();
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                IMoveAction moveAction = mRobotPlatform.getCurrentAction();
-                try {
-                    if (moveAction != null) {
-                        moveAction.cancel();
-                    }
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
+    @SuppressLint("CheckResult")
+    public void getBatteryInfo(GetBatteryCallBack callBack) {
+        if (mRobotPlatform == null || callBack == null) return;
+        Observable.create((ObservableOnSubscribe<String>) e -> {
+            JSONObject jsonObject = new JSONObject();
+            int percent = mRobotPlatform.getBatteryPercentage();
+            boolean isCharging = mRobotPlatform.getBatteryIsCharging();
+            jsonObject.put("batteryPercent", percent);
+            jsonObject.put("isCharging", isCharging);
+            e.onNext(jsonObject.toString());
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(callBack::onSuccess,
+                        throwable -> callBack.onFailed());
     }
 
     /**
@@ -574,15 +226,10 @@ public final class IBenMoveSDK {
      * @return 当前点坐标
      */
     public Location getLocation() {
-        if (mRobotPlatform != null) {
-            try {
-                return mRobotPlatform.getLocation();
-            } catch (Throwable throwable) {
-                onRequestError();
-                return null;
-            }
-        } else {
-            onRequestError();
+        if (mRobotPlatform == null) return null;
+        try {
+            return mRobotPlatform.getLocation();
+        } catch (Exception e) {
             return null;
         }
     }
@@ -593,15 +240,10 @@ public final class IBenMoveSDK {
      * @return 当前点姿态
      */
     public Pose getPose() {
-        if (mRobotPlatform != null) {
-            try {
-                return mRobotPlatform.getPose();
-            } catch (Throwable throwable) {
-                onRequestError();
-                return null;
-            }
-        } else {
-            onRequestError();
+        if (mRobotPlatform == null) return null;
+        try {
+            return mRobotPlatform.getPose();
+        } catch (Exception e) {
             return null;
         }
     }
@@ -611,201 +253,197 @@ public final class IBenMoveSDK {
      *
      * @param pose 当前姿态
      */
-    private void setPose(final Pose pose, StopBtnState btnState) {
+    @SuppressLint("CheckResult")
+    private void setPose(Pose pose, StopBtnState btnState) {
+        if (mRobotPlatform == null || pose == null || btnState == null) return;
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
         }
-        if (pose != null) {
-            if (mRobotPlatform != null) {
-                Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                    try {
-                        mRobotPlatform.setPose(pose);
-                        e.onNext(true);
-                    } catch (Throwable throwable) {
-                        e.onNext(false);
-                    }
-                })
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(aBoolean -> {
-                            if (!aBoolean) {
-                                onRequestError();
-                            }
-                        }, throwable -> onRequestError());
-            } else {
-                onRequestError();
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            mRobotPlatform.setPose(pose);
+            e.onNext(true);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                }, Throwable::printStackTrace);
+    }
+
+    /**
+     * 根据方向进行移动和间隔持续移动(默认300毫秒间隔)
+     *
+     * @param direction 方向
+     */
+    public void moveByDirection(MoveDirection direction, StopBtnState btnState) {
+        moveByDirection(direction, 300, btnState);
+    }
+
+    /**
+     * 根据方向进行移动和间隔持续移动
+     *
+     * @param direction 方向
+     * @param period    间隔
+     */
+    public void moveByDirection(MoveDirection direction, long period, StopBtnState btnState) {
+        if (mRobotPlatform == null || direction == null || btnState == null) return;
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
+        cancelAllActions();
+        // 开启运动计时器，定时移动
+        startMoveTimer(direction, period);
+    }
+
+    /**
+     * 开启移动定时器
+     *
+     * @param direction 方向
+     * @param period    周期
+     */
+    private void startMoveTimer(MoveDirection direction, Long period) {
+        // 首先停止之前的移动定时器
+        cancelMoveTimer();
+        mMoveSubscribe = Observable.interval(0, period, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> mRobotPlatform.moveBy(direction));
+    }
+
+    /**
+     * 取消移动计时器
+     */
+    private void cancelMoveTimer() {
+        if (mMoveSubscribe != null && !mMoveSubscribe.isDisposed()) {
+            mMoveSubscribe.dispose();
+            mMoveSubscribe = null;
+        }
+    }
+
+    /**
+     * 旋转机器人
+     *
+     * @param angle 需要旋转的角度
+     */
+    @SuppressLint("CheckResult")
+    public void rotate(double angle, StopBtnState btnState) {
+        if (mRobotPlatform == null || btnState == null) return;
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
+        cancelAllActions();
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            float tempAngle = (float) (angle / 180 * Math.PI);
+            Rotation rotation = new Rotation(tempAngle);
+            mRobotPlatform.rotate(rotation);
+            e.onNext(true);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                }, Throwable::printStackTrace);
+    }
+
+    /**
+     * 回充电桩
+     */
+    @SuppressLint("CheckResult")
+    public void goHome(MoveCallBack callBack, StopBtnState btnState) {
+        if (mRobotPlatform == null || callBack == null || btnState == null) return;
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
+        cancelAllActions();
+        Observable.create((ObservableOnSubscribe<IAction>) e -> {
+            IAction action = mRobotPlatform.goHome();
+            e.onNext(action);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(iAction -> startLocationTimer(iAction, -99, callBack, btnState),
+                        Throwable::printStackTrace)
+        ;
+    }
+
+    /**
+     * 行走到指定点
+     *
+     * @param location 定点对象
+     * @param yaw      角度
+     * @param callBack 回调
+     */
+    @SuppressLint("CheckResult")
+    public void goLocation(Location location, float yaw, MoveCallBack callBack, StopBtnState btnState) {
+        if (mRobotPlatform == null || location == null || callBack == null || btnState == null)
+            return;
+        if (hasSystemEmergencyStop()) {
+            btnState.isOnEmergencyStop(true);
+            return;
+        }
+        cancelAllActions();
+        // 然后执行行走至定点操作
+        Observable.create((ObservableOnSubscribe<IAction>) e -> {
+            // 脱桩操作
+            if (isHome()) {
+                moveByDirection(MoveDirection.FORWARD, 300, btnState);
+                SystemClock.sleep(1000);
+                cancelAllActions();
             }
-        }
+            MoveOption option = new MoveOption();
+            option.setSpeedRatio(0.4);
+            option.setWithYaw(false);
+            option.setPrecise(true);
+            option.setMilestone(true);
+            // 执行行走指令
+            IAction action = mRobotPlatform.moveTo(location, option, yaw);
+            e.onNext(action);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(action -> {
+                    // 创建定点回调计时器
+                    startLocationTimer(action, yaw, callBack, btnState);
+                }, Throwable::printStackTrace);
     }
 
     /**
-     * 行走到指定点
-     *
-     * @param location 定点对象
-     * @param yaw      角度
-     * @param callBack 回调
+     * 停止所有动作
      */
-    public void old_go2Location(final Location location, final float yaw,
-                                final MoveCallBack callBack, final StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        if (mRobotPlatform != null) {
-            // 首先停止所有动作
-            cancelAllActions();
-            // 然后执行行走至定点操作
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    if (location != null) {
-                        // 脱桩操作
-                        if (isHome()) {
-                            moveByDirection(MoveDirection.FORWARD, 300, btnState);
-                            SystemClock.sleep(1000);
-                            cancelAllActions();
-                            SystemClock.sleep(500);
-                        }
-                        MoveOption option = new MoveOption();
-                        option.setSpeedRatio(0.4);
-                        option.setWithYaw(true);
-                        // 执行行走指令
-                        mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
-                        e.onNext(true);
-                    }
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Boolean>() {
-                        @Override
-                        public void onSubscribe(@NonNull Disposable disposable) {
-
-                        }
-
-                        @Override
-                        public void onNext(@NonNull Boolean aBoolean) {
-                            if (!aBoolean) {
-                                onRequestError();
-                            } else {
-                                // 创建定点回调计时器
-                                startLocationTimer(yaw, callBack, btnState);
-                            }
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable throwable) {
-                            onRequestError();
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 行走到指定点
-     *
-     * @param location 定点对象
-     * @param yaw      角度
-     * @param callBack 回调
-     */
-    public void go2Location(final Location location, final float yaw,
-                            final MoveCallBack callBack, final StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
-        if (mRobotPlatform != null) {
-            // 首先停止所有动作
-            cancelAllActions();
-            // 然后执行行走至定点操作
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    if (location != null) {
-                        // 脱桩操作
-                        if (isHome()) {
-                            moveByDirection(MoveDirection.FORWARD, 300, btnState);
-                            SystemClock.sleep(1000);
-                            cancelAllActions();
-                            SystemClock.sleep(500);
-                        }
-                        MoveOption option = new MoveOption();
-                        option.setSpeedRatio(0.4);
-                        option.setWithYaw(false);
-                        option.setPrecise(true);
-                        option.setMilestone(true);
-                        // 执行行走指令
-                        mLocationAction = mRobotPlatform.moveTo(location, option, yaw);
-                        e.onNext(true);
-                    }
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Boolean>() {
-                        @Override
-                        public void onSubscribe(@NonNull Disposable disposable) {
-
-                        }
-
-                        @Override
-                        public void onNext(@NonNull Boolean aBoolean) {
-                            if (!aBoolean) {
-                                onRequestError();
-                            } else {
-                                // 创建定点回调计时器
-                                startLocationTimer(yaw, callBack, btnState);
-                            }
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable throwable) {
-                            onRequestError();
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        } else {
-            onRequestError();
-        }
+    @SuppressLint("CheckResult")
+    public void cancelAllActions() {
+        if (mRobotPlatform == null) return;
+        // 取消移动计时器
+        cancelMoveTimer();
+        // 取消去定点计时器
+        cancelLocationTimer();
+        // 调用底盘取消当前动作
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            mRobotPlatform.getCurrentAction().cancel();
+            e.onNext(true);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                }, Throwable::printStackTrace);
     }
 
     /**
      * 清除所有虚拟墙
      */
+    @SuppressLint("CheckResult")
     public void clearAllWalls() {
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    mRobotPlatform.clearWalls();
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
+        if (mRobotPlatform == null) return;
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            mRobotPlatform.clearWalls();
+            e.onNext(true);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                }, Throwable::printStackTrace);
     }
 
     /**
@@ -814,21 +452,20 @@ public final class IBenMoveSDK {
      * @return 是否在无线充电状态
      */
     public boolean isHome() {
-        boolean dockingStatusValue = false;
+        boolean isHome = false;
         try {
-            PowerStatus status = mRobotPlatform.getPowerStatus();
-            DockingStatus dockingStatus = status.getDockingStatus();
-            dockingStatusValue = dockingStatus == DockingStatus.OnDock;
+            DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
+            isHome = dockingStatus == DockingStatus.OnDock;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return dockingStatusValue;
+        return isHome;
     }
 
     /**
      * 查询机器人电池状态
      *
-     * @return 0未在充电1线充2桩充
+     * @return int:0-未在充电,1-线充,2-桩充
      */
     public int getPowerStatus() {
         try {
@@ -849,116 +486,42 @@ public final class IBenMoveSDK {
         return 0;
     }
 
-
-    /**
-     * 保存地图
-     *
-     * @param mapName  要保存地图的名字
-     * @param callBack 回调函数
-     */
-    public void saveMap(final String mapName, final MapCallBack callBack) {
-        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            try {
-                // 获取底盘的Map对象
-                Map map = getMap();
-                if (map != null) {
-                    // 判断目录是否存在不存在的话创建
-                    FileUtils.createOrExistsDir(Constants.MAP_PATH);
-                    // 文件输出流对象
-                    FileOutputStream fos = new FileOutputStream(Constants.MAP_PATH + "/" + mapName);
-                    // 对象输出流(写入)
-                    ObjectOutputStream oos = new ObjectOutputStream(fos);
-                    // 写入Origin对象
-                    oos.writeFloat(map.getOrigin().getX());
-                    oos.writeFloat(map.getOrigin().getY());
-                    // 写入Dimension对象
-                    oos.writeInt(map.getDimension().getWidth());
-                    oos.writeInt(map.getDimension().getHeight());
-                    // 写入Resolution对象
-                    oos.writeFloat(map.getResolution().getX());
-                    oos.writeFloat(map.getResolution().getY());
-                    // 写入时间戳对象
-                    oos.writeLong(map.getTimestamp());
-                    // 写入真实地图对象
-                    oos.writeObject(map.getData());
-                    // oos.write(map.getData());
-                    // 关闭流并且刷新操作
-                    oos.close();
-                    // 生成缩略图
-                    FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
-                    // 写入BMP图像
-                    int width = map.getDimension().getWidth();
-                    int height = map.getDimension().getHeight();
-                    Bitmap bitmap = createImage(map.getData(), width, height);
-                    byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
-                    FileIOUtils.writeFileFromBytesByStream(
-                            FileUtils.getFileByPath(
-                                    Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
-                } else {
-                    e.onNext(false);
-                }
-                e.onNext(true);
-            } catch (Throwable throwable) {
-                e.onNext(false);
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> {
-                    if (aBoolean) {
-                        callBack.onSuccess();
-                    } else {
-                        callBack.onFailed();
-                    }
-                }, throwable -> {
-                    callBack.onFailed();
-                });
-    }
-
     /**
      * 保存地图
      *
      * @param mapName  要保存的地图名字
-     * @param isNewMap 是否为新地图
      * @param callBack 回调函数
      */
-    public void saveMap(final String mapName, boolean isNewMap, final MapCallBack callBack) {
+    @SuppressLint("CheckResult")
+    public void saveMap(String mapName, MapCallBack callBack) {
+        if (mRobotPlatform == null || callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            try {
-                // 生成保存路径
-                String path = Constants.MAP_PATH + "/" + mapName;
-                // 获取完全版地图并保存到指定路径中
-                CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
-                CompositeMapHelper mapHelper = new CompositeMapHelper();
-                mapHelper.saveFile(path, compositeMap);
-                // 生成缩略图
-                FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
-                // 写入BMP图像
-                for (MapLayer layer : compositeMap.getMaps()) {
-                    if (layer instanceof GridMap) {
-                        GridMap map = ((GridMap) layer);
-                        int width = map.getDimension().getWidth();
-                        int height = map.getDimension().getHeight();
-                        Bitmap bitmap = createImage(map.getMapData(), width, height);
-                        byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
-                        FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
-                                Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
-                    }
+            // 生成保存路径
+            String path = Constants.MAP_PATH + "/" + mapName;
+            // 获取完全版地图并保存到指定路径中
+            CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
+            CompositeMapHelper mapHelper = new CompositeMapHelper();
+            mapHelper.saveFile(path, compositeMap);
+            // 生成缩略图
+            FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+            // 写入BMP图像
+            for (MapLayer layer : compositeMap.getMaps()) {
+                if (layer instanceof GridMap) {
+                    GridMap map = ((GridMap) layer);
+                    int width = map.getDimension().getWidth();
+                    int height = map.getDimension().getHeight();
+                    Bitmap bitmap = createImage(map.getMapData(), width, height);
+                    byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
+                    FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
+                            Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
                 }
-                e.onNext(true);
-            } catch (Throwable throwable) {
-                e.onNext(false);
             }
+            e.onNext(true);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> {
-                    if (aBoolean) {
-                        callBack.onSuccess();
-                    } else {
-                        callBack.onFailed();
-                    }
-                }, throwable -> callBack.onFailed());
+                .subscribe(aBoolean -> callBack.onSuccess(),
+                        throwable -> callBack.onFailed());
     }
 
     /**
@@ -982,76 +545,19 @@ public final class IBenMoveSDK {
     /**
      * 根据地图名字加载地图
      *
-     * @param mapNamePath 地图文件路径
-     * @param callBack    回调函数
-     */
-    public void loadMap(final String mapNamePath, final Pose mapPose, final MapCallBack callBack) {
-        loadMap(mapNamePath, false, mapPose, callBack);
-    }
-
-    /**
-     * 根据地图名字加载地图
-     *
      * @param mapNamePath 保存的地图文件路径
-     * @param isNewMap    是否为新格式的地图
      * @param currentPose 当前位置的姿态信息
      * @param callBack    回调函数
      */
-    public void loadMap(final String mapNamePath, final boolean isNewMap, final Pose currentPose, final MapCallBack callBack) {
+    @SuppressLint("CheckResult")
+    public void loadMap(String mapNamePath, Pose currentPose, MapCallBack callBack) {
+        if (mRobotPlatform == null || callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            try {
-                // 新地图加载逻辑
-                if (isNewMap) {
-                    // 地图加载帮助对象
-                    CompositeMapHelper helper = new CompositeMapHelper();
-                    CompositeMap map = helper.loadFile(mapNamePath);
-                    // 地图不为空的话加载地图
-                    if (mRobotPlatform != null && map != null) {
-                        mRobotPlatform.setCompositeMap(map, currentPose == null ? new Pose() : currentPose);
-                        e.onNext(true);
-                    } else {
-                        e.onNext(false);
-                    }
-                }
-                // 旧地图加载逻辑
-                else {
-                    // 获取地图文件
-                    File file = new File(mapNamePath);
-                    // 地图文件不存在直接返回
-                    if (!FileUtils.isFileExists(file)) {
-                        e.onNext(false);
-                    }
-                    // 地图文件存在才继续做事情
-                    else {
-                        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file.getAbsolutePath()));
-                        // 生成Origin对象
-                        float ox = ois.readFloat();
-                        float oy = ois.readFloat();
-                        PointF origin = new PointF(ox, oy);
-                        // 生成Dimension对象
-                        int width = ois.readInt();
-                        int height = ois.readInt();
-                        Size size = new Size(width, height);
-                        // 生成Resolution对象
-                        float rx = ois.readFloat();
-                        float ry = ois.readFloat();
-                        PointF resolution = new PointF(rx, ry);
-                        // 赋值时间戳
-                        long timeStamp = ois.readLong();
-                        // 生成二进制数组
-                        byte[] data = (byte[]) ois.readObject();
-                        // 生成地图对象
-                        Map map = new Map(origin, size, resolution, timeStamp, data);
-                        // 设置地图
-                        setMap(map);
-                        // 关闭流
-                        ois.close();
-                        e.onNext(true);
-                    }
-                }
-            } catch (Throwable throwable) {
-                e.onNext(false);
-            }
+            // 地图加载帮助对象
+            CompositeMapHelper helper = new CompositeMapHelper();
+            CompositeMap map = helper.loadFile(mapNamePath);
+            // 地图不为空的话加载地图
+            mRobotPlatform.setCompositeMap(map, currentPose == null ? new Pose() : currentPose);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -1066,38 +572,16 @@ public final class IBenMoveSDK {
      * @return 返回地图
      */
     private Map getMap() {
-        if (mRobotPlatform != null) {
-            // 地图类型为8位位图
-            MapType mapType = MapType.BITMAP_8BIT;
-            // 地图种类为扫描建图
-            MapKind mapKind = MapKind.EXPLORE_MAP;
-            try {
-                return mRobotPlatform.getMap(mapType, mapKind, mRobotPlatform.getKnownArea(mapType));
-            } catch (Throwable throwable) {
-                onRequestError();
-                return null;
-            }
-
-        } else {
-            onRequestError();
+        if (mRobotPlatform == null) return null;
+        // 地图类型为8位位图
+        MapType mapType = MapType.BITMAP_8BIT;
+        // 地图种类为扫描建图
+        MapKind mapKind = MapKind.EXPLORE_MAP;
+        try {
+            return mRobotPlatform.getMap(mapType, mapKind, mRobotPlatform.getKnownArea(mapType));
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
-        }
-    }
-
-    /**
-     * 更新地图
-     *
-     * @param map 需要设置的地图
-     */
-    private void setMap(Map map) {
-        if (mRobotPlatform != null) {
-            try {
-                mRobotPlatform.setMap(map);
-            } catch (Throwable throwable) {
-                onRequestError();
-            }
-        } else {
-            onRequestError();
         }
     }
 
@@ -1106,42 +590,22 @@ public final class IBenMoveSDK {
      *
      * @param callBack 回调
      */
-    private void startLocationTimer(final float yaw,
-                                    final MoveCallBack callBack,
-                                    final StopBtnState btnState) {
-        if (hasSystemEmergencyStop()) {
-            btnState.isOnEmergencyStop(true);
-            return;
-        }
+    private void startLocationTimer(IAction action, float yaw, MoveCallBack callBack, StopBtnState btnState) {
         // 首先停止之前的定时任务
         cancelLocationTimer();
-        // 非空判断
-        if (mLocationTimer == null) {
-            mLocationTimer = new Timer();
-        }
-        if (mLocationTask == null) {
-            mLocationTask = new TimerTask() {
-                @Override
-                public void run() {
-                    checkStatus(yaw, callBack, btnState);
-                }
-            };
-        }
-        // 开始计时器
-        mLocationTimer.schedule(mLocationTask, 0, 100);
+        mLocationSubscribe = Observable.interval(0, 100, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> checkStatus(action, yaw, callBack, btnState));
     }
 
     /**
      * 取消定位计时器
      */
     private void cancelLocationTimer() {
-        if (mLocationTimer != null) {
-            mLocationTimer.cancel();
-            mLocationTimer = null;
-        }
-        if (mLocationTask != null) {
-            mLocationTask.cancel();
-            mLocationTask = null;
+        if (mLocationSubscribe != null && !mLocationSubscribe.isDisposed()) {
+            mLocationSubscribe.dispose();
+            mLocationSubscribe = null;
         }
     }
 
@@ -1150,39 +614,37 @@ public final class IBenMoveSDK {
      *
      * @param callBack 回调
      */
-    private void checkStatus(final float yaw,
-                             final MoveCallBack callBack,
-                             final StopBtnState btnState) {
+    private void checkStatus(IAction action, float yaw, MoveCallBack callBack, StopBtnState btnState) {
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
         }
-        if (mLocationAction != null) {
-            try {
-                ActionStatus currentStatus = mLocationAction.getStatus();
-                if (currentStatus.equals(ActionStatus.FINISHED) || currentStatus.equals(ActionStatus.STOPPED)
-                        || currentStatus.equals(ActionStatus.ERROR)) {
-                    if (yaw == -99) {
-                        // 回调状态值
-                        callBack.onStateChange(currentStatus);
+        if (action == null) {
+            // 发生意外停止监听状态计时器
+            cancelLocationTimer();
+            return;
+        }
+        try {
+            ActionStatus currentStatus = action.getStatus();
+            if (currentStatus.equals(ActionStatus.FINISHED) || currentStatus.equals(ActionStatus.STOPPED)
+                    || currentStatus.equals(ActionStatus.ERROR)) {
+                if (yaw == -99) {
+                    // 回调状态值
+                    callBack.onStateChange(currentStatus);
+                } else {
+                    if (currentStatus.equals(ActionStatus.FINISHED)) {
+                        rotate(yaw, callBack, btnState);
                     } else {
-                        if (currentStatus.equals(ActionStatus.FINISHED)) {
-                            rotateto(yaw, callBack, btnState);
-                        } else {
-                            callBack.onStateChange(currentStatus);
-                        }
+                        callBack.onStateChange(currentStatus);
                     }
-                    // 停止定位计时器
-                    cancelLocationTimer();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                callBack.onStateChange(ActionStatus.ERROR);
                 // 停止定位计时器
                 cancelLocationTimer();
             }
-        } else {
-            // 发生意外停止监听状态计时器
+        } catch (Exception e) {
+            e.printStackTrace();
+            callBack.onStateChange(ActionStatus.ERROR);
+            // 停止定位计时器
             cancelLocationTimer();
         }
     }
@@ -1192,142 +654,45 @@ public final class IBenMoveSDK {
      *
      * @param yaw 偏移量
      */
-    public void rotateto(float yaw, final MoveCallBack callBack, StopBtnState btnState) {
+    @SuppressLint("CheckResult")
+    private void rotate(float yaw, MoveCallBack callBack, StopBtnState btnState) {
+        if (mRobotPlatform == null || callBack == null || btnState == null) return;
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
         }
-        final Rotation rotation = new Rotation(yaw);
-        if (mRobotPlatform != null) {
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                try {
-                    moveAction = mRobotPlatform.rotateTo(rotation);
-                    try {
-                        Thread.sleep(4000);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    e.onNext(true);
-                } catch (Throwable throwable) {
-                    e.onNext(false);
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        if (!aBoolean) {
-                            onRequestError();
-                        } else {
-                            while (true) {
-                                if (moveAction != null) {
-                                    ActionStatus status = moveAction.getStatus();
-                                    if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
-                                            || status.equals(ActionStatus.ERROR)) {
-                                        callBack.onStateChange(status);
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
+        Rotation rotation = new Rotation(yaw);
+        Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+            IMoveAction moveAction = mRobotPlatform.rotateTo(rotation);
+            Thread.sleep(4000);
+            e.onNext(moveAction);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(moveAction -> {
+                    while (true) {
+                        if (moveAction != null) {
+                            ActionStatus status = moveAction.getStatus();
+                            if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
+                                    || status.equals(ActionStatus.ERROR)) {
+                                callBack.onStateChange(status);
+                                break;
                             }
+                        } else {
+                            break;
                         }
-                    }, throwable -> onRequestError());
-        } else {
-            onRequestError();
-        }
-    }
-
-    /**
-     * 开启移动定时器
-     *
-     * @param direction 方向
-     * @param period    周期
-     */
-    private void startMoveTimer(final MoveDirection direction, Long period) {
-        // 首先停止之前的移动定时器
-        cancelMoveTimer();
-        // 非空判断
-        if (mMoveTimer == null) {
-            mMoveTimer = new Timer();
-        }
-        if (mMoveTask == null) {
-            mMoveTask = new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        mRobotPlatform.moveBy(direction);
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-            };
-        }
-        // 开启计时器移动
-        mMoveTimer.schedule(mMoveTask, 0, period);
-    }
-
-    /**
-     * 取消移动计时器
-     */
-    private void cancelMoveTimer() {
-        if (mMoveTimer != null) {
-            mMoveTimer.cancel();
-            mMoveTimer = null;
-        }
-        if (mMoveTask != null) {
-            mMoveTask.cancel();
-            mMoveTask = null;
-        }
-    }
-
-    /**
-     * 开启重连计时器
-     */
-    private void startReconnectTimer() {
-        // 取消重连计时器
-        cancelReconnectTimer();
-        // 非空判断
-        if (mReconnectTimer == null) {
-            mReconnectTimer = new Timer();
-        }
-        if (mReconnectTask == null) {
-            mReconnectTask = new TimerTask() {
-                @Override
-                public void run() {
-                    connectRobot(mIp, mPort, mCallBack);
-                }
-            };
-        }
-        // 开启计时器
-        mReconnectTimer.schedule(mReconnectTask, 0, 3000);
-    }
-
-    /**
-     * 取消重连计时器
-     */
-    private void cancelReconnectTimer() {
-        if (mReconnectTimer != null) {
-            mReconnectTimer.cancel();
-            mReconnectTimer = null;
-        }
-        if (mReconnectTask != null) {
-            mReconnectTask.cancel();
-            mReconnectTask = null;
-        }
+                }, throwable -> callBack.onStateChange(ActionStatus.ERROR));
     }
 
     /**
      * 判断底盘急停按钮是否开启
      */
     public boolean hasSystemEmergencyStop() {
-        if (mRobotPlatform == null) {
-            onRequestError();
-            return true;
-        }
+        if (mRobotPlatform == null) return true;
         try {
             return mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
         } catch (Exception e) {
-            LogUtils.e("判断底盘急停按钮是否开启：" + e.toString());
             return true;
         }
     }
@@ -1336,22 +701,12 @@ public final class IBenMoveSDK {
      * 判断底盘是否正在运动
      */
     public boolean isMoveing() {
-        if (mRobotPlatform == null) {
+        if (mRobotPlatform == null) return false;
+        try {
+            ActionStatus status = mRobotPlatform.getCurrentAction().getStatus();
+            return status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
+        } catch (Exception e) {
             return false;
-        } else {
-            try {
-                IMoveAction currentAction = mRobotPlatform.getCurrentAction();
-                if (currentAction == null) {
-                    return false;
-                }
-                ActionStatus status = currentAction.getStatus();
-                if (status == null) {
-                    return false;
-                }
-                return status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
-            } catch (Exception e) {
-                return false;
-            }
         }
     }
 
@@ -1424,12 +779,5 @@ public final class IBenMoveSDK {
          * 获取电量失败
          */
         void onFailed();
-    }
-
-    /**
-     * 回到充电桩回调
-     */
-    public interface toDockCallBack {
-        void onDock(boolean isOnDock);
     }
 }

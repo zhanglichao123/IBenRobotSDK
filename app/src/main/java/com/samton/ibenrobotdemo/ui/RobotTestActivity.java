@@ -106,7 +106,7 @@ public class RobotTestActivity extends AppCompatActivity implements
                 }
                 Location location = new Location(
                         Float.valueOf(x), Float.valueOf(y), 0);
-                moveSDK.go2Location(location, Float.valueOf(yaw), this, this);
+                moveSDK.goLocation(location, Float.valueOf(yaw), this, this);
             default:
                 break;
         }
