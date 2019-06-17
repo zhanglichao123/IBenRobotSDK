@@ -71,7 +71,14 @@ public final class IBenMoveSDK {
      * 移动的Disposable
      */
     private Disposable mMoveSubscribe;
+    /**
+     * 旋转的Disposable
+     */
     private Disposable mRotateSubscribe;
+    /**
+     * 是否低电量模式
+     */
+    private boolean isWarnPower = false;
 
     /**
      * 私有构造
@@ -137,7 +144,7 @@ public final class IBenMoveSDK {
     private void startReconnectTimer(String ip, int port, ConnectCallBack callBack) {
         // 取消重连计时器
         cancelReconnectTimer();
-        //开始三秒后进行重连
+        // 开始三秒后进行重连
         mConnectSubscribe = Observable.timer(3000, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -222,6 +229,24 @@ public final class IBenMoveSDK {
     }
 
     /**
+     * 设置是否低电量模式
+     *
+     * @param warnPower 是否是低电量
+     */
+    public void setWarnPower(boolean warnPower) {
+        isWarnPower = warnPower;
+    }
+
+    /**
+     * 获取当前是否是低电量模式
+     *
+     * @return 是否是低电量
+     */
+    public boolean isWarnPower() {
+        return isWarnPower;
+    }
+
+    /**
      * 获取当前点坐标
      *
      * @return 当前点坐标
@@ -288,6 +313,9 @@ public final class IBenMoveSDK {
      */
     public void moveByDirection(MoveDirection direction, long period, StopBtnState btnState) {
         if (mRobotPlatform == null || direction == null || btnState == null) return;
+        //如果是低电量模式直接返回
+        if (isWarnPower) return;
+        //如果开启急停返回
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
@@ -329,7 +357,11 @@ public final class IBenMoveSDK {
      */
     @SuppressLint("CheckResult")
     public void rotate(double angle, StopBtnState btnState) {
-        if (mRobotPlatform == null || btnState == null) return;
+        //如果是在充电桩不进行旋转
+        if (mRobotPlatform == null || btnState == null || isHome()) return;
+        //如果是低电量模式直接返回
+        if (isWarnPower) return;
+        //如果开启急停返回
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
@@ -353,6 +385,7 @@ public final class IBenMoveSDK {
     @SuppressLint("CheckResult")
     public void goHome(MoveCallBack callBack, StopBtnState btnState) {
         if (mRobotPlatform == null || callBack == null || btnState == null) return;
+        //如果开启急停返回
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
@@ -380,6 +413,9 @@ public final class IBenMoveSDK {
     public void goLocation(Location location, float yaw, MoveCallBack callBack, StopBtnState btnState) {
         if (mRobotPlatform == null || location == null || callBack == null || btnState == null)
             return;
+        //如果是低电量模式直接返回
+        if (isWarnPower) return;
+        //如果开启急停返回
         if (hasSystemEmergencyStop()) {
             btnState.isOnEmergencyStop(true);
             return;
@@ -683,6 +719,9 @@ public final class IBenMoveSDK {
                         throwable -> callBack.onStateChange(ActionStatus.ERROR));
     }
 
+    /**
+     * 取消旋转计时器
+     */
     private void cancelRotate() {
         if (mRotateSubscribe != null && !mRotateSubscribe.isDisposed()) {
             mRotateSubscribe.dispose();
