@@ -71,6 +71,7 @@ public final class IBenMoveSDK {
      * 移动的Disposable
      */
     private Disposable mMoveSubscribe;
+    private Disposable mRotateSubscribe;
 
     /**
      * 私有构造
@@ -419,6 +420,8 @@ public final class IBenMoveSDK {
         cancelMoveTimer();
         // 取消去定点计时器
         cancelLocationTimer();
+        // 取消转动计时器
+        cancelRotate();
         // 调用底盘取消当前动作
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
             mRobotPlatform.getCurrentAction().cancel();
@@ -662,27 +665,29 @@ public final class IBenMoveSDK {
             return;
         }
         Rotation rotation = new Rotation(yaw);
-        Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+        mRotateSubscribe = Observable.create((ObservableOnSubscribe<ActionStatus>) e -> {
             IMoveAction moveAction = mRobotPlatform.rotateTo(rotation);
-            Thread.sleep(4000);
-            e.onNext(moveAction);
+            while (true) {
+                if (moveAction == null) break;
+                ActionStatus status = moveAction.getStatus();
+                if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
+                        || status.equals(ActionStatus.ERROR)) {
+                    e.onNext(status);
+                    break;
+                }
+            }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(moveAction -> {
-                    while (true) {
-                        if (moveAction != null) {
-                            ActionStatus status = moveAction.getStatus();
-                            if (status.equals(ActionStatus.FINISHED) || status.equals(ActionStatus.STOPPED)
-                                    || status.equals(ActionStatus.ERROR)) {
-                                callBack.onStateChange(status);
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }, throwable -> callBack.onStateChange(ActionStatus.ERROR));
+                .subscribe(callBack::onStateChange,
+                        throwable -> callBack.onStateChange(ActionStatus.ERROR));
+    }
+
+    private void cancelRotate() {
+        if (mRotateSubscribe != null && !mRotateSubscribe.isDisposed()) {
+            mRotateSubscribe.dispose();
+            mRotateSubscribe = null;
+        }
     }
 
     /**
