@@ -1013,6 +1013,7 @@ public final class InitBean {
         private int groupId;
         private String name;
         private int state;
+        private int version;
         private List<PrintsBean> prints;
 
         public int getGroupId() {
@@ -1037,6 +1038,14 @@ public final class InitBean {
 
         public void setState(int state) {
             this.state = state;
+        }
+
+        public int getVersion() {
+            return version;
+        }
+
+        public void setVersion(int version) {
+            this.version = version;
         }
 
         public List<PrintsBean> getPrints() {
