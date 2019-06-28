@@ -53,8 +53,8 @@ public final class IBenWakeUpUtil {
         try {
             // 设置串口号、波特率
             // mSerialUtil = new SerialUtil("/dev/ttyS3");//旧板子
-            // mSerialUtil = new SerialUtil("/dev/ttyS4");//新开发板子
-            mSerialUtil = new SerialUtil("/dev/ttyXRUSB0");// 3399主板
+             mSerialUtil = new SerialUtil("/dev/ttyS4");//新开发板子
+//            mSerialUtil = new SerialUtil("/dev/ttyXRUSB0");// 3399主板
         } catch (Exception e) {
             e.printStackTrace();
         }
