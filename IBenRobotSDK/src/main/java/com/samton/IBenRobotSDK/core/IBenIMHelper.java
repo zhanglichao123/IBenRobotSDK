@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
@@ -48,6 +49,7 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
      * 人工信息回调
      */
     private IBenMsgCallBack mCallBack = null;
+    private Disposable mLoginSubscribe;
 
     /**
      * 私有构造
@@ -235,13 +237,13 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
     @Override
     public void onConnectState(ECDevice.ECConnectState ecConnectState, ECError ecError) {
         LogUtils.i("onConnectState   ecConnectState:" + ecConnectState.name() + ",errpr:" + ecError.errorMsg);
-        // 如果登录失败的话进行从新登录
+        // 如果登录失败的话进行重新登录
         if (ecConnectState == ECDevice.ECConnectState.CONNECT_FAILED) {
             Log.e("登入容联账号", "失败重新登入");
             // 登录
-            Observable.timer(5, TimeUnit.SECONDS)
+            if (mLoginSubscribe != null && !mLoginSubscribe.isDisposed()) return;
+            mLoginSubscribe = Observable.timer(5, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(aLong -> login());
         } else if (ecConnectState == ECDevice.ECConnectState.CONNECT_SUCCESS) {
             // 初始化人工消息回调函数
