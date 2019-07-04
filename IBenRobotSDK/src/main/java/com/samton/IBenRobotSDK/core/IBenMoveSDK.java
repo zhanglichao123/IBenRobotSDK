@@ -391,6 +391,7 @@ public final class IBenMoveSDK {
         if (btnState == null || isWarnPower) return;
         //判断机器人是否正在充电桩
         isHome(isHome -> {
+            LogUtils.d("当前旋转机器人机器人是否在充电桩:" + isHome);
             if (isHome) return;
             //取消所有动作
             cancelAllActions();
@@ -431,6 +432,7 @@ public final class IBenMoveSDK {
                 Observable.create((ObservableOnSubscribe<IAction>) e -> {
                     DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
                     boolean isHome = dockingStatus == DockingStatus.OnDock;
+                    LogUtils.d("当前执行回充电桩操作机器人是否在充电桩:" + isHome);
                     if (isHome) {
                         callBack.onStateChange(ActionStatus.FINISHED);
                         e.onComplete();
@@ -472,6 +474,7 @@ public final class IBenMoveSDK {
                     // 判断机器人当前是否正在充电桩
                     DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
                     boolean isHome = dockingStatus == DockingStatus.OnDock;
+                    LogUtils.d("当前去定点状态机器人是否在充电桩:" + isHome);
                     if (isHome) {
                         moveByDirection(MoveDirection.FORWARD, 300, btnState);
                         SystemClock.sleep(1000);
