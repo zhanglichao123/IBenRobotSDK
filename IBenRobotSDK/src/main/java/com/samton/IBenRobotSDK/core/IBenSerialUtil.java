@@ -1,6 +1,8 @@
 package com.samton.IBenRobotSDK.core;
 
+import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
+import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.serialport.SerialUtil;
 
 import java.util.concurrent.TimeUnit;
@@ -47,14 +49,18 @@ public final class IBenSerialUtil {
      * 私有构造
      */
     private IBenSerialUtil() {
-        // 打开串口
-        try {
-            // 设置串口号、波特率，
-            // mSerialUtil = new SerialUtil("/dev/ttyS0");// 旧板子
-            mSerialUtil = new SerialUtil("/dev/ttyS1");//新开发版
-            // mSerialUtil = new SerialUtil("/dev/ttyXRUSB2");// 3399主板
-        } catch (Exception e) {
-            e.printStackTrace();
+        // 设置串口号、波特率
+        String type = SPUtils.getInstance().getString(Constants.PLANK_TYPE);
+        switch (type) {
+            case "rk3288h":// 3288黑板
+                mSerialUtil = new SerialUtil("/dev/ttyS0");
+                break;
+            case "rk3288l":// 3288蓝板
+                mSerialUtil = new SerialUtil("/dev/ttyS1");
+                break;
+            case "rk3399l":// 3399蓝板
+                mSerialUtil = new SerialUtil("/dev/ttyXRUSB2");
+                break;
         }
     }
 

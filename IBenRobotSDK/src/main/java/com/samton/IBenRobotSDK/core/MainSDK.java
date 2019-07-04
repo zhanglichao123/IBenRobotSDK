@@ -1,12 +1,13 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.text.TextUtils;
 
 import com.iflytek.cloud.SpeechUtility;
+import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpRequest;
@@ -17,10 +18,6 @@ import com.samton.IBenRobotSDK.utils.Utils;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.samton.IBenRobotSDK.data.Constants.APP_ID;
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_IM_ACCOUNT;
 
 /**
  * author : syk
@@ -57,9 +54,9 @@ public final class MainSDK {
         // 初始化工具类
         Utils.init(mApplication);
         // 读取XML中的必须配置
-        readMetaDataFromApplication(mApplication);
+        readMetaDataAndSave(mApplication);
         // 科大讯飞的语音系统
-        SpeechUtility.createUtility(mApplication, APP_ID);
+        SpeechUtility.createUtility(mApplication, Constants.APP_ID);
     }
 
     /**
@@ -85,31 +82,34 @@ public final class MainSDK {
     }
 
     /**
-     * 读取application 节点  meta-data 信息
+     * 读取项目配置信息并保存到本地
      */
-    private void readMetaDataFromApplication(Context mContext) {
+    private void readMetaDataAndSave(Context mContext) {
         try {
-            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
-            String appKey = appInfo.metaData.getString("IBEN_APPKEY");
-            // 初始化机器人唯一标识
-            SPUtils.getInstance().put(ROBOT_APP_KEY, TextUtils.isEmpty(appKey) ? "" : appKey);
-            // 登录荣联云通讯的唯一ID
-            if (TextUtils.isEmpty(SPUtils.getInstance().getString(ROBOT_IM_ACCOUNT, ""))) {
-                SPUtils.getInstance().put(ROBOT_IM_ACCOUNT, TextUtils.isEmpty(appKey) ? "" : appKey);
-            }
-        } catch (Throwable e) {
+            ApplicationInfo info = mContext.getPackageManager()
+                    .getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
+            // 获取AppKey
+            String iben_appkey = info.metaData.getString("IBEN_APPKEY", "");
+            // 获取当前主板类型
+            String plank_type = info.metaData.getString("PLANK_TYPE", "rk3399l");
+            // 初始化机器人配置信息
+            SPUtils spInstance = SPUtils.getInstance();
+            spInstance.put(Constants.ROBOT_APP_KEY, iben_appkey);// 机器人唯一标识
+            spInstance.put(Constants.ROBOT_IM_ACCOUNT, iben_appkey);// 容联云ID
+            spInstance.put(Constants.PLANK_TYPE, plank_type);// 主板类型
+        } catch (PackageManager.NameNotFoundException e) {
             LogUtils.e("请在AndroidManifest中配置相应的数据");
         }
     }
 
-
     /**
      * 激活机器人
      */
+    @SuppressLint("CheckResult")
     public void activeRobot(final IActiveCallBack callBack) {
         // 机器人执行激活操作
         HttpUtil.getInstance().create(HttpRequest.class)
-                .activeRobot(SPUtils.getInstance().getString(ROBOT_APP_KEY))
+                .activeRobot(SPUtils.getInstance().getString(Constants.ROBOT_APP_KEY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(initBean -> {

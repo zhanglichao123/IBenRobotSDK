@@ -2,7 +2,9 @@ package com.samton.IBenRobotSDK.core;
 
 import android.text.TextUtils;
 
+import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.interfaces.IWakeUpCallBack;
+import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.serialport.SerialUtil;
 
 import java.util.concurrent.TimeUnit;
@@ -49,14 +51,18 @@ public final class IBenWakeUpUtil {
      * 私有构造
      */
     private IBenWakeUpUtil() {
-        // 打开串口
-        try {
-            // 设置串口号、波特率
-            // mSerialUtil = new SerialUtil("/dev/ttyS3");//旧板子
-            mSerialUtil = new SerialUtil("/dev/ttyS4");//新开发板子
-            // mSerialUtil = new SerialUtil("/dev/ttyXRUSB0");// 3399主板
-        } catch (Exception e) {
-            e.printStackTrace();
+        // 设置串口号、波特率
+        String type = SPUtils.getInstance().getString(Constants.PLANK_TYPE);
+        switch (type) {
+            case "rk3288h":// 3288黑板
+                mSerialUtil = new SerialUtil("/dev/ttyS3");
+                break;
+            case "rk3288l":// 3288蓝板
+                mSerialUtil = new SerialUtil("/dev/ttyS4");
+                break;
+            case "rk3399l":// 3399蓝板
+                mSerialUtil = new SerialUtil("/dev/ttyXRUSB0");
+                break;
         }
     }
 

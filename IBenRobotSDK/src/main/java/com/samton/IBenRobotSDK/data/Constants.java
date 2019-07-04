@@ -46,6 +46,10 @@ public final class Constants {
      */
     public static final String ROBOT_APP_KEY = "ROBOT_APP_KEY";
     /**
+     * 目前使用的主板类型
+     */
+    public static final String PLANK_TYPE = "PLANK_TYPE";
+    /**
      * 保存证书的路径
      */
     public static final String FACE_PATH = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/IBenService/FaceLicense";
