@@ -51,8 +51,8 @@ public final class IBenSerialUtil {
         try {
             // 设置串口号、波特率，
             // mSerialUtil = new SerialUtil("/dev/ttyS0");// 旧板子
-//             mSerialUtil = new SerialUtil("/dev/ttyXRUSB2");// 3399主板
             mSerialUtil = new SerialUtil("/dev/ttyS1");//新开发版
+            // mSerialUtil = new SerialUtil("/dev/ttyXRUSB2");// 3399主板
         } catch (Exception e) {
             e.printStackTrace();
         }
