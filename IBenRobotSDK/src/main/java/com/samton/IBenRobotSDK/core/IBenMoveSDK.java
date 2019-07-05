@@ -357,17 +357,20 @@ public final class IBenMoveSDK {
     private void startMoveTimer(MoveDirection direction, Long period) {
         // 首先停止之前的移动定时器
         cancelMoveTimer();
-        mMoveSubscribe = Observable.interval(0, period, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .flatMap((Function<Long, ObservableSource<IMoveAction>>) aLong ->
-                        Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
-                            LogUtils.d("当前机器人正在移动");
-                            IMoveAction action = mRobotPlatform.moveBy(direction);
-                            e.onNext(action);
-                        }).subscribeOn(Schedulers.io()))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(action -> LogUtils.d("机器人移动成功"),
-                        throwable -> LogUtils.d("机器人移动失败"));
+        isHome(isHome -> {
+            if (isHome && direction != MoveDirection.FORWARD) return;
+            mMoveSubscribe = Observable.interval(0, period, TimeUnit.MILLISECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .flatMap((Function<Long, ObservableSource<IMoveAction>>) aLong ->
+                            Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+                                LogUtils.d("当前机器人正在移动");
+                                IMoveAction action = mRobotPlatform.moveBy(direction);
+                                e.onNext(action);
+                            }).subscribeOn(Schedulers.io()))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(action -> LogUtils.d("机器人移动成功"),
+                            throwable -> LogUtils.d("机器人移动失败"));
+        });
     }
 
     /**
