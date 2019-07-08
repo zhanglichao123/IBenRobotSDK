@@ -20,7 +20,7 @@ import com.samton.IBenRobotSDK.utils.LogUtils;
 public class FaceManager {
 
     private static FaceManager manager;
-    private Facepp facepp;
+    public Facepp facepp;
     private boolean isCheckFaceLicense = false;//证书是否授权
 
     private FaceManager() {
