@@ -407,6 +407,7 @@ public final class InitBean {
         private String mapName;
         private String imgUrl;
         private String file;
+        private String pose;
         private List<PositionPointsBean> positionPoints;
 
         public int getMapId() {
@@ -447,6 +448,14 @@ public final class InitBean {
 
         public void setFile(String file) {
             this.file = file;
+        }
+
+        public String getPose() {
+            return pose;
+        }
+
+        public void setPose(String pose) {
+            this.pose = pose;
         }
 
         public List<PositionPointsBean> getPositionPoints() {
