@@ -44,5 +44,5 @@ public final class HttpUrl {
     /**
      * 富文本连接头
      */
-    public static final String RICH_HEADER = BASE_URL + (isTest ? "resources/views/show.html?content=" : "resources/views/show.html?content=");
+    public static final String RICH_HEADER = BASE_URL + (isTest ? "XiaoBenManager/resources/views/show.html?content=" : "resources/views/show.html?content=");
 }
