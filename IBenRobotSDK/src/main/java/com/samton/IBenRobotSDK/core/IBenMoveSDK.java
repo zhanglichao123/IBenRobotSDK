@@ -35,10 +35,8 @@ import org.json.JSONObject;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -205,15 +203,16 @@ public final class IBenMoveSDK {
      * 清除地图
      */
     @SuppressLint("CheckResult")
-    public void removeMap() {
+    public void removeMap(ResultCallBack<Boolean> callBack) {
+        if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
             mRobotPlatform.clearMap();
             e.onNext(true);
             e.onComplete();
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("清除地图状态成功"),
-                        throwable -> LogUtils.d("清除地图状态失败"));
+                .subscribe(callBack::onResult,
+                        throwable -> callBack.onResult(false));
     }
 
     /**
@@ -263,16 +262,16 @@ public final class IBenMoveSDK {
      * @return 当前点坐标
      */
     @SuppressLint("CheckResult")
-    public void getLocation(ResultCallBack<Location> resultCallBack) {
-        if (resultCallBack == null) return;
+    public void getLocation(ResultCallBack<Location> callBack) {
+        if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Location>) e -> {
             Location location = mRobotPlatform.getLocation();
             e.onNext(location);
             e.onComplete();
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(resultCallBack::onResult,
-                        throwable -> resultCallBack.onResult(null));
+                .subscribe(callBack::onResult,
+                        throwable -> callBack.onResult(null));
     }
 
     /**
@@ -281,16 +280,16 @@ public final class IBenMoveSDK {
      * @return 当前点姿态
      */
     @SuppressLint("CheckResult")
-    public void getPose(ResultCallBack<Pose> resultCallBack) {
-        if (resultCallBack == null) return;
+    public void getPose(ResultCallBack<Pose> callBack) {
+        if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Pose>) e -> {
             Pose pose = mRobotPlatform.getPose();
             e.onNext(pose);
             e.onComplete();
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(resultCallBack::onResult,
-                        throwable -> resultCallBack.onResult(null));
+                .subscribe(callBack::onResult,
+                        throwable -> callBack.onResult(null));
     }
 
     /**
