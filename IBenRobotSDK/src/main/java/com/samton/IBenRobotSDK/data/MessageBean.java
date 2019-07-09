@@ -109,6 +109,7 @@ public final class MessageBean {
              * message : 北京今天23℃~25℃ 裤。
              * relationId : 关联问题ID
              * relationName : 关联问题
+             * promptAnswer : 打开百度网页
              * relationWords : 第几轮问答标识
              * relationWords : 关联问题播报语
              * readFaceCommand : 消息关联的表情
@@ -124,7 +125,7 @@ public final class MessageBean {
             private int categoryId = -1;
             private String imgDesc;//图片的描述
             private Pointlist pointlist;
-
+            private String promptAnswer;
             private int relationId;
             private String relationName;
             private String relationIndex;
@@ -172,6 +173,14 @@ public final class MessageBean {
 
             public void setReadFaceCommand(int readFaceCommand) {
                 this.readFaceCommand = readFaceCommand;
+            }
+
+            public String getPromptAnswer() {
+                return promptAnswer;
+            }
+
+            public void setPromptAnswer(String promptAnswer) {
+                this.promptAnswer = promptAnswer;
             }
 
             public Pointlist getPointlist() {
