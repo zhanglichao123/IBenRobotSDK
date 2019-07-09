@@ -1,6 +1,7 @@
 package com.samton.IBenRobotSDK.data;
 
 import com.google.gson.annotations.SerializedName;
+import com.slamtec.slamware.robot.Pose;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -407,7 +408,7 @@ public final class InitBean {
         private String mapName;
         private String imgUrl;
         private String file;
-        private String pose;
+        private Pose pose;
         private List<PositionPointsBean> positionPoints;
 
         public int getMapId() {
@@ -450,11 +451,11 @@ public final class InitBean {
             this.file = file;
         }
 
-        public String getPose() {
+        public Pose getPose() {
             return pose;
         }
 
-        public void setPose(String pose) {
+        public void setPose(Pose pose) {
             this.pose = pose;
         }
 
