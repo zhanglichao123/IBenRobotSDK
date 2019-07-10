@@ -168,10 +168,8 @@ public final class IBenChatSDK {
                 .send2IBen(appKey, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(messageBean -> {
-                    // 成功回调
-                    mCallBack.onSuccess(messageBean);
-                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
+                .subscribe(messageBean -> mCallBack.onSuccess(messageBean),
+                        throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
     /**
