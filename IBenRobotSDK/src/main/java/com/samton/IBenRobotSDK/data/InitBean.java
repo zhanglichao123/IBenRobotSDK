@@ -452,6 +452,9 @@ public final class InitBean {
         }
 
         public Pose getPose() {
+            if (pose == null) {
+                pose = new Pose();
+            }
             return pose;
         }
 
