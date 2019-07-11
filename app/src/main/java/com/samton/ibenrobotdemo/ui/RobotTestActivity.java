@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.samton.IBenRobotSDK.core.IBenMoveSDK;
 import com.samton.IBenRobotSDK.utils.ToastUtils;
 import com.samton.ibenrobotdemo.R;
-import com.slamtec.slamware.action.ActionStatus;
 import com.slamtec.slamware.robot.Location;
 
 /**
@@ -27,7 +26,6 @@ import com.slamtec.slamware.robot.Location;
 public class RobotTestActivity extends AppCompatActivity implements
         View.OnClickListener,
         IBenMoveSDK.ConnectCallBack,
-        IBenMoveSDK.MoveCallBack,
         IBenMoveSDK.StopBtnState {
 
     /**
@@ -106,7 +104,13 @@ public class RobotTestActivity extends AppCompatActivity implements
                 }
                 Location location = new Location(
                         Float.valueOf(x), Float.valueOf(y), 0);
-                moveSDK.goLocation(location, Float.valueOf(yaw), this, this);
+                moveSDK.goLocation(location, Float.valueOf(yaw), new IBenMoveSDK.MoveCallBack() {
+                    @Override
+                    public void onFinish(boolean isSuccess) {
+                        String msg = "到达该点的状态" + isSuccess;
+                        mRobotStatus.setText(msg);
+                    }
+                }, this);
             default:
                 break;
         }
@@ -155,17 +159,6 @@ public class RobotTestActivity extends AppCompatActivity implements
             @Override
             public void run() {
                 mRobotStatus.setText("机器人已开启急停按钮");
-            }
-        });
-    }
-
-    @Override
-    public void onStateChange(final ActionStatus status) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String msg = "到达该点的状态" + status;
-                mRobotStatus.setText(msg);
             }
         });
     }
