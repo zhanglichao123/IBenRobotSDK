@@ -87,8 +87,6 @@ public final class IBenMoveSDK {
     private MoveCallBack mCurrentCallBack;
     // 当前急停回调
     private StopBtnState mCurrentStopState;
-    // 标记本轮运动是否需要回调onStart
-    private boolean isNeedCallBackStart = true;
 
     /**
      * 私有构造
@@ -722,6 +720,7 @@ public final class IBenMoveSDK {
         // 停止旋转指令
         cancelRotate();
         mLocationSubscribe = Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            boolean isNeedCallBackStart = true;
             while (true) {
                 //判断当前的急停状态
                 boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
@@ -765,10 +764,8 @@ public final class IBenMoveSDK {
             }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isSuccess -> {
-                    isNeedCallBackStart = true;
-                    callBack.onFinish(isSuccess);
-                }, throwable -> callBack.onFinish(false));
+                .subscribe(callBack::onFinish
+                        , throwable -> callBack.onFinish(false));
     }
 
     /**
@@ -823,10 +820,8 @@ public final class IBenMoveSDK {
             }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isSuccess -> {
-                    isNeedCallBackStart = true;
-                    callBack.onFinish(isSuccess);
-                }, throwable -> callBack.onFinish(false));
+                .subscribe(callBack::onFinish
+                        , throwable -> callBack.onFinish(false));
     }
 
     /**
@@ -984,7 +979,6 @@ public final class IBenMoveSDK {
     private void startStopStateTimer() {
         cancelStopStateTimer();
         cancelReGoPoint();
-        isNeedCallBackStart = true;
         mStopStateSubscribe = Observable.timer(500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
