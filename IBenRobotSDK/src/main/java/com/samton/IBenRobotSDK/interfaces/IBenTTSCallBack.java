@@ -20,6 +20,18 @@ public interface IBenTTSCallBack {
     }
 
     /**
+     * 暂停播报
+     */
+    default void onPause() {
+    }
+
+    /**
+     * 继续播报
+     */
+    default void onResume() {
+    }
+
+    /**
      * 开始转换
      */
     void onSpeakBegin();

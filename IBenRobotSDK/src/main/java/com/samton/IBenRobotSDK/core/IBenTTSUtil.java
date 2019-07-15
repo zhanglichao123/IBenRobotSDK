@@ -41,9 +41,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onSpeakBegin() {
-            if (mCallBack != null) {
-                mCallBack.onSpeakBegin();
-            }
+            if (mCallBack != null) mCallBack.onSpeakBegin();
         }
 
         /**
@@ -62,6 +60,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onSpeakPaused() {
+            if (mCallBack != null) mCallBack.onPause();
         }
 
         /**
@@ -69,6 +68,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onSpeakResumed() {
+            if (mCallBack != null) mCallBack.onResume();
         }
 
         /**
@@ -79,7 +79,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onSpeakProgress(int percent, int beginPos, int endPos) {
-            mCallBack.onProgress(percent, beginPos, endPos);
+            if (mCallBack != null) mCallBack.onProgress(percent, beginPos, endPos);
         }
 
         /**
@@ -88,7 +88,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onCompleted(SpeechError error) {
-            mCallBack.onCompleted(error);
+            if (mCallBack != null) mCallBack.onCompleted(error);
         }
 
         @Override
