@@ -36,7 +36,6 @@ public final class IBenTTSUtil {
      * 合成回调监听。
      */
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
-
         /**
          * 开始播报
          */
@@ -80,6 +79,7 @@ public final class IBenTTSUtil {
          */
         @Override
         public void onSpeakProgress(int percent, int beginPos, int endPos) {
+            mCallBack.onProgress(percent, beginPos, endPos);
         }
 
         /**
@@ -95,10 +95,10 @@ public final class IBenTTSUtil {
         public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
             // 以下代码用于获取与云端的会话id，当业务出错时将会话id提供给技术支持人员，可用于查询会话日志，定位出错原因
             // 若使用本地能力，会话id为null
-            //	if (SpeechEvent.EVENT_SESSION_ID == eventType) {
-            //		String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
-            //		Log.d(TAG, "session id =" + sid);
-            //	}
+            // if (SpeechEvent.EVENT_SESSION_ID == eventType) {
+            // 	 String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
+            // 	 Log.d(TAG, "session id =" + sid);
+            // }
         }
     };
 

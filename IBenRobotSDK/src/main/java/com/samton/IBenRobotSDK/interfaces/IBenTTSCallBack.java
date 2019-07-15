@@ -14,6 +14,12 @@ import com.iflytek.cloud.SpeechError;
 
 public interface IBenTTSCallBack {
     /**
+     * 语音播报进度
+     */
+    default void onProgress(int percent, int beginPos, int endPos) {
+    }
+
+    /**
      * 开始转换
      */
     void onSpeakBegin();

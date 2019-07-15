@@ -55,13 +55,8 @@ public final class TTSManager {
         // 初始化上下文对象
         this.mContext = context;
         // 初始化
-        mTts = SpeechSynthesizer.createSynthesizer(context, code -> {
-            if (code != ErrorCode.SUCCESS) {
-                LogUtils.d(">>>>>>>>语音合成初始化失败");
-            } else {
-                LogUtils.d(">>>>>>>>语音合成初始化成功");
-            }
-        });
+        mTts = SpeechSynthesizer.createSynthesizer(context, code ->
+                LogUtils.d("语音合成初始化" + (code == ErrorCode.SUCCESS ? "成功" : "失败")));
     }
 
     /**
@@ -75,9 +70,7 @@ public final class TTSManager {
         // 设置在线合成发音人
         if (mTts.getParameter(SpeechConstant.ENGINE_TYPE).equals(SpeechConstant.TYPE_CLOUD)) {
             mTts.setParameter(SpeechConstant.VOICE_NAME, "vinn");
-        }
-        // 设置离线发音人
-        else {
+        } else { // 设置离线发音人
             // 目前IBenTTSUtil.setTTSParam()未启用，保留此行（修改音色）
             ttsName = SPUtils.getInstance().getString("voiceSpeaker", "xiaoyan");
             // 设置发音人
@@ -97,9 +90,9 @@ public final class TTSManager {
         mTts.setParameter(SpeechConstant.KEY_REQUEST_FOCUS, "true");
         // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
-//        mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
+        // mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
         // 保存路径
-//        mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, Environment.getExternalStorageDirectory().getAbsolutePath() + "/IBenService/Voices/" + SpeechConstant.VOICE_NAME + ".wav");
+        // mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, Environment.getExternalStorageDirectory().getAbsolutePath() + "/IBenService/Voices/" + SpeechConstant.VOICE_NAME + ".wav");
     }
 
 
