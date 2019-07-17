@@ -1,6 +1,7 @@
 package com.samton.IBenRobotSDK.core;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
@@ -147,7 +148,9 @@ public final class IBenChatSDK {
                     // 发送消息给小笨
                     if (chatFlagBean.getRs() != 1) send2IBen(msg, accout, reMsg, reIndex);
                     // 发送给人工的消息
-                    IBenIMHelper.getInstance().sendTxtMsg(accout, msg);
+                    if (!TextUtils.isEmpty(accout)) {
+                        IBenIMHelper.getInstance().sendTxtMsg(accout, msg);
+                    }
                 }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
@@ -170,7 +173,11 @@ public final class IBenChatSDK {
                 .subscribe(msgBean -> {
                     mCallBack.onSuccess(msgBean);
                     // 发送消息到容联云
-                    sendMsgToYtx(accout, msgBean);
+                    try {
+                        sendMsgToYtx(accout, msgBean);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
                 }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
@@ -196,7 +203,7 @@ public final class IBenChatSDK {
     /**
      * 判断返回消息类型并回传给后台(人工消息框)
      */
-    private void sendMsgToYtx(String accout, MessageBean msgBean) {
+    private void sendMsgToYtx(String accout, MessageBean msgBean) throws NullPointerException {
         MessageBean.DataBean.AppMessageBean mResult = msgBean.getData().getAppMessage().get(0);
         String resultAnswer = mResult.getMessage();
         // 判断类型
