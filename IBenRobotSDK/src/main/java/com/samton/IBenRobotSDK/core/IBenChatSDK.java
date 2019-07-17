@@ -143,12 +143,11 @@ public final class IBenChatSDK {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chatFlagBean -> {
-                    if (chatFlagBean.getRs() == 1) {
-                        // 发送给人工的消息
-                        IBenIMHelper.getInstance().sendTxtMsg(chatFlagBean.getAccout(), msg);
-                    } else {// 发送消息给小笨
-                        send2IBen(msg, reMsg, reIndex);
-                    }
+                    String accout = chatFlagBean.getAccout();
+                    // 发送消息给小笨
+                    if (chatFlagBean.getRs() != 1) send2IBen(msg, accout, reMsg, reIndex);
+                    // 发送给人工的消息
+                    IBenIMHelper.getInstance().sendTxtMsg(accout, msg);
                 }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
@@ -158,7 +157,7 @@ public final class IBenChatSDK {
      * @param msg   要发送的消息
      * @param reMsg 返回的关联问题
      */
-    private void send2IBen(String msg, String reMsg, String reIndex) {
+    private void send2IBen(String msg, String accout, String reMsg, String reIndex) {
         // APP_KEY
         String appKey = SPUtils.getInstance().getString(ROBOT_APP_KEY);
         // 当前时间
@@ -168,8 +167,11 @@ public final class IBenChatSDK {
                 .send2IBen(appKey, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(messageBean -> mCallBack.onSuccess(messageBean),
-                        throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
+                .subscribe(msgBean -> {
+                    mCallBack.onSuccess(msgBean);
+                    // 发送消息到容联云
+                    sendMsgToYtx(accout, msgBean);
+                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
     /**
@@ -189,5 +191,45 @@ public final class IBenChatSDK {
         dataBean.setAppMessage(list);
         messageBean.setData(dataBean);
         return messageBean;
+    }
+
+    /**
+     * 判断返回消息类型并回传给后台(人工消息框)
+     */
+    private void sendMsgToYtx(String accout, MessageBean msgBean) {
+        MessageBean.DataBean.AppMessageBean mResult = msgBean.getData().getAppMessage().get(0);
+        String resultAnswer = mResult.getMessage();
+        // 判断类型
+        switch (mResult.getAnswerType()) {
+            case 1:
+                resultAnswer = "富文本消息";
+                break;
+            case 2:
+                resultAnswer = "超链接消息";
+                break;
+            case 3:
+                resultAnswer = "图片消息";
+                break;
+            case 4:
+                resultAnswer = "表单信息";
+                break;
+            case 5:
+                resultAnswer = "流程消息";
+                break;
+            case 7:
+                resultAnswer = "视频消息";
+                break;
+            case 8:
+                resultAnswer = "动作消息";
+                break;
+            case 21:
+                resultAnswer = "天气消息";
+                break;
+            case 22:
+                resultAnswer = "故事消息";
+                break;
+        }
+        // 发送给人工的消息
+        IBenIMHelper.getInstance().sendTxtMsg(accout, "#RENGONG#" + resultAnswer);
     }
 }
