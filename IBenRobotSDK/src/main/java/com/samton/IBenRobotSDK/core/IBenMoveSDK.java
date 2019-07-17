@@ -73,8 +73,10 @@ public final class IBenMoveSDK {
     private boolean isWarnPower = false;
     // 点位的Disposable
     private Disposable mLocationSubscribe;
-    // 重连的Disposable
+    // 连接底盘的Disposable
     private Disposable mConnectSubscribe;
+    // 重连底盘的Disposable
+    private Disposable mReconnectSubscribe;
     // 移动的Disposable
     private Disposable mMoveSubscribe;
     // 旋转的Disposable
@@ -139,11 +141,10 @@ public final class IBenMoveSDK {
             mIp = ip;
             mPort = port;
             mConnectCallBack = callBack;
-            Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            mConnectSubscribe = Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                LogUtils.e("思岚底盘--当前正在进行连接底盘操作");
                 // 设置机器人连接监听
                 mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
-                // 获取机器人电量
-                LogUtils.e("思岚底盘--当前机电量值:" + mRobotPlatform.getBatteryPercentage());
                 e.onNext(true);
                 e.onComplete();
             }).subscribeOn(Schedulers.io())
@@ -157,6 +158,7 @@ public final class IBenMoveSDK {
      * 机器人底盘连接成功
      */
     private void connectSuccess() {
+        LogUtils.e("思岚底盘--连接底盘成功");
         // 将连接状态置为已连接
         isConnect = true;
         // 回调机器人连接成功
@@ -173,6 +175,11 @@ public final class IBenMoveSDK {
     private void connectFail() {
         // 将连接状态置为未连接
         isConnect = false;
+        // 如果正在重连或者连接则返回
+        if ((mConnectSubscribe != null && !mConnectSubscribe.isDisposed())
+                || (mConnectSubscribe != null && mConnectSubscribe.isDisposed()))
+            return;
+        LogUtils.e("思岚底盘--连接底盘失败");
         if (mConnectCallBack != null) {
             mConnectCallBack.onConnectFailed();
         }
@@ -193,22 +200,24 @@ public final class IBenMoveSDK {
      * 开启重连计时器
      */
     private void startReconnectTimer() {
-        // 取消重连计时器
-        if (mConnectSubscribe != null && !mConnectSubscribe.isDisposed()) return;
+        cancelReconnectTimer();
         // 开始三秒后进行重连
-        mConnectSubscribe = Observable.timer(3, TimeUnit.SECONDS)
+        mReconnectSubscribe = Observable.timer(3, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> connectRobot(mIp, mPort, mConnectCallBack));
+                .subscribe(aLong -> {
+                    LogUtils.e("思岚底盘--当前正在进行重新连接底盘操作");
+                    connectRobot(mIp, mPort, mConnectCallBack);
+                });
     }
 
     /**
      * 取消重连计时器
      */
     private void cancelReconnectTimer() {
-        if (mConnectSubscribe != null && !mConnectSubscribe.isDisposed()) {
-            mConnectSubscribe.dispose();
-            mConnectSubscribe = null;
+        if (mReconnectSubscribe != null && !mReconnectSubscribe.isDisposed()) {
+            mReconnectSubscribe.dispose();
+            mReconnectSubscribe = null;
         }
     }
 
@@ -217,6 +226,7 @@ public final class IBenMoveSDK {
      */
     @SuppressLint("CheckResult")
     public void disConnectRobot() {
+        LogUtils.e("思岚底盘--当前正在进行底盘断开连接操作");
         mIp = "";
         mPort = 0;
         mConnectCallBack = null;
@@ -241,6 +251,7 @@ public final class IBenMoveSDK {
     @SuppressLint("CheckResult")
     public void setMapUpdate(boolean isUpdate) {
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--设置是否开启地图更新");
             if (isConnect) {
                 mRobotPlatform.setMapUpdate(isUpdate);
                 e.onNext(true);
@@ -265,6 +276,7 @@ public final class IBenMoveSDK {
     public void removeMap(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--清除地图");
             if (isConnect) {
                 mRobotPlatform.clearMap();
                 e.onNext(true);
@@ -280,8 +292,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--清除地图状态失败:" + throwable.getMessage());
-                    callBack.onResult(false);
                     connectFail();
+                    callBack.onResult(false);
                 });
     }
 
@@ -294,6 +306,7 @@ public final class IBenMoveSDK {
     public void getBatteryInfo(GetBatteryCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<String>) e -> {
+            LogUtils.e("思岚底盘--获取电池信息");
             if (isConnect) {
                 JSONObject jsonObject = new JSONObject();
                 int percent = mRobotPlatform.getBatteryPercentage();
@@ -314,8 +327,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--获取电池信息失败:" + throwable.getMessage());
-                    callBack.onFailed();
                     connectFail();
+                    callBack.onFailed();
                 });
     }
 
@@ -346,6 +359,7 @@ public final class IBenMoveSDK {
     public void getLocation(ResultCallBack<Location> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Location>) e -> {
+            LogUtils.e("思岚底盘--获取当前点坐标");
             if (isConnect) {
                 Location location = mRobotPlatform.getLocation();
                 e.onNext(location);
@@ -361,8 +375,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--获取当前点位坐标失败:" + throwable.getMessage());
-                    callBack.onResult(null);
                     connectFail();
+                    callBack.onResult(null);
                 });
     }
 
@@ -375,6 +389,7 @@ public final class IBenMoveSDK {
     public void getPose(ResultCallBack<Pose> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Pose>) e -> {
+            LogUtils.e("思岚底盘--获取机器人姿态");
             if (isConnect) {
                 Pose pose = mRobotPlatform.getPose();
                 e.onNext(pose);
@@ -390,8 +405,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--获取当前姿态失败:" + throwable.getMessage());
-                    callBack.onResult(null);
                     connectFail();
+                    callBack.onResult(null);
                 });
     }
 
@@ -409,6 +424,7 @@ public final class IBenMoveSDK {
                 btnState.isOnEmergencyStop(true);
             } else {
                 Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+                    LogUtils.e("思岚底盘--设置机器人的姿态");
                     if (isConnect) {
                         mRobotPlatform.setPose(pose);
                         e.onNext(true);
@@ -469,6 +485,7 @@ public final class IBenMoveSDK {
         cancelMoveTimer();
         isHome(isHome -> {
             if (isHome && direction != MoveDirection.FORWARD) return;
+            LogUtils.e("思岚底盘--开启移动定时器");
             mMoveSubscribe = Observable.interval(0, period, TimeUnit.MILLISECONDS)
                     .subscribeOn(Schedulers.io())
                     .flatMap((Function<Long, ObservableSource<IMoveAction>>) aLong ->
@@ -522,6 +539,7 @@ public final class IBenMoveSDK {
                     btnState.isOnEmergencyStop(true);
                 } else {
                     Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+                        LogUtils.e("思岚底盘--开启旋转机器人");
                         if (isConnect) {
                             float tempAngle = (float) (angle / 180 * Math.PI);
                             Rotation rotation = new Rotation(tempAngle);
@@ -566,6 +584,7 @@ public final class IBenMoveSDK {
                 btnState.isOnEmergencyStop(true);
             } else {
                 Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+                    LogUtils.e("思岚底盘--开启回充电桩操作");
                     if (isConnect) {
                         DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
                         boolean isHome = dockingStatus == DockingStatus.OnDock;
@@ -588,8 +607,8 @@ public final class IBenMoveSDK {
                                 , throwable -> {
                                     throwable.printStackTrace();
                                     LogUtils.d("思岚底盘--当前回桩操作失败:" + throwable.getMessage());
-                                    callBack.onFinish(false);
                                     connectFail();
+                                    callBack.onFinish(false);
                                 });
             }
         });
@@ -622,6 +641,7 @@ public final class IBenMoveSDK {
             } else {
                 // 然后执行行走至定点操作
                 Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
+                    LogUtils.e("思岚底盘--开启行走到指定点操作");
                     if (isConnect) {
                         // 判断机器人当前是否正在充电桩
                         DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
@@ -650,8 +670,8 @@ public final class IBenMoveSDK {
                                 , throwable -> {
                                     throwable.printStackTrace();
                                     LogUtils.d("思岚底盘--当前走定点操作失败:" + throwable.getMessage());
-                                    callBack.onFinish(false);
                                     connectFail();
+                                    callBack.onFinish(false);
                                 });
             }
         });
@@ -674,6 +694,7 @@ public final class IBenMoveSDK {
         cancelReGoPoint();
         // 调用底盘取消当前动作
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--停止所有动作");
             if (isConnect) {
                 mRobotPlatform.getCurrentAction().cancel();
                 e.onNext(true);
@@ -699,6 +720,7 @@ public final class IBenMoveSDK {
     public void clearAllWalls() {
         if (mRobotPlatform == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--清除所有虚拟墙");
             if (isConnect) {
                 mRobotPlatform.clearWalls();
                 e.onNext(true);
@@ -726,6 +748,7 @@ public final class IBenMoveSDK {
     public void isHome(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--判断机器人是否是无线充电状态");
             if (isConnect) {
                 DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
                 boolean isHome = dockingStatus == DockingStatus.OnDock;
@@ -742,8 +765,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--获取当前是否在充电桩失败:" + throwable.getMessage());
-                    callBack.onResult(true);
                     connectFail();
+                    callBack.onResult(true);
                 });
     }
 
@@ -756,6 +779,7 @@ public final class IBenMoveSDK {
     public void getPowerStatus(ResultCallBack<Integer> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Integer>) e -> {
+            LogUtils.e("思岚底盘--查询机器人电池状态");
             if (isConnect) {
                 int powerStatus = 0;
                 PowerStatus status = mRobotPlatform.getPowerStatus();
@@ -776,8 +800,8 @@ public final class IBenMoveSDK {
                 throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--查询电池状态失败:" + throwable.getMessage());
-                    callBack.onResult(0);
                     connectFail();
+                    callBack.onResult(0);
                 });
     }
 
@@ -791,6 +815,7 @@ public final class IBenMoveSDK {
     public void saveMap(String mapName, MapCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--保存地图");
             if (isConnect) {
                 // 生成保存路径
                 String path = Constants.MAP_PATH + "/" + mapName;
@@ -826,8 +851,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--保存地图失败:" + throwable.getMessage());
-                    callBack.onFailed();
                     connectFail();
+                    callBack.onFailed();
                 });
     }
 
@@ -860,6 +885,7 @@ public final class IBenMoveSDK {
     public void loadMap(String mapNamePath, Pose cachePose, MapCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.e("思岚底盘--加载地图");
             if (isConnect) {
                 // 地图加载帮助对象
                 CompositeMapHelper helper = new CompositeMapHelper();
@@ -880,8 +906,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--地图加载失败:" + throwable.getMessage());
-                    callBack.onFailed();
                     connectFail();
+                    callBack.onFailed();
                 });
     }
 
@@ -895,6 +921,7 @@ public final class IBenMoveSDK {
     private void getMap(ResultCallBack<Map> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Map>) e -> {
+            LogUtils.e("思岚底盘--获取地图");
             if (isConnect) {
                 // 地图类型为8位位图
                 MapType mapType = MapType.BITMAP_8BIT;
@@ -913,8 +940,8 @@ public final class IBenMoveSDK {
                         throwable -> {
                             throwable.printStackTrace();
                             LogUtils.d("思岚底盘--获取地图失败:" + throwable.getMessage());
-                            callBack.onResult(null);
                             connectFail();
+                            callBack.onResult(null);
                         });
     }
 
@@ -931,6 +958,10 @@ public final class IBenMoveSDK {
         mLocationSubscribe = Observable.create((ObservableOnSubscribe<Boolean>) e -> {
             boolean isNeedCallBackStart = true;
             while (true) {
+                if (!isConnect) {
+                    e.onError(new Throwable(ERR_MSG));
+                    break;
+                }
                 //判断当前的急停状态
                 boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
                 if (isEmergencyStop) {
@@ -977,8 +1008,8 @@ public final class IBenMoveSDK {
                         , throwable -> {
                             throwable.printStackTrace();
                             LogUtils.d("思岚底盘--去定点状态查询失败:" + throwable.getMessage());
-                            callBack.onFinish(false);
                             connectFail();
+                            callBack.onFinish(false);
                         });
     }
 
@@ -1005,6 +1036,10 @@ public final class IBenMoveSDK {
         mRotateSubscribe = Observable.create((ObservableOnSubscribe<Boolean>) e -> {
             IMoveAction action = mRobotPlatform.rotateTo(new Rotation(yaw));
             while (true) {
+                if (!isConnect) {
+                    e.onError(new Throwable(ERR_MSG));
+                    break;
+                }
                 //判断当前的急停状态
                 boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
                 if (isEmergencyStop) {
@@ -1038,8 +1073,8 @@ public final class IBenMoveSDK {
                         , throwable -> {
                             throwable.printStackTrace();
                             LogUtils.d("思岚底盘--旋转角度状态查询失败:" + throwable.getMessage());
-                            callBack.onFinish(false);
                             connectFail();
+                            callBack.onFinish(false);
                         });
     }
 
@@ -1060,6 +1095,7 @@ public final class IBenMoveSDK {
     public void hasSystemEmergencyStop(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.d("思岚底盘--开始获取急停状态");
             if (isConnect) {
                 boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
                 e.onNext(isEmergencyStop);
@@ -1075,8 +1111,8 @@ public final class IBenMoveSDK {
                 }, throwable -> {
                     throwable.printStackTrace();
                     LogUtils.d("思岚底盘--获取急停状态失败:" + throwable.getMessage());
-                    callBack.onResult(true);
                     connectFail();
+                    callBack.onResult(true);
                 });
     }
 
@@ -1087,6 +1123,7 @@ public final class IBenMoveSDK {
     public void isMoveing(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            LogUtils.d("思岚底盘--开始判断底盘是否正在运动");
             if (isConnect) {
                 ActionStatus status = mRobotPlatform.getCurrentAction().getStatus();
                 boolean isMove = status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
@@ -1101,8 +1138,8 @@ public final class IBenMoveSDK {
                         throwable -> {
                             throwable.printStackTrace();
                             LogUtils.d("思岚底盘--获取移动状态失败:" + throwable.getMessage());
-                            callBack.onResult(false);
                             connectFail();
+                            callBack.onResult(false);
                         });
     }
 
