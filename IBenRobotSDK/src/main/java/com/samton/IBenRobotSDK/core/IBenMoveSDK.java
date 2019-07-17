@@ -63,8 +63,12 @@ import io.reactivex.schedulers.Schedulers;
 public final class IBenMoveSDK {
     // IBenMoveSDK单例
     private static IBenMoveSDK mInstance = null;
+    // 底盘连接失败信息
+    private static final String ERR_MSG = "底盘未连接";
     // 思岚SDK平台对象
     private SlamwareCorePlatform mRobotPlatform;
+    // 是否连接成功
+    private volatile boolean isConnect = false;
     // 是否低电量模式
     private boolean isWarnPower = false;
     // 点位的Disposable
@@ -87,6 +91,12 @@ public final class IBenMoveSDK {
     private MoveCallBack mCurrentCallBack;
     // 当前急停回调
     private StopBtnState mCurrentStopState;
+    // 连接IP地址
+    private String mIp;
+    // 连接端口号
+    private int mPort;
+    // 当前连接状态的回调
+    private ConnectCallBack mConnectCallBack;
 
     /**
      * 私有构造
@@ -119,45 +129,77 @@ public final class IBenMoveSDK {
      */
     @SuppressLint("CheckResult")
     public void connectRobot(String ip, int port, ConnectCallBack callBack) {
-        if (callBack == null) return;
+        isConnect = false;
         // 判断ip和端口是否合法
         if (TextUtils.isEmpty(ip) || port <= 0 || port > 65535) {
-            callBack.onConnectFailed();
-        } else {
+            if (callBack != null) {
+                callBack.onConnectFailed();
+            }
+        } else { // 进行全局状态赋值
+            mIp = ip;
+            mPort = port;
+            mConnectCallBack = callBack;
             Observable.create((ObservableOnSubscribe<Boolean>) e -> {
                 // 设置机器人连接监听
                 mRobotPlatform = SlamwareCorePlatform.connect(ip, port);
                 // 获取机器人电量
-                LogUtils.e("当前机器人电量>>>" + mRobotPlatform.getBatteryPercentage());
+                LogUtils.e("思岚底盘--当前机电量值:" + mRobotPlatform.getBatteryPercentage());
                 e.onNext(true);
                 e.onComplete();
-            })
-                    .subscribeOn(Schedulers.io())
+            }).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(aBoolean -> {
-                        // 回调机器人连接成功
-                        callBack.onConnectSuccess();
-                        // 取消重连计时器
-                        cancelReconnectTimer();
-                    }, throwable -> {
-                        callBack.onConnectFailed();
-                        // 这里进行三秒重连
-                        startReconnectTimer(ip, port, callBack);
-                    });
+                    .subscribe(aBoolean -> connectSuccess(),
+                            throwable -> connectFail());
         }
+    }
+
+    /**
+     * 机器人底盘连接成功
+     */
+    private void connectSuccess() {
+        // 将连接状态置为已连接
+        isConnect = true;
+        // 回调机器人连接成功
+        if (mConnectCallBack != null) {
+            mConnectCallBack.onConnectSuccess();
+        }
+        // 取消重连计时器
+        cancelReconnectTimer();
+    }
+
+    /**
+     * 机器人底盘连接失败
+     */
+    private void connectFail() {
+        // 将连接状态置为未连接
+        isConnect = false;
+        if (mConnectCallBack != null) {
+            mConnectCallBack.onConnectFailed();
+        }
+        // 这里进行三秒重连
+        startReconnectTimer();
+    }
+
+    /**
+     * 获取底盘连接状态
+     *
+     * @return 底盘连接状态
+     */
+    public boolean isConnect() {
+        return isConnect;
     }
 
     /**
      * 开启重连计时器
      */
-    private void startReconnectTimer(String ip, int port, ConnectCallBack callBack) {
+    private void startReconnectTimer() {
         // 取消重连计时器
-        cancelReconnectTimer();
+        if (mConnectSubscribe != null && !mConnectSubscribe.isDisposed()) return;
         // 开始三秒后进行重连
         mConnectSubscribe = Observable.timer(3, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> connectRobot(ip, port, callBack));
+                .subscribe(aLong -> connectRobot(mIp, mPort, mConnectCallBack));
     }
 
     /**
@@ -175,6 +217,9 @@ public final class IBenMoveSDK {
      */
     @SuppressLint("CheckResult")
     public void disConnectRobot() {
+        mIp = "";
+        mPort = 0;
+        mConnectCallBack = null;
         // 取消重连计时器
         cancelReconnectTimer();
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
@@ -184,7 +229,7 @@ public final class IBenMoveSDK {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("与机器人断开连接成功"),
+                .subscribe(aBoolean -> LogUtils.d("思岚底盘--与机器人断开连接成功"),
                         Throwable::printStackTrace);
     }
 
@@ -196,13 +241,21 @@ public final class IBenMoveSDK {
     @SuppressLint("CheckResult")
     public void setMapUpdate(boolean isUpdate) {
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            mRobotPlatform.setMapUpdate(isUpdate);
-            e.onNext(true);
-            e.onComplete();
+            if (isConnect) {
+                mRobotPlatform.setMapUpdate(isUpdate);
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("设置地图更新状态成功"),
-                        throwable -> LogUtils.d("设置地图更新状态失败"));
+                .subscribe(aBoolean -> LogUtils.d("思岚底盘--设置地图更新状态成功"),
+                        throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--设置地图更新状态失败:" + throwable.getMessage());
+                            connectFail();
+                        });
     }
 
     /**
@@ -212,13 +265,24 @@ public final class IBenMoveSDK {
     public void removeMap(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            mRobotPlatform.clearMap();
-            e.onNext(true);
-            e.onComplete();
+            if (isConnect) {
+                mRobotPlatform.clearMap();
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(false));
+                .subscribe(aBoolean -> {
+                    LogUtils.d("思岚底盘--清除地图状态成功");
+                    callBack.onResult(true);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--清除地图状态失败:" + throwable.getMessage());
+                    callBack.onResult(false);
+                    connectFail();
+                });
     }
 
     /**
@@ -230,18 +294,29 @@ public final class IBenMoveSDK {
     public void getBatteryInfo(GetBatteryCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<String>) e -> {
-            JSONObject jsonObject = new JSONObject();
-            int percent = mRobotPlatform.getBatteryPercentage();
-            boolean isCharging = mRobotPlatform.getBatteryIsCharging();
-            jsonObject.put("batteryPercent", percent);
-            jsonObject.put("isCharging", isCharging);
-            e.onNext(jsonObject.toString());
-            e.onComplete();
+            if (isConnect) {
+                JSONObject jsonObject = new JSONObject();
+                int percent = mRobotPlatform.getBatteryPercentage();
+                boolean isCharging = mRobotPlatform.getBatteryIsCharging();
+                jsonObject.put("batteryPercent", percent);
+                jsonObject.put("isCharging", isCharging);
+                e.onNext(jsonObject.toString());
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onSuccess,
-                        throwable -> callBack.onFailed());
+                .subscribe(result -> {
+                    LogUtils.d("思岚底盘--获取电池信息成功:" + result);
+                    callBack.onSuccess(result);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--获取电池信息失败:" + throwable.getMessage());
+                    callBack.onFailed();
+                    connectFail();
+                });
     }
 
     /**
@@ -271,13 +346,24 @@ public final class IBenMoveSDK {
     public void getLocation(ResultCallBack<Location> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Location>) e -> {
-            Location location = mRobotPlatform.getLocation();
-            e.onNext(location);
-            e.onComplete();
+            if (isConnect) {
+                Location location = mRobotPlatform.getLocation();
+                e.onNext(location);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(null));
+                .subscribe(result -> {
+                    LogUtils.d("思岚底盘--获取当前点位坐标成功:" + result.toString());
+                    callBack.onResult(result);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--获取当前点位坐标失败:" + throwable.getMessage());
+                    callBack.onResult(null);
+                    connectFail();
+                });
     }
 
     /**
@@ -289,13 +375,24 @@ public final class IBenMoveSDK {
     public void getPose(ResultCallBack<Pose> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Pose>) e -> {
-            Pose pose = mRobotPlatform.getPose();
-            e.onNext(pose);
-            e.onComplete();
+            if (isConnect) {
+                Pose pose = mRobotPlatform.getPose();
+                e.onNext(pose);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(null));
+                .subscribe(result -> {
+                    LogUtils.d("思岚底盘--获取当前姿态成功:" + result.toString());
+                    callBack.onResult(result);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--获取当前姿态失败:" + throwable.getMessage());
+                    callBack.onResult(null);
+                    connectFail();
+                });
     }
 
     /**
@@ -312,13 +409,21 @@ public final class IBenMoveSDK {
                 btnState.isOnEmergencyStop(true);
             } else {
                 Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-                    mRobotPlatform.setPose(pose);
-                    e.onNext(true);
-                    e.onComplete();
+                    if (isConnect) {
+                        mRobotPlatform.setPose(pose);
+                        e.onNext(true);
+                        e.onComplete();
+                    } else {
+                        e.onError(new Throwable(ERR_MSG));
+                    }
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(aBoolean -> LogUtils.d("设置机器人姿态成功"),
-                                throwable -> LogUtils.d("设置机器人姿态失败"));
+                        .subscribe(aBoolean -> LogUtils.d("思岚底盘--设置当前姿态成功"),
+                                throwable -> {
+                                    throwable.printStackTrace();
+                                    LogUtils.d("思岚底盘--设置当前姿态失败");
+                                    connectFail();
+                                });
             }
         });
     }
@@ -368,13 +473,21 @@ public final class IBenMoveSDK {
                     .subscribeOn(Schedulers.io())
                     .flatMap((Function<Long, ObservableSource<IMoveAction>>) aLong ->
                             Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
-                                LogUtils.d("当前机器人正在移动");
-                                IMoveAction action = mRobotPlatform.moveBy(direction);
-                                e.onNext(action);
+                                if (isConnect) {
+                                    LogUtils.d("思岚底盘--当前正在移动");
+                                    IMoveAction action = mRobotPlatform.moveBy(direction);
+                                    e.onNext(action);
+                                } else {
+                                    e.onError(new Throwable(ERR_MSG));
+                                }
                             }).subscribeOn(Schedulers.io()))
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(action -> LogUtils.d("机器人移动成功"),
-                            throwable -> LogUtils.d("机器人移动失败"));
+                    .subscribe(action -> LogUtils.d("思岚底盘--当前移动成功"),
+                            throwable -> {
+                                throwable.printStackTrace();
+                                LogUtils.d("思岚底盘--当前移动失败:" + throwable.getMessage());
+                                connectFail();
+                            });
         });
     }
 
@@ -399,7 +512,7 @@ public final class IBenMoveSDK {
         if (btnState == null || isWarnPower) return;
         //判断机器人是否正在充电桩
         isHome(isHome -> {
-            LogUtils.d("当前旋转机器人机器人是否在充电桩:" + isHome);
+            LogUtils.d("思岚底盘--当前旋转是否在充电桩:" + isHome);
             if (isHome) return;
             //取消所有动作
             cancelAllActions();
@@ -409,16 +522,24 @@ public final class IBenMoveSDK {
                     btnState.isOnEmergencyStop(true);
                 } else {
                     Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
-                        float tempAngle = (float) (angle / 180 * Math.PI);
-                        Rotation rotation = new Rotation(tempAngle);
-                        IMoveAction action = mRobotPlatform.rotate(rotation);
-                        e.onNext(action);
-                        e.onComplete();
+                        if (isConnect) {
+                            float tempAngle = (float) (angle / 180 * Math.PI);
+                            Rotation rotation = new Rotation(tempAngle);
+                            IMoveAction action = mRobotPlatform.rotate(rotation);
+                            e.onNext(action);
+                            e.onComplete();
+                        } else {
+                            e.onError(new Throwable(ERR_MSG));
+                        }
                     })
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(action -> LogUtils.d("机器人旋转角度成功"),
-                                    throwable -> LogUtils.d("机器人旋转角度失败"));
+                            .subscribe(action -> LogUtils.d("思岚底盘--旋转角度成功"),
+                                    throwable -> {
+                                        throwable.printStackTrace();
+                                        LogUtils.d("思岚底盘--旋转角度失败:" + throwable.getMessage());
+                                        connectFail();
+                                    });
                 }
             });
         });
@@ -445,22 +566,31 @@ public final class IBenMoveSDK {
                 btnState.isOnEmergencyStop(true);
             } else {
                 Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
-                    DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
-                    boolean isHome = dockingStatus == DockingStatus.OnDock;
-                    LogUtils.d("当前执行回充电桩操作机器人是否在充电桩:" + isHome);
-                    if (isHome) {
-                        callBack.onFinish(true);
-                        e.onComplete();
+                    if (isConnect) {
+                        DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
+                        boolean isHome = dockingStatus == DockingStatus.OnDock;
+                        LogUtils.d("思岚底盘--当前执行回充电桩操作是否在充电桩:" + isHome);
+                        if (isHome) {
+                            callBack.onFinish(true);
+                            e.onComplete();
+                        } else {
+                            IMoveAction action = mRobotPlatform.goHome();
+                            e.onNext(action);
+                            e.onComplete();
+                        }
                     } else {
-                        IMoveAction action = mRobotPlatform.goHome();
-                        e.onNext(action);
-                        e.onComplete();
+                        e.onError(new Throwable(ERR_MSG));
                     }
                 })
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(action -> startLocationTimer(action, -999, callBack, btnState)
-                                , throwable -> callBack.onFinish(false));
+                                , throwable -> {
+                                    throwable.printStackTrace();
+                                    LogUtils.d("思岚底盘--当前回桩操作失败:" + throwable.getMessage());
+                                    callBack.onFinish(false);
+                                    connectFail();
+                                });
             }
         });
     }
@@ -492,28 +622,37 @@ public final class IBenMoveSDK {
             } else {
                 // 然后执行行走至定点操作
                 Observable.create((ObservableOnSubscribe<IMoveAction>) e -> {
-                    // 判断机器人当前是否正在充电桩
-                    DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
-                    boolean isHome = dockingStatus == DockingStatus.OnDock;
-                    LogUtils.d("当前去定点状态机器人是否在充电桩:" + isHome);
-                    if (isHome) {
-                        moveByDirection(MoveDirection.FORWARD, 300, btnState);
-                        SystemClock.sleep(1000);
-                        cancelAllActions();
+                    if (isConnect) {
+                        // 判断机器人当前是否正在充电桩
+                        DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
+                        boolean isHome = dockingStatus == DockingStatus.OnDock;
+                        LogUtils.d("思岚底盘--当前去定点状态是否在充电桩:" + isHome);
+                        if (isHome) {
+                            moveByDirection(MoveDirection.FORWARD, 300, btnState);
+                            SystemClock.sleep(1000);
+                            cancelAllActions();
+                        }
+                        MoveOption option = new MoveOption();
+                        option.setSpeedRatio(0.4);
+                        option.setWithYaw(false);
+                        option.setPrecise(true);
+                        option.setMilestone(true);
+                        // 执行行走指令
+                        IMoveAction action = mRobotPlatform.moveTo(location, option, yaw);
+                        e.onNext(action);
+                    } else {
+                        e.onError(new Throwable(ERR_MSG));
                     }
-                    MoveOption option = new MoveOption();
-                    option.setSpeedRatio(0.4);
-                    option.setWithYaw(false);
-                    option.setPrecise(true);
-                    option.setMilestone(true);
-                    // 执行行走指令
-                    IMoveAction action = mRobotPlatform.moveTo(location, option, yaw);
-                    e.onNext(action);
                 })
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(action -> startLocationTimer(action, yaw, callBack, btnState)
-                                , throwable -> callBack.onFinish(false));
+                                , throwable -> {
+                                    throwable.printStackTrace();
+                                    LogUtils.d("思岚底盘--当前走定点操作失败:" + throwable.getMessage());
+                                    callBack.onFinish(false);
+                                    connectFail();
+                                });
             }
         });
     }
@@ -535,14 +674,22 @@ public final class IBenMoveSDK {
         cancelReGoPoint();
         // 调用底盘取消当前动作
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            mRobotPlatform.getCurrentAction().cancel();
-            e.onNext(true);
-            e.onComplete();
+            if (isConnect) {
+                mRobotPlatform.getCurrentAction().cancel();
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("机器人停止所有动作"),
-                        Throwable::printStackTrace);
+                .subscribe(aBoolean -> LogUtils.d("思岚底盘--停止所有动作成功"),
+                        throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--停止所有动作失败:" + throwable.getMessage());
+                            connectFail();
+                        });
     }
 
     /**
@@ -552,14 +699,22 @@ public final class IBenMoveSDK {
     public void clearAllWalls() {
         if (mRobotPlatform == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            mRobotPlatform.clearWalls();
-            e.onNext(true);
-            e.onComplete();
+            if (isConnect) {
+                mRobotPlatform.clearWalls();
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("机器人清除虚拟墙成功"),
-                        throwable -> LogUtils.d("机器人清除虚拟墙失败"));
+                .subscribe(aBoolean -> LogUtils.d("思岚底盘--清除虚拟墙成功"),
+                        throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--清除虚拟墙失败:" + throwable.getMessage());
+                            connectFail();
+                        });
     }
 
     /**
@@ -571,14 +726,25 @@ public final class IBenMoveSDK {
     public void isHome(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
-            boolean isHome = dockingStatus == DockingStatus.OnDock;
-            e.onNext(isHome);
-            e.onComplete();
+            if (isConnect) {
+                DockingStatus dockingStatus = mRobotPlatform.getPowerStatus().getDockingStatus();
+                boolean isHome = dockingStatus == DockingStatus.OnDock;
+                e.onNext(isHome);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(false));
+                .subscribe(result -> {
+                    LogUtils.d("思岚底盘--获取当前是否在充电桩成功:" + result);
+                    callBack.onResult(result);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--获取当前是否在充电桩失败:" + throwable.getMessage());
+                    callBack.onResult(true);
+                    connectFail();
+                });
     }
 
     /**
@@ -590,20 +756,29 @@ public final class IBenMoveSDK {
     public void getPowerStatus(ResultCallBack<Integer> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Integer>) e -> {
-            int powerStatus = 0;
-            PowerStatus status = mRobotPlatform.getPowerStatus();
-            if (status.isCharging()) {
-                // 直流电源连接
-                if (status.isDCConnected()) {
-                    powerStatus = 1;
-                } else {
-                    powerStatus = 2;
+            if (isConnect) {
+                int powerStatus = 0;
+                PowerStatus status = mRobotPlatform.getPowerStatus();
+                if (status.isCharging()) {
+                    // 直流电源连接
+                    if (status.isDCConnected()) {
+                        powerStatus = 1;
+                    } else {
+                        powerStatus = 2;
+                    }
                 }
+                e.onNext(powerStatus);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
             }
-            e.onNext(powerStatus);
-            e.onComplete();
         }).subscribe(callBack::onResult,
-                throwable -> callBack.onResult(0));
+                throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--查询电池状态失败:" + throwable.getMessage());
+                    callBack.onResult(0);
+                    connectFail();
+                });
     }
 
     /**
@@ -616,32 +791,44 @@ public final class IBenMoveSDK {
     public void saveMap(String mapName, MapCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            // 生成保存路径
-            String path = Constants.MAP_PATH + "/" + mapName;
-            // 获取完全版地图并保存到指定路径中
-            CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
-            CompositeMapHelper mapHelper = new CompositeMapHelper();
-            mapHelper.saveFile(path, compositeMap);
-            // 生成缩略图
-            FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
-            // 写入BMP图像
-            for (MapLayer layer : compositeMap.getMaps()) {
-                if (layer instanceof GridMap) {
-                    GridMap map = ((GridMap) layer);
-                    int width = map.getDimension().getWidth();
-                    int height = map.getDimension().getHeight();
-                    Bitmap bitmap = createImage(map.getMapData(), width, height);
-                    byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
-                    FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
-                            Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
+            if (isConnect) {
+                // 生成保存路径
+                String path = Constants.MAP_PATH + "/" + mapName;
+                // 获取完全版地图并保存到指定路径中
+                CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
+                CompositeMapHelper mapHelper = new CompositeMapHelper();
+                mapHelper.saveFile(path, compositeMap);
+                // 生成缩略图
+                FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+                // 写入BMP图像
+                for (MapLayer layer : compositeMap.getMaps()) {
+                    if (layer instanceof GridMap) {
+                        GridMap map = ((GridMap) layer);
+                        int width = map.getDimension().getWidth();
+                        int height = map.getDimension().getHeight();
+                        Bitmap bitmap = createImage(map.getMapData(), width, height);
+                        byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
+                        FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
+                                Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
+                    }
                 }
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
             }
-            e.onNext(true);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> callBack.onSuccess(),
-                        throwable -> callBack.onFailed());
+                .subscribe(aBoolean -> {
+                    LogUtils.d("思岚底盘--保存地图成功");
+                    callBack.onSuccess();
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--保存地图失败:" + throwable.getMessage());
+                    callBack.onFailed();
+                    connectFail();
+                });
     }
 
     /**
@@ -673,16 +860,29 @@ public final class IBenMoveSDK {
     public void loadMap(String mapNamePath, Pose cachePose, MapCallBack callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            // 地图加载帮助对象
-            CompositeMapHelper helper = new CompositeMapHelper();
-            CompositeMap map = helper.loadFile(mapNamePath);
-            // 地图不为空的话加载地图
-            mRobotPlatform.setCompositeMap(map, cachePose == null ? new Pose() : cachePose);
+            if (isConnect) {
+                // 地图加载帮助对象
+                CompositeMapHelper helper = new CompositeMapHelper();
+                CompositeMap map = helper.loadFile(mapNamePath);
+                // 地图不为空的话加载地图
+                mRobotPlatform.setCompositeMap(map, cachePose == null ? new Pose() : cachePose);
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> callBack.onSuccess(),
-                        throwable -> callBack.onFailed());
+                .subscribe(aBoolean -> {
+                    LogUtils.d("思岚底盘--地图加载成功");
+                    callBack.onSuccess();
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--地图加载失败:" + throwable.getMessage());
+                    callBack.onFailed();
+                    connectFail();
+                });
     }
 
 
@@ -695,18 +895,27 @@ public final class IBenMoveSDK {
     private void getMap(ResultCallBack<Map> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Map>) e -> {
-            // 地图类型为8位位图
-            MapType mapType = MapType.BITMAP_8BIT;
-            // 地图种类为扫描建图
-            MapKind mapKind = MapKind.EXPLORE_MAP;
-            // 获取地图
-            Map map = mRobotPlatform.getMap(mapType, mapKind, mRobotPlatform.getKnownArea(mapType));
-            e.onNext(map);
-            e.onComplete();
+            if (isConnect) {
+                // 地图类型为8位位图
+                MapType mapType = MapType.BITMAP_8BIT;
+                // 地图种类为扫描建图
+                MapKind mapKind = MapKind.EXPLORE_MAP;
+                // 获取地图
+                Map map = mRobotPlatform.getMap(mapType, mapKind, mRobotPlatform.getKnownArea(mapType));
+                e.onNext(map);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(null));
+                        throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--获取地图失败:" + throwable.getMessage());
+                            callBack.onResult(null);
+                            connectFail();
+                        });
     }
 
     /**
@@ -765,7 +974,12 @@ public final class IBenMoveSDK {
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callBack::onFinish
-                        , throwable -> callBack.onFinish(false));
+                        , throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--去定点状态查询失败:" + throwable.getMessage());
+                            callBack.onFinish(false);
+                            connectFail();
+                        });
     }
 
     /**
@@ -821,7 +1035,12 @@ public final class IBenMoveSDK {
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callBack::onFinish
-                        , throwable -> callBack.onFinish(false));
+                        , throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--旋转角度状态查询失败:" + throwable.getMessage());
+                            callBack.onFinish(false);
+                            connectFail();
+                        });
     }
 
     /**
@@ -841,13 +1060,24 @@ public final class IBenMoveSDK {
     public void hasSystemEmergencyStop(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
-            e.onNext(isEmergencyStop);
-            e.onComplete();
+            if (isConnect) {
+                boolean isEmergencyStop = mRobotPlatform.getRobotHealth().getHasSystemEmergencyStop();
+                e.onNext(isEmergencyStop);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(true));
+                .subscribe(result -> {
+                    LogUtils.d("思岚底盘--获取急停状态成功:" + result);
+                    callBack.onResult(result);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    LogUtils.d("思岚底盘--获取急停状态失败:" + throwable.getMessage());
+                    callBack.onResult(true);
+                    connectFail();
+                });
     }
 
     /**
@@ -857,14 +1087,23 @@ public final class IBenMoveSDK {
     public void isMoveing(ResultCallBack<Boolean> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
-            ActionStatus status = mRobotPlatform.getCurrentAction().getStatus();
-            boolean isMove = status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
-            e.onNext(isMove);
-            e.onComplete();
+            if (isConnect) {
+                ActionStatus status = mRobotPlatform.getCurrentAction().getStatus();
+                boolean isMove = status == ActionStatus.WAITING_FOR_START || status == ActionStatus.RUNNING;
+                e.onNext(isMove);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callBack::onResult,
-                        throwable -> callBack.onResult(false));
+                        throwable -> {
+                            throwable.printStackTrace();
+                            LogUtils.d("思岚底盘--获取移动状态失败:" + throwable.getMessage());
+                            callBack.onResult(false);
+                            connectFail();
+                        });
     }
 
     /**
