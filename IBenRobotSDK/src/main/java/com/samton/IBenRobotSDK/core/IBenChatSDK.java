@@ -173,11 +173,7 @@ public final class IBenChatSDK {
                 .subscribe(msgBean -> {
                     mCallBack.onSuccess(msgBean);
                     // 发送消息到容联云
-                    try {
-                        sendMsgToYtx(accout, msgBean);
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
+                    sendMsgToYtx(accout, msgBean);
                 }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
     }
 
@@ -203,8 +199,15 @@ public final class IBenChatSDK {
     /**
      * 判断返回消息类型并回传给后台(人工消息框)
      */
-    private void sendMsgToYtx(String accout, MessageBean msgBean) throws NullPointerException {
-        MessageBean.DataBean.AppMessageBean mResult = msgBean.getData().getAppMessage().get(0);
+    private void sendMsgToYtx(String accout, MessageBean msgBean) {
+        // 先做非空判断
+        if (accout == null || msgBean == null) return;
+        MessageBean.DataBean mDataBean = msgBean.getData();
+        if (mDataBean == null) return;
+        List<MessageBean.DataBean.AppMessageBean> mAppMessage = mDataBean.getAppMessage();
+        if (mAppMessage == null || mAppMessage.isEmpty()) return;
+        MessageBean.DataBean.AppMessageBean mResult = mAppMessage.get(0);
+        if (mResult == null) return;
         String resultAnswer = mResult.getMessage();
         // 判断类型
         switch (mResult.getAnswerType()) {
