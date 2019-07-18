@@ -650,7 +650,7 @@ public final class IBenMoveSDK {
                         if (isHome) {
                             moveByDirection(MoveDirection.FORWARD, 300, btnState);
                             SystemClock.sleep(1000);
-                            cancelAllActions();
+                            cancelMoveTimer();
                         }
                         MoveOption option = new MoveOption();
                         option.setSpeedRatio(0.4);
@@ -660,6 +660,7 @@ public final class IBenMoveSDK {
                         // 执行行走指令
                         IMoveAction action = mRobotPlatform.moveTo(location, option, yaw);
                         e.onNext(action);
+                        e.onComplete();
                     } else {
                         e.onError(new Throwable(ERR_MSG));
                     }
@@ -984,6 +985,7 @@ public final class IBenMoveSDK {
                         if (isErrorToEmergencyStop()) {
                             startReGoPoint();
                         } else {
+                            LogUtils.d("思岚底盘--查询移动中状态为失败:" + action.getReason());
                             e.onNext(false);
                             e.onComplete();
                         }
