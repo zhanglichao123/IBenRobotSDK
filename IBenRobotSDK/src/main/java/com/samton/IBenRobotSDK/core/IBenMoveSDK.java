@@ -200,7 +200,7 @@ public final class IBenMoveSDK {
      * 开启重连计时器
      */
     private void startReconnectTimer() {
-        cancelReconnectTimer();
+        if (mReconnectSubscribe != null && !mReconnectSubscribe.isDisposed()) return;
         // 开始三秒后进行重连
         mReconnectSubscribe = Observable.timer(3, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
@@ -321,7 +321,6 @@ public final class IBenMoveSDK {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .timeout(5, TimeUnit.SECONDS)
                 .subscribe(result -> {
                     LogUtils.d("思岚底盘--获取电池信息成功:" + result);
                     callBack.onSuccess(result);
