@@ -208,7 +208,7 @@ public final class IBenMoveSDK {
                 .subscribe(aLong -> {
                     LogUtils.d("思岚底盘--当前正在进行重新连接底盘操作");
                     connectRobot(mIp, mPort, mConnectCallBack);
-                });
+                }, Throwable::printStackTrace);
     }
 
     /**
@@ -1269,7 +1269,7 @@ public final class IBenMoveSDK {
                         cancelStopStateTimer();
                         startReGoPoint();
                     }
-                });
+                }, Throwable::printStackTrace);
     }
 
     /**
@@ -1297,6 +1297,6 @@ public final class IBenMoveSDK {
                         goLocation(mCurrentLocation, mCurrentYaw, mCurrentCallBack, mCurrentStopState);
                     }
                     cancelReGoPoint();
-                });
+                }, Throwable::printStackTrace);
     }
 }
