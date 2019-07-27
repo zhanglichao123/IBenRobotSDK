@@ -1,5 +1,6 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
 import com.samton.IBenRobotSDK.data.Constants;
@@ -36,7 +37,7 @@ public final class IBenWakeUpUtil {
     /**
      * 唤醒回调
      */
-    private Disposable mAngleSubscribe;
+    private volatile IWakeUpCallBack mIWakeUpCallBack;
 
     /**
      * 获取唤醒工具单例
@@ -50,6 +51,7 @@ public final class IBenWakeUpUtil {
     /**
      * 私有构造
      */
+    @SuppressLint("CheckResult")
     private IBenWakeUpUtil() {
         // 设置串口号、波特率
         String type = SPUtils.getInstance().getString(Constants.PLANK_TYPE);
@@ -64,21 +66,11 @@ public final class IBenWakeUpUtil {
                 mSerialUtil = new SerialUtil("/dev/ttyXRUSB0");
                 break;
         }
-    }
-
-    /**
-     * 初始化唤醒工具类
-     *
-     * @param callBack 回调接口
-     */
-    public void setCallBack(IWakeUpCallBack callBack) {
-        //先停止上一轮的唤醒
-        stopWakeUp();
-        mAngleSubscribe = Observable.interval(0, 20, TimeUnit.MILLISECONDS)
+        Observable.interval(0, 500, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> {
-                    if (mSerialUtil == null || callBack == null) return;
+                    if (mSerialUtil == null) return;
                     // 读取数据
                     byte[] data = mSerialUtil.getDataByte();
                     // 不为空的话进行回写
@@ -99,8 +91,18 @@ public final class IBenWakeUpUtil {
                         angle = 0;
                     }
                     // 回调
-                    callBack.onWakeUp(angle);
+                    if (mIWakeUpCallBack != null)
+                        mIWakeUpCallBack.onWakeUp(angle);
                 });
+    }
+
+    /**
+     * 初始化唤醒工具类
+     *
+     * @param callBack 回调接口
+     */
+    public void setCallBack(IWakeUpCallBack callBack) {
+        mIWakeUpCallBack = callBack;
     }
 
     /**
@@ -115,10 +117,6 @@ public final class IBenWakeUpUtil {
      * 停止语音唤醒监听
      */
     public void stopWakeUp() {
-        // 清空回显定时器
-        if (mAngleSubscribe != null && !mAngleSubscribe.isDisposed()) {
-            mAngleSubscribe.dispose();
-            mAngleSubscribe = null;
-        }
+        mIWakeUpCallBack = null;
     }
 }

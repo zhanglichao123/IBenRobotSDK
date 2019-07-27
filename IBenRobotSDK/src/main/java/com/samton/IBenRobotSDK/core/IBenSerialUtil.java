@@ -1,5 +1,7 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.annotation.SuppressLint;
+
 import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
 import com.samton.IBenRobotSDK.utils.SPUtils;
@@ -32,9 +34,9 @@ public final class IBenSerialUtil {
      */
     private volatile static IBenSerialUtil instance = new IBenSerialUtil();
     /**
-     * 串口回调
+     * 唤醒回调监听
      */
-    private Disposable mReadSubscribe;
+    private volatile ISerialCallBack mISerialCallBack;
 
     /**
      * 获取串口工具单例
@@ -48,6 +50,7 @@ public final class IBenSerialUtil {
     /**
      * 私有构造
      */
+    @SuppressLint("CheckResult")
     private IBenSerialUtil() {
         // 设置串口号、波特率
         String type = SPUtils.getInstance().getString(Constants.PLANK_TYPE);
@@ -62,6 +65,22 @@ public final class IBenSerialUtil {
                 mSerialUtil = new SerialUtil("/dev/ttyXRUSB2");
                 break;
         }
+        Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> {
+                    if (mSerialUtil == null) return;
+                    // 读取数据
+                    byte[] data = mSerialUtil.getDataByte();
+                    // 不为空的话进行回写
+                    if (data == null || data.length < 1) return;
+                    String result = new String(data);
+                    int startIndex = result.indexOf("{");
+                    int endIndex = result.indexOf("}");
+                    if (startIndex == -1 || endIndex == -1) return;
+                    if (mISerialCallBack != null)
+                        mISerialCallBack.onReadData(result);
+                });
     }
 
     /**
@@ -70,35 +89,15 @@ public final class IBenSerialUtil {
      * @param callBack 回调
      */
     public void setCallBack(ISerialCallBack callBack) {
-        // 清空计时器
-        removeCallBack();
-        mReadSubscribe = Observable.interval(0, 20, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> {
-                    if (mSerialUtil == null || callBack == null) return;
-                    // 读取数据
-                    byte[] data = mSerialUtil.getDataByte();
-                    // 不为空的话进行回写
-                    if (data != null) {
-                        String result = new String(data);
-                        int startIndex = result.indexOf("{");
-                        int endIndex = result.indexOf("}");
-                        if (startIndex != -1 && endIndex != -1) {
-                            callBack.onReadData(result);
-                        }
-                    }
-                });
+        mISerialCallBack = callBack;
+
     }
 
     /**
      * 移除回调监听
      */
     public void removeCallBack() {
-        if (mReadSubscribe != null && !mReadSubscribe.isDisposed()) {
-            mReadSubscribe.dispose();
-            mReadSubscribe = null;
-        }
+        mISerialCallBack = null;
     }
 
     /**
@@ -107,8 +106,7 @@ public final class IBenSerialUtil {
      * @param msg 要写的数据
      */
     public void sendData(String msg) {
-        if (mSerialUtil != null)
-            mSerialUtil.setData(msg.getBytes());
+        if (mSerialUtil == null) return;
+        mSerialUtil.setData(msg.getBytes());
     }
-
 }
