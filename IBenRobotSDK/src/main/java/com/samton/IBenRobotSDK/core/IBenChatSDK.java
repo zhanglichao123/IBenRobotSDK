@@ -151,7 +151,10 @@ public final class IBenChatSDK {
                     if (!TextUtils.isEmpty(accout)) {
                         IBenIMHelper.getInstance().sendTxtMsg(accout, msg);
                     }
-                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
+                }, throwable -> {
+                    if (mCallBack == null) return;
+                    mCallBack.onSuccess(getDefaultMessageBean());
+                });
     }
 
     /**
@@ -171,10 +174,14 @@ public final class IBenChatSDK {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(msgBean -> {
+                    if (mCallBack == null) return;
                     mCallBack.onSuccess(msgBean);
                     // 发送消息到容联云
                     sendMsgToYtx(accout, msgBean);
-                }, throwable -> mCallBack.onSuccess(getDefaultMessageBean()));
+                }, throwable -> {
+                    if (mCallBack == null) return;
+                    mCallBack.onSuccess(getDefaultMessageBean());
+                });
     }
 
     /**
