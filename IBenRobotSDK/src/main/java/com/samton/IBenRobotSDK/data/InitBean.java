@@ -234,33 +234,18 @@ public final class InitBean {
          * rightHeadImg : http://121.41.40.145:7080/img/deault/user_icon.png
          * logoImg : http://121.41.40.145:7080/img/deault/company_logo.png
          * questionTip : ["回充电桩","宣讲模式","今天天气怎么样","打印个名片","跳个舞吧","看看我颜值多少分","讲个笑话吧","北京的景区"]
+         * fristMsg : 首次进去欢迎语
+         * contentReply : 首次进去欢迎语
          */
         private int version;
         private String leftHeadImg;
         private String rightHeadImg;
         private String logoImg;
         private List<String> questionTip;
-
-        /**
-         * fristMsg : 首次进去欢迎语
-         * contentReply : 首次进去欢迎语
-         * anthomaniacPwd : ["花痴"]
-         * happyPwd : ["高兴"]
-         * sadPwd : ["难过"]
-         * levelPwd : ["双手持平"]
-         * movePwd : ["双手举高"]
-         * rightHandPwd : ["右手举高"]
-         */
-
         private String fristMsg;
         private String repeatMsg;
         private String contentReply;
-        private List<String> anthomaniacPwd;
-        private List<String> happyPwd;
-        private List<String> sadPwd;
-        private List<String> levelPwd;
-        private List<String> movePwd;
-        private List<String> rightHandPwd;
+        private int subject;
 
         public String getRepeatMsg() {
             return repeatMsg;
@@ -321,70 +306,12 @@ public final class InitBean {
             this.contentReply = contentReply;
         }
 
-        public List<String> getAnthomaniacPwd() {
-            if (anthomaniacPwd == null) {
-                anthomaniacPwd = new ArrayList<>();
-            }
-            return anthomaniacPwd;
+        public int getSubject() {
+            return subject;
         }
 
-        public void setAnthomaniacPwd(List<String> anthomaniacPwd) {
-            this.anthomaniacPwd = anthomaniacPwd;
-        }
-
-        public List<String> getHappyPwd() {
-            if (happyPwd == null) {
-                happyPwd = new ArrayList<>();
-            }
-            return happyPwd;
-        }
-
-        public void setHappyPwd(List<String> happyPwd) {
-            this.happyPwd = happyPwd;
-        }
-
-        public List<String> getSadPwd() {
-            if (sadPwd == null) {
-                sadPwd = new ArrayList<>();
-            }
-            return sadPwd;
-        }
-
-        public void setSadPwd(List<String> sadPwd) {
-            this.sadPwd = sadPwd;
-        }
-
-        public List<String> getLevelPwd() {
-            if (levelPwd == null) {
-                levelPwd = new ArrayList<>();
-            }
-            return levelPwd;
-        }
-
-        public void setLevelPwd(List<String> levelPwd) {
-            this.levelPwd = levelPwd;
-        }
-
-        public List<String> getMovePwd() {
-            if (movePwd == null) {
-                movePwd = new ArrayList<>();
-            }
-            return movePwd;
-        }
-
-        public void setMovePwd(List<String> movePwd) {
-            this.movePwd = movePwd;
-        }
-
-        public List<String> getRightHandPwd() {
-            if (rightHandPwd == null) {
-                rightHandPwd = new ArrayList<>();
-            }
-            return rightHandPwd;
-        }
-
-        public void setRightHandPwd(List<String> rightHandPwd) {
-            this.rightHandPwd = rightHandPwd;
+        public void setSubject(int subject) {
+            this.subject = subject;
         }
 
         public int getVersion() {
