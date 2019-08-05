@@ -1,7 +1,6 @@
 package com.samton.IBenRobotSDK.face;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.megvii.facepp.sdk.Facepp;
 import com.megvii.licensemanager.sdk.LicenseManager;
@@ -50,6 +49,7 @@ public class FaceManager {
         licenseManager.setExpirationMillis(Facepp.getApiExpirationMillis(
                 context, FaceUtil.getFileContent(context, faceppRawId)));
         String uuid = FaceUtil.getUUIDString(context);
+//        String uuid = "MmE1Nzk5NmEtZDYyNS00MTY4LTgyYjgtZTI2MDgzOGZiYzYz";
         long apiName = Facepp.getApiName();
         licenseManager.setAuthTimeBufferMillis(0);
         licenseManager.takeLicenseFromNetwork(FaceKey.CN_LICENSE_URL, uuid, FaceKey.API_KEY, FaceKey.API_SECRET, apiName,
@@ -150,8 +150,6 @@ public class FaceManager {
      * @return
      */
     public double FaceCommpare(byte[] imageData, byte[] imageData2) {
-        Log.e("Liu", "FaceCommpare:imageData " + imageData.length / 1024);
-        Log.e("Liu", "FaceCommpare:imageData2 " + imageData2.length / 1024);
         if (null != facepp) {
             if (null != imageData && null != imageData2) {
                 return facepp.faceCompare(imageData, imageData2);
