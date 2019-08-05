@@ -974,6 +974,7 @@ public final class IBenMoveSDK {
                     break;
                 } else {
                     ActionStatus status = action.getStatus();
+                    LogUtils.d("思岚底盘--查询移动中状态:" + status);
                     if (status == ActionStatus.RUNNING) {
                         // 回调开始行走
                         if (isNeedCallBackStart) {
@@ -985,9 +986,9 @@ public final class IBenMoveSDK {
                         if (isErrorToEmergencyStop()) {
                             startReGoPoint();
                         } else {
-                            LogUtils.d("思岚底盘--查询移动中状态为失败:" + action.getReason());
                             e.onNext(false);
                             e.onComplete();
+                            LogUtils.d("思岚底盘--查询移动中状态为失败:" + action.getReason());
                         }
                         break;
                     } else if (status == ActionStatus.FINISHED) {
