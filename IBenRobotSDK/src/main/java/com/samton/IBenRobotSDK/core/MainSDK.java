@@ -7,13 +7,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import com.iflytek.cloud.SpeechUtility;
-import com.samton.IBenRobotSDK.data.Constants;
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpRequest;
 import com.samton.IBenRobotSDK.net.HttpUtil;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -25,7 +24,7 @@ import io.reactivex.schedulers.Schedulers;
  * time   : 2017/09/07
  * desc   : 机器人SDK入口
  */
-public final class MainSDK {
+public class MainSDK {
     private static Application mApplication;
     private static volatile MainSDK mInstance = null;
 
@@ -56,14 +55,14 @@ public final class MainSDK {
         // 读取XML中的必须配置
         readMetaDataAndSave(mApplication);
         // 科大讯飞的语音系统
-        SpeechUtility.createUtility(mApplication, Constants.APP_ID);
+        SpeechUtility.createUtility(mApplication, AppConfig.ROBOT_APPID);
     }
 
     /**
      * 单独初始化Fece++
      */
-    public void initFacepp(final int faceppRawId) {
-        final FaceManager faceManager = FaceManager.getInstance();
+    public void initFacepp(int faceppRawId) {
+        FaceManager faceManager = FaceManager.getInstance();
         // 检验人脸识别证书是否过期
         faceManager.CheckFaceLicense(mApplication, faceppRawId, new FaceCheckLicenseCallBack() {
             @Override
@@ -76,7 +75,6 @@ public final class MainSDK {
             @Override
             public void onCheckFail(String errorMessage) {
                 LogUtils.e("加载证书失败" + errorMessage);
-                throw new UnsupportedOperationException("加载证书失败" + errorMessage);
             }
         });
     }
@@ -84,19 +82,24 @@ public final class MainSDK {
     /**
      * 读取项目配置信息并保存到本地
      */
-    private void readMetaDataAndSave(Context mContext) {
+    private void readMetaDataAndSave(Context context) {
         try {
-            ApplicationInfo info = mContext.getPackageManager()
-                    .getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA);
+            ApplicationInfo info = context.getPackageManager()
+                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             // 获取AppKey
-            String iben_appkey = info.metaData.getString("IBEN_APPKEY", "");
+            AppConfig.ROBOT_APPID = info.metaData.getString("IBEN_APPKEY", "");
             // 获取当前主板类型
-            String plank_type = info.metaData.getString("PLANK_TYPE", "rk3399l");
-            // 初始化机器人配置信息
-            SPUtils spInstance = SPUtils.getInstance();
-            spInstance.put(Constants.ROBOT_APP_KEY, iben_appkey);// 机器人唯一标识
-            spInstance.put(Constants.ROBOT_IM_ACCOUNT, iben_appkey);// 容联云ID
-            spInstance.put(Constants.PLANK_TYPE, plank_type);// 主板类型
+            AppConfig.PLANK_TYPE = info.metaData.getString("PLANK_TYPE", "rk3399l");
+            // 获取科大讯飞的AppKey
+            AppConfig.IFLYTEK_APPKEY = info.metaData.getString("IFLYTEK_APPKEY", "");
+            // 容联云的AppID
+            AppConfig.YTX_APPID = info.metaData.getString("YTX_APPID", "");
+            // 容联云的ToKen
+            AppConfig.YTX_APPTOKEN = info.metaData.getString("YTX_APPTOKEN", "");
+            // Face++的AppKey
+            AppConfig.FACE_KEY = info.metaData.getString("FACE_KEY", "");
+            // Face++的Secret
+            AppConfig.FACE_SECRET = info.metaData.getString("FACE_SECRET", "");
         } catch (PackageManager.NameNotFoundException e) {
             LogUtils.e("请在AndroidManifest中配置相应的数据");
         }
@@ -106,24 +109,27 @@ public final class MainSDK {
      * 激活机器人
      */
     @SuppressLint("CheckResult")
-    public void activeRobot(final IActiveCallBack callBack) {
+    public void activeRobot(IActiveCallBack callBack) {
         // 机器人执行激活操作
         HttpUtil.getInstance().create(HttpRequest.class)
-                .activeRobot(SPUtils.getInstance().getString(Constants.ROBOT_APP_KEY))
+                .activeRobot(AppConfig.ROBOT_APPID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(initBean -> {
                     // 初始化成功
                     if (initBean.getRs() != -1) {
                         // 成功回调
-                        callBack.onSuccess();
+                        if (callBack != null)
+                            callBack.onSuccess();
                     } else {
                         // 失败回调
-                        callBack.onFailed(initBean.getData().getErrorMsg());
+                        if (callBack != null)
+                            callBack.onFailed(initBean.getData().getErrorMsg());
                     }
                 }, throwable -> {
                     // 初始化失败
-                    callBack.onFailed(throwable.getMessage());
+                    if (callBack != null)
+                        callBack.onFailed(throwable.getMessage());
                 });
     }
 

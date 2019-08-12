@@ -19,7 +19,7 @@ import com.samton.IBenRobotSDK.media.TTSManager;
  * </pre>
  */
 
-public final class IBenTTSUtil {
+public class IBenTTSUtil {
     /**
      * 单例
      */

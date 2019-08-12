@@ -2,16 +2,14 @@ package com.samton.IBenRobotSDK.core;
 
 import android.annotation.SuppressLint;
 
-import com.samton.IBenRobotSDK.data.Constants;
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.serialport.SerialUtil;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -24,7 +22,7 @@ import io.reactivex.schedulers.Schedulers;
  * </pre>
  */
 
-public final class IBenSerialUtil {
+public class IBenSerialUtil {
     /**
      * 串口操作工具类
      */
@@ -53,8 +51,7 @@ public final class IBenSerialUtil {
     @SuppressLint("CheckResult")
     private IBenSerialUtil() {
         // 设置串口号、波特率
-        String type = SPUtils.getInstance().getString(Constants.PLANK_TYPE);
-        switch (type) {
+        switch (AppConfig.PLANK_TYPE) {
             case "rk3288h":// 3288黑板
                 mSerialUtil = new SerialUtil("/dev/ttyS0");
                 break;

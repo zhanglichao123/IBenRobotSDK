@@ -16,7 +16,7 @@ import java.util.List;
  * </pre>
  */
 
-public final class InitBean {
+public class InitBean {
 
     /**
      * _token_iben : null

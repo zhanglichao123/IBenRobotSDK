@@ -13,7 +13,6 @@ import com.iflytek.cloud.util.UserWords;
 import com.samton.IBenRobotSDK.interfaces.IBenRecordCallBack;
 import com.samton.IBenRobotSDK.media.RecordManager;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,8 +22,6 @@ import org.json.JSONTokener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_LANGUAGE;
 
 /**
  * <pre>
@@ -36,7 +33,7 @@ import static com.samton.IBenRobotSDK.data.Constants.ROBOT_LANGUAGE;
  * </pre>
  */
 
-public final class IBenRecordUtil {
+public class IBenRecordUtil {
     /**
      * 单例
      */
@@ -57,6 +54,10 @@ public final class IBenRecordUtil {
      * 语音回调接口
      */
     private IBenRecordCallBack mCallBack = null;
+    /**
+     * 语音听写(中文/英文)
+     */
+    private String language = "zh_cn";
     /**
      * 科大讯飞识别监听
      */
@@ -160,7 +161,16 @@ public final class IBenRecordUtil {
      * @param isChinese 是否为中文
      */
     public void setLanguage(boolean isChinese) {
-        SPUtils.getInstance().put(ROBOT_LANGUAGE, isChinese ? "zh_cn" : "en_us");
+        language = isChinese ? "zh_cn" : "en_us";
+    }
+
+    /**
+     * 获取听写语言
+     *
+     * @return zh_cn:中文,en_us:英文
+     */
+    public String getLanguage() {
+        return language;
     }
 
     /**

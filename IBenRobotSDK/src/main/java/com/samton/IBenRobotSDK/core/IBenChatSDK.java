@@ -3,6 +3,7 @@ package com.samton.IBenRobotSDK.core;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
 import com.samton.IBenRobotSDK.net.HttpRequest;
@@ -16,8 +17,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
-
 /**
  * <pre>
  *     author : syk
@@ -28,7 +27,7 @@ import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
  * </pre>
  */
 
-public final class IBenChatSDK {
+public class IBenChatSDK {
     /**
      * 单例模式
      */
@@ -92,6 +91,7 @@ public final class IBenChatSDK {
      * 移除消息回调监听
      */
     public void removeCallBack() {
+        //取消网络请求
         cancelHttp();
         mCallBack = null;
         IBenIMHelper.getInstance().removeCallBack();
@@ -101,10 +101,12 @@ public final class IBenChatSDK {
      * 取消所有的网络请求
      */
     private void cancelHttp() {
+        //取消获取聊天类型的请求
         if (mGetChatFlagSubscribe != null && !mGetChatFlagSubscribe.isDisposed()) {
             mGetChatFlagSubscribe.dispose();
             mGetChatFlagSubscribe = null;
         }
+        //取消向后台发送消息的请求
         if (mSendIBenSubscribe != null && !mSendIBenSubscribe.isDisposed()) {
             mSendIBenSubscribe.dispose();
             mSendIBenSubscribe = null;
@@ -114,7 +116,7 @@ public final class IBenChatSDK {
     /**
      * 与小笨机器人聊天
      *
-     * @param msg 要发送的信息
+     * @param msg 发送的信息
      */
     public void sendMessage(String msg) {
         sendMessage(msg, "");
@@ -123,8 +125,8 @@ public final class IBenChatSDK {
     /**
      * 与小笨机器人聊天
      *
-     * @param msg   要发送的信息
-     * @param reMsg 返回的关联问题
+     * @param msg   发送的信息
+     * @param reMsg 关联问题
      */
     public void sendMessage(String msg, String reMsg) {
         // 标识位赋值
@@ -134,25 +136,28 @@ public final class IBenChatSDK {
     /**
      * 与小笨机器人聊天
      *
-     * @param msg   要发送的信息
-     * @param reMsg 返回的关联问题
+     * @param msg   发送的信息
+     * @param reMsg 关联问题
      */
     public void sendMessage(String msg, String reMsg, String reIndex) {
+        // 取消网络请求
         cancelHttp();
+        // 向后台获取人工状态
         mGetChatFlagSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
-                .getRobotChatFlag(SPUtils.getInstance().getString(ROBOT_APP_KEY))
+                .getRobotChatFlag(AppConfig.ROBOT_APPID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(chatFlagBean -> {
-                    String accout = chatFlagBean.getAccout();
+                    String account = chatFlagBean.getAccout();
                     // 发送消息给小笨
-                    if (chatFlagBean.getRs() != 1) send2IBen(msg, accout, reMsg, reIndex);
+                    if (chatFlagBean.getRs() != 1) send2IBen(msg, account, reMsg, reIndex);
                     // 发送给人工的消息
-                    if (!TextUtils.isEmpty(accout)) {
-                        IBenIMHelper.getInstance().sendTxtMsg(accout, msg);
+                    if (!TextUtils.isEmpty(account)) {
+                        IBenIMHelper.getInstance().sendTxtMsg(account, msg);
                     }
                 }, throwable -> {
                     if (mCallBack == null) return;
+                    // 失败返回默认的提示内容
                     mCallBack.onSuccess(getDefaultMessageBean());
                 });
     }
@@ -160,26 +165,26 @@ public final class IBenChatSDK {
     /**
      * 发送消息给小笨
      *
-     * @param msg   要发送的消息
-     * @param reMsg 返回的关联问题
+     * @param msg   发送的消息
+     * @param reMsg 关联问题
      */
-    private void send2IBen(String msg, String accout, String reMsg, String reIndex) {
-        // APP_KEY
-        String appKey = SPUtils.getInstance().getString(ROBOT_APP_KEY);
+    private void send2IBen(String msg, String account, String reMsg, String reIndex) {
         // 当前时间
         String time = String.valueOf(System.currentTimeMillis());
+        // 取消网络请求
         cancelHttp();
         mSendIBenSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
-                .send2IBen(appKey, time, msg, reMsg, reIndex)
+                .send2IBen(AppConfig.ROBOT_APPID, time, msg, reMsg, reIndex)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(msgBean -> {
                     if (mCallBack == null) return;
                     mCallBack.onSuccess(msgBean);
                     // 发送消息到容联云
-                    sendMsgToYtx(accout, msgBean);
+                    sendMsgToYtx(account, msgBean);
                 }, throwable -> {
                     if (mCallBack == null) return;
+                    // 失败返回默认的提示内容
                     mCallBack.onSuccess(getDefaultMessageBean());
                 });
     }
@@ -206,9 +211,9 @@ public final class IBenChatSDK {
     /**
      * 判断返回消息类型并回传给后台(人工消息框)
      */
-    private void sendMsgToYtx(String accout, MessageBean msgBean) {
+    private void sendMsgToYtx(String account, MessageBean msgBean) {
         // 先做非空判断
-        if (accout == null || msgBean == null) return;
+        if (account == null || msgBean == null) return;
         MessageBean.DataBean mDataBean = msgBean.getData();
         if (mDataBean == null) return;
         List<MessageBean.DataBean.AppMessageBean> mAppMessage = mDataBean.getAppMessage();
@@ -247,6 +252,6 @@ public final class IBenChatSDK {
                 break;
         }
         // 发送给人工的消息
-        IBenIMHelper.getInstance().sendTxtMsg(accout, "#RENGONG#" + resultAnswer);
+        IBenIMHelper.getInstance().sendTxtMsg(account, "#RENGONG#" + resultAnswer);
     }
 }

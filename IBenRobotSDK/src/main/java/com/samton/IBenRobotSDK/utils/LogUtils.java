@@ -46,7 +46,7 @@ import javax.xml.transform.stream.StreamSource;
  *     desc  : Log相关工具类
  * </pre>
  */
-public final class LogUtils {
+public class LogUtils {
 
     public static final int V = Log.VERBOSE;
     public static final int D = Log.DEBUG;
@@ -64,27 +64,27 @@ public final class LogUtils {
 
     private static final int FILE = 0x10;
     private static final int JSON = 0x20;
-    private static final int XML  = 0x30;
+    private static final int XML = 0x30;
 
-    private static final String FILE_SEP       = System.getProperty("file.separator");
-    private static final String LINE_SEP       = System.getProperty("line.separator");
-    private static final String TOP_CORNER     = "┌";
-    private static final String MIDDLE_CORNER  = "├";
-    private static final String LEFT_BORDER    = "│ ";
-    private static final String BOTTOM_CORNER  = "└";
-    private static final String SIDE_DIVIDER   = "────────────────────────────────────────────────────────";
+    private static final String FILE_SEP = System.getProperty("file.separator");
+    private static final String LINE_SEP = System.getProperty("line.separator");
+    private static final String TOP_CORNER = "┌";
+    private static final String MIDDLE_CORNER = "├";
+    private static final String LEFT_BORDER = "│ ";
+    private static final String BOTTOM_CORNER = "└";
+    private static final String SIDE_DIVIDER = "────────────────────────────────────────────────────────";
     private static final String MIDDLE_DIVIDER = "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄";
-    private static final String TOP_BORDER     = TOP_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
-    private static final String MIDDLE_BORDER  = MIDDLE_CORNER + MIDDLE_DIVIDER + MIDDLE_DIVIDER;
-    private static final String BOTTOM_BORDER  = BOTTOM_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
-    private static final int    MAX_LEN        = 3000;
+    private static final String TOP_BORDER = TOP_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
+    private static final String MIDDLE_BORDER = MIDDLE_CORNER + MIDDLE_DIVIDER + MIDDLE_DIVIDER;
+    private static final String BOTTOM_BORDER = BOTTOM_CORNER + SIDE_DIVIDER + SIDE_DIVIDER;
+    private static final int MAX_LEN = 3000;
     @SuppressLint("SimpleDateFormat")
-    private static final Format FORMAT         = new SimpleDateFormat("MM-dd HH:mm:ss.SSS ");
-    private static final String NOTHING        = "log nothing";
-    private static final String NULL           = "null";
-    private static final String ARGS           = "args";
-    private static final String PLACEHOLDER    = " ";
-    private static final Config CONFIG         = new Config();
+    private static final Format FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS ");
+    private static final String NOTHING = "log nothing";
+    private static final String NULL = "null";
+    private static final String ARGS = "args";
+    private static final String PLACEHOLDER = " ";
+    private static final Config CONFIG = new Config();
     private static ExecutorService sExecutor;
 
     private LogUtils() {
@@ -581,19 +581,19 @@ public final class LogUtils {
     public static class Config {
         private String mDefaultDir;// The default storage directory of log.
         private String mDir;       // The storage directory of log.
-        private String  mFilePrefix        = "util";// The file prefix of log.
-        private boolean mLogSwitch         = true;  // The switch of log.
+        private String mFilePrefix = "util";// The file prefix of log.
+        private boolean mLogSwitch = true;  // The switch of log.
         private boolean mLog2ConsoleSwitch = true;  // The logcat's switch of log.
-        private String  mGlobalTag         = null;  // The global tag of log.
-        private boolean mTagIsSpace        = true;  // The global tag is space.
-        private boolean mLogHeadSwitch     = true;  // The head's switch of log.
-        private boolean mLog2FileSwitch    = false; // The file's switch of log.
-        private boolean mLogBorderSwitch   = true;  // The border's switch of log.
-        private boolean mSingleTagSwitch   = true;  // The single tag of log.
-        private int     mConsoleFilter     = V;     // The console's filter of log.
-        private int     mFileFilter        = V;     // The file's filter of log.
-        private int     mStackDeep         = 1;     // The stack's deep of log.
-        private int     mStackOffset       = 0;     // The stack's offset of log.
+        private String mGlobalTag = null;  // The global tag of log.
+        private boolean mTagIsSpace = true;  // The global tag is space.
+        private boolean mLogHeadSwitch = true;  // The head's switch of log.
+        private boolean mLog2FileSwitch = false; // The file's switch of log.
+        private boolean mLogBorderSwitch = true;  // The border's switch of log.
+        private boolean mSingleTagSwitch = true;  // The single tag of log.
+        private int mConsoleFilter = V;     // The console's filter of log.
+        private int mFileFilter = V;     // The file's filter of log.
+        private int mStackDeep = 1;     // The stack's deep of log.
+        private int mStackOffset = 0;     // The stack's offset of log.
 
         private Config() {
             if (mDefaultDir != null) return;
@@ -708,9 +708,9 @@ public final class LogUtils {
     }
 
     private static class TagHead {
-        String   tag;
+        String tag;
         String[] consoleHead;
-        String   fileHead;
+        String fileHead;
 
         TagHead(String tag, String[] consoleHead, String fileHead) {
             this.tag = tag;

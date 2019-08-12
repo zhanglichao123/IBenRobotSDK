@@ -10,7 +10,7 @@ package com.samton.IBenRobotSDK.data;
  * </pre>
  */
 
-public final class ChatFlagBean {
+public class ChatFlagBean {
 
     /**
      * rs : -1

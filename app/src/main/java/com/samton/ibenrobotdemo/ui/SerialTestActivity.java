@@ -7,9 +7,9 @@ import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.core.IBenSerialUtil;
 import com.samton.IBenRobotSDK.core.MainSDK;
-import com.samton.IBenRobotSDK.data.Constants;
 import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
 import com.samton.IBenRobotSDK.utils.FileUtils;
@@ -36,20 +36,15 @@ public class SerialTestActivity extends AppCompatActivity implements ISerialCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_serial_test);
 
-        mTextView = (TextView) findViewById(R.id.mTextView);
-        mContent = (ScrollView) findViewById(R.id.mContent);
+        mTextView = findViewById(R.id.mTextView);
+        mContent = findViewById(R.id.mContent);
 
         MainSDK.getInstance().init(getApplication());
         IBenSerialUtil.getInstance().setCallBack(this);
 
-        FileUtils.createOrExistsFile(Constants.MAP_PATH + "/log.txt");
+        FileUtils.createOrExistsFile(AppConfig.MAP_PATH + "/log.txt");
 
-        findViewById(R.id.mClearBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mTextView.setText("");
-            }
-        });
+        findViewById(R.id.mClearBtn).setOnClickListener(v -> mTextView.setText(""));
     }
 
     @Override
@@ -57,13 +52,10 @@ public class SerialTestActivity extends AppCompatActivity implements ISerialCall
         final String msg = TimeUtils.getNowString()
                 + "---" + result.substring(0, 5) + "\n";
         FileIOUtils.writeFileFromString(
-                Constants.MAP_PATH + "/log.txt", msg, true);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView.append(msg);
-                mContent.fullScroll(ScrollView.FOCUS_DOWN);
-            }
+                AppConfig.MAP_PATH + "/log.txt", msg, true);
+        runOnUiThread(() -> {
+            mTextView.append(msg);
+            mContent.fullScroll(ScrollView.FOCUS_DOWN);
         });
     }
 }

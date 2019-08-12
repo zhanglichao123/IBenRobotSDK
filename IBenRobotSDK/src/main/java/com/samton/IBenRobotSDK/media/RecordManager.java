@@ -3,15 +3,12 @@ package com.samton.IBenRobotSDK.media;
 import android.content.Context;
 
 import com.iflytek.cloud.ErrorCode;
-import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechRecognizer;
+import com.samton.IBenRobotSDK.core.IBenRecordUtil;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
-
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_LANGUAGE;
 
 /**
  * <pre>
@@ -23,7 +20,7 @@ import static com.samton.IBenRobotSDK.data.Constants.ROBOT_LANGUAGE;
  * </pre>
  */
 
-public final class RecordManager {
+public class RecordManager {
     /**
      * 语音识别类
      */
@@ -36,14 +33,11 @@ public final class RecordManager {
      */
     public RecordManager(Context context) {
         // 初始化讯飞听写
-        mIat = SpeechRecognizer.createRecognizer(context, new InitListener() {
-            @Override
-            public void onInit(int code) {
-                if (code != ErrorCode.SUCCESS) {
-                    LogUtils.d(">>>>>>>>语音听写初始化失败");
-                } else {
-                    LogUtils.d(">>>>>>>>语音听写初始化成功");
-                }
+        mIat = SpeechRecognizer.createRecognizer(context, code -> {
+            if (code != ErrorCode.SUCCESS) {
+                LogUtils.d(">>>>>>>>语音听写初始化失败");
+            } else {
+                LogUtils.d(">>>>>>>>语音听写初始化成功");
             }
         });
     }
@@ -60,16 +54,11 @@ public final class RecordManager {
         mIat.setParameter(SpeechConstant.ENGINE_MODE, SpeechConstant.MODE_AUTO);
         // 设置返回结果格式
         mIat.setParameter(SpeechConstant.RESULT_TYPE, "json");
-        String lag = SPUtils.getInstance().getString(ROBOT_LANGUAGE, "zh_cn");
-        if (lag.equals("en_us")) {
-            // 设置语言
-            mIat.setParameter(SpeechConstant.LANGUAGE, "en_us");
-        } else {
-            // 设置语言
-            mIat.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
-            // 设置语言区域
-            mIat.setParameter(SpeechConstant.ACCENT, lag);
-        }
+        String lag = IBenRecordUtil.getInstance().getLanguage();
+        // 设置语言
+        mIat.setParameter(SpeechConstant.LANGUAGE, lag);
+        // 设置语言区域
+        mIat.setParameter(SpeechConstant.ACCENT, lag);
         // 采样率为16000单声道音频
 //        mIat.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
         // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理

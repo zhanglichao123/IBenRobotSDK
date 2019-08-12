@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 
 import java.lang.reflect.Method;
@@ -16,6 +15,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.Objects;
 
 /**
  * <pre>
@@ -53,8 +53,9 @@ public final class NetworkUtils {
      *
      * @return NetworkInfo
      */
+    @SuppressLint("MissingPermission")
     private static NetworkInfo getActiveNetworkInfo() {
-        return ((ConnectivityManager) Utils.getApp().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return ((ConnectivityManager) Objects.requireNonNull(Utils.getApp().getSystemService(Context.CONNECTIVITY_SERVICE))).getActiveNetworkInfo();
     }
 
     /**
@@ -93,14 +94,7 @@ public final class NetworkUtils {
             ip = "223.5.5.5";// 阿里巴巴公共ip
         }
         ShellUtils.CommandResult result = ShellUtils.execCmd(String.format("ping -c 1 %s", ip), false);
-        boolean ret = result.result == 0;
-        if (result.errorMsg != null) {
-            Log.d("NetworkUtils", "isAvailableByPing() called" + result.errorMsg);
-        }
-        if (result.successMsg != null) {
-            Log.d("NetworkUtils", "isAvailableByPing() called" + result.successMsg);
-        }
-        return ret;
+        return result.result == 0;
     }
 
     /**
@@ -108,9 +102,11 @@ public final class NetworkUtils {
      *
      * @return {@code true}: 是<br>{@code false}: 否
      */
+    @SuppressLint("PrivateApi")
     public static boolean getDataEnabled() {
         try {
             TelephonyManager tm = (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm == null) return false;
             Method getMobileDataEnabledMethod = tm.getClass().getDeclaredMethod("getDataEnabled");
             if (null != getMobileDataEnabledMethod) {
                 return (boolean) getMobileDataEnabledMethod.invoke(tm);
@@ -127,9 +123,10 @@ public final class NetworkUtils {
      *
      * @param enabled {@code true}: 打开<br>{@code false}: 关闭
      */
-    public static void setDataEnabled(final boolean enabled) {
+    public static void setDataEnabled(boolean enabled) {
         try {
             TelephonyManager tm = (TelephonyManager) Utils.getApp().getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm == null) return;
             Method setMobileDataEnabledMethod = tm.getClass().getDeclaredMethod("setDataEnabled", boolean.class);
             if (null != setMobileDataEnabledMethod) {
                 setMobileDataEnabledMethod.invoke(tm, enabled);
@@ -159,7 +156,7 @@ public final class NetworkUtils {
     public static boolean getWifiEnabled() {
         @SuppressLint("WifiManagerLeak")
         WifiManager wifiManager = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.isWifiEnabled();
+        return wifiManager != null && wifiManager.isWifiEnabled();
     }
 
     /**
@@ -168,9 +165,11 @@ public final class NetworkUtils {
      *
      * @param enabled {@code true}: 打开<br>{@code false}: 关闭
      */
-    public static void setWifiEnabled(final boolean enabled) {
+    @SuppressLint("MissingPermission")
+    public static void setWifiEnabled(boolean enabled) {
         @SuppressLint("WifiManagerLeak")
         WifiManager wifiManager = (WifiManager) Utils.getApp().getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager == null) return;
         if (enabled) {
             if (!wifiManager.isWifiEnabled()) {
                 wifiManager.setWifiEnabled(true);
@@ -188,6 +187,7 @@ public final class NetworkUtils {
      *
      * @return {@code true}: 连接<br>{@code false}: 未连接
      */
+    @SuppressLint("MissingPermission")
     public static boolean isWifiConnected() {
         ConnectivityManager cm = (ConnectivityManager) Utils.getApp()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);

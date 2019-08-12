@@ -61,10 +61,6 @@ public class HttpUtil {
     private Retrofit createRetrofit() {
         // 自定义OkHttpClient
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                // 网络请求拦截器
-                .addInterceptor(new LoggingInterceptor())
-                // 访问HTTPS
-                // .sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager)
                 // 连接超时>>>10秒
                 .connectTimeout(10000L, TimeUnit.MILLISECONDS)
                 // 读取超时>>>10秒

@@ -27,7 +27,7 @@ import java.util.List;
  *     desc  : 文件读写相关工具类
  * </pre>
  */
-public final class FileIOUtils {
+public class FileIOUtils {
 
     private FileIOUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
