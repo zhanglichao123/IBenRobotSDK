@@ -55,7 +55,7 @@ public class MainSDK {
         // 读取XML中的必须配置
         readMetaDataAndSave(mApplication);
         // 科大讯飞的语音系统
-        SpeechUtility.createUtility(mApplication, AppConfig.ROBOT_APPID);
+        SpeechUtility.createUtility(mApplication, AppConfig.IFLYTEK_APPKEY);
     }
 
     /**
