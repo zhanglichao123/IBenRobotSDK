@@ -13,6 +13,7 @@ import com.samton.IBenRobotSDK.interfaces.ISerialCallBack;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
 import com.samton.IBenRobotSDK.utils.FileUtils;
 import com.samton.IBenRobotSDK.utils.TimeUtils;
+import com.samton.ibenrobotdemo.BuildConfig;
 import com.samton.ibenrobotdemo.R;
 
 /**
@@ -38,7 +39,7 @@ public class SerialTestActivity extends AppCompatActivity implements ISerialCall
         mTextView = findViewById(R.id.mTextView);
         mContent = findViewById(R.id.mContent);
 
-        MainSDK.getInstance().init(getApplication(), "", "");
+        MainSDK.getInstance().init(getApplication(), "", "", BuildConfig.DEBUG);
         IBenSerialUtil.getInstance().setCallBack(this);
 
         FileUtils.createOrExistsFile(AppConfig.MAP_PATH + "/log.txt");
