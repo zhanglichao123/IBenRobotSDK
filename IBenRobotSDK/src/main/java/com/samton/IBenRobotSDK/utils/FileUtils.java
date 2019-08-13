@@ -3,12 +3,14 @@ package com.samton.IBenRobotSDK.utils;
 import android.annotation.SuppressLint;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1037,6 +1039,30 @@ public class FileUtils {
         int lastSep = filePath.lastIndexOf(File.separator);
         if (lastPoi == -1 || lastSep >= lastPoi) return "";
         return filePath.substring(lastPoi + 1);
+    }
+
+    /**
+     * 读取本地txt文件
+     *
+     * @param file 文件
+     * @return 文件内容
+     */
+    public static String getFileContentForTxt(File file) {
+        try {
+            StringBuilder strBuilder = new StringBuilder();
+            InputStream instream = new FileInputStream(file);
+            InputStreamReader inreader = new InputStreamReader(instream);
+            BufferedReader buffreader = new BufferedReader(inreader);
+            String line;
+            while ((line = buffreader.readLine()) != null) {
+                strBuilder.append(line);
+            }
+            inreader.close();
+            instream.close();
+            return strBuilder.toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -6,8 +6,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 
-import com.samton.AppConfig;
-
 /**
  * <pre>
  *     author: Blankj
@@ -46,6 +44,7 @@ public final class Utils {
 
     /**
      * 获取清单文件中配置的MetaData
+     *
      * @param key MetaData的key
      * @return MetaData的值
      */
@@ -54,10 +53,7 @@ public final class Utils {
         try {
             ApplicationInfo info = sApplication.getPackageManager()
                     .getApplicationInfo(sApplication.getPackageName(), PackageManager.GET_META_DATA);
-            // 获取AppKey
-            AppConfig.ROBOT_APPID = info.metaData.getString("IBEN_APPKEY", "");
             value = info.metaData.getString(key, "");
-
         } catch (PackageManager.NameNotFoundException e) {
             LogUtils.e("请在AndroidManifest中配置相应的数据");
         }

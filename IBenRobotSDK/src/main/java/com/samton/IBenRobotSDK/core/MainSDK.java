@@ -46,10 +46,13 @@ public class MainSDK {
      * 初始化SDK
      *
      * @param application Application对象
-     *                    请在XML中配置好robUuid、appKey和appId
      */
-    public void init(Application application) {
+    public void init(Application application, String appkey, String type) {
         mApplication = application;
+        // 设置AppKey
+        AppConfig.ROBOT_APPID = appkey;
+        // 当前主板类型
+        AppConfig.PLANK_TYPE = type;
         // 初始化工具类
         Utils.init(mApplication);
         // 读取XML中的必须配置
@@ -86,10 +89,10 @@ public class MainSDK {
         try {
             ApplicationInfo info = context.getPackageManager()
                     .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            // 获取AppKey
-            AppConfig.ROBOT_APPID = info.metaData.getString("IBEN_APPKEY", "");
-            // 获取当前主板类型
-            AppConfig.PLANK_TYPE = info.metaData.getString("PLANK_TYPE", "rk3399l");
+//            // 获取AppKey
+//            AppConfig.ROBOT_APPID = info.metaData.getString("IBEN_APPKEY", "");
+//            // 获取当前主板类型
+//            AppConfig.PLANK_TYPE = info.metaData.getString("PLANK_TYPE", "rk3399l");
             // 获取科大讯飞的AppKey
             AppConfig.IFLYTEK_APPKEY = info.metaData.getString("IFLYTEK_APPKEY", "");
             // 容联云的AppID

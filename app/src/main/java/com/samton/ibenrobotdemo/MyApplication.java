@@ -18,6 +18,6 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MainSDK.getInstance().init(this);
+        MainSDK.getInstance().init(this, "", "");
     }
 }

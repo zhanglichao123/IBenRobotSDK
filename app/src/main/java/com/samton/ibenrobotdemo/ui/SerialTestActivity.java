@@ -3,7 +3,6 @@ package com.samton.ibenrobotdemo.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -39,7 +38,7 @@ public class SerialTestActivity extends AppCompatActivity implements ISerialCall
         mTextView = findViewById(R.id.mTextView);
         mContent = findViewById(R.id.mContent);
 
-        MainSDK.getInstance().init(getApplication());
+        MainSDK.getInstance().init(getApplication(), "", "");
         IBenSerialUtil.getInstance().setCallBack(this);
 
         FileUtils.createOrExistsFile(AppConfig.MAP_PATH + "/log.txt");
