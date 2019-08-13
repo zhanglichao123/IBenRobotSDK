@@ -54,7 +54,7 @@ import java.nio.ByteBuffer;
  *     desc  : 图片相关工具类
  * </pre>
  */
-public final class ImageUtils {
+public class ImageUtils {
 
     private ImageUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

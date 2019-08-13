@@ -1,10 +1,10 @@
 package com.samton.IBenRobotSDK.face;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.megvii.facepp.sdk.Facepp;
 import com.megvii.licensemanager.sdk.LicenseManager;
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.utils.LogUtils;
 
 
@@ -19,9 +19,10 @@ import com.samton.IBenRobotSDK.utils.LogUtils;
  */
 public class FaceManager {
 
-    private static FaceManager manager;
+    public static FaceManager manager;
     public Facepp facepp;
-    private boolean isCheckFaceLicense = false;//证书是否授权
+    public boolean isCheckFaceLicense = false;//证书是否授权
+    private LicenseManager mLicenseManager;
 
     private FaceManager() {
     }
@@ -46,15 +47,16 @@ public class FaceManager {
      */
     public void CheckFaceLicense(Context context, int faceppRawId,
                                  final FaceCheckLicenseCallBack callBack) {
-        LicenseManager licenseManager = new LicenseManager(context);
-        licenseManager.setExpirationMillis(Facepp.getApiExpirationMillis(
+        mLicenseManager = new LicenseManager(context);
+        mLicenseManager.setExpirationMillis(Facepp.getApiExpirationMillis(
                 context, FaceUtil.getFileContent(context, faceppRawId)));
-        String uuid = FaceUtil.getUUIDString(context);
+        String uuid = FaceUtil.getUUIDString();
+//        String uuid = "MmE1Nzk5NmEtZDYyNS00MTY4LTgyYjgtZTI2MDgzOGZiYzYz";
         long apiName = Facepp.getApiName();
-        licenseManager.setAuthTimeBufferMillis(0);
-        licenseManager.takeLicenseFromNetwork(FaceKey.CN_LICENSE_URL, uuid, FaceKey.API_KEY, FaceKey.API_SECRET, apiName,
+        mLicenseManager.setAuthTimeBufferMillis(0);
+        mLicenseManager.takeLicenseFromNetwork(AppConfig.CN_LICENSE_URL, uuid, AppConfig.FACE_KEY, AppConfig.FACE_SECRET, apiName,
                 //正式  申请365
-                FaceKey.FACE_TIME, "Landmark", FaceKey.FACE_TIMES, new LicenseManager.TakeLicenseCallback() {
+                AppConfig.FACE_TIME, "Landmark", String.valueOf(AppConfig.FACE_TIME), new LicenseManager.TakeLicenseCallback() {
                     @Override
                     public void onSuccess() {
                         isCheckFaceLicense = true;
@@ -110,8 +112,8 @@ public class FaceManager {
         faceppConfig.minFaceSize = 50;
         faceppConfig.roi_left = 0;
         faceppConfig.roi_top = 0;
-        faceppConfig.roi_right = FaceConstants.PREVIEW_WIDTH;
-        faceppConfig.roi_bottom = FaceConstants.PREVIEW_HEIGHT;
+        faceppConfig.roi_right = 640;
+        faceppConfig.roi_bottom = 480;
         faceppConfig.detectionMode = Facepp.FaceppConfig.DETECTION_MODE_NORMAL;
         faceppConfig.rotation = 0;
         facepp.setFaceppConfig(faceppConfig);
@@ -131,8 +133,7 @@ public class FaceManager {
         }
         try {
             if (null != facepp) {
-                Facepp.Face[] detect = facepp.detect(imageData, width, height, Facepp.IMAGEMODE_NV21);
-                return detect;
+                return facepp.detect(imageData, width, height, Facepp.IMAGEMODE_NV21);
             }
         } catch (Exception e) {
 //            LogUtils.e(e.toString());
@@ -150,8 +151,6 @@ public class FaceManager {
      * @return
      */
     public double FaceCommpare(byte[] imageData, byte[] imageData2) {
-        Log.e("Liu", "FaceCommpare:imageData " + imageData.length / 1024);
-        Log.e("Liu", "FaceCommpare:imageData2 " + imageData2.length / 1024);
         if (null != facepp) {
             if (null != imageData && null != imageData2) {
                 return facepp.faceCompare(imageData, imageData2);

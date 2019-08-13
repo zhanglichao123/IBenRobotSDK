@@ -3,13 +3,12 @@ package com.samton.IBenRobotSDK.core;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.yuntongxun.ecsdk.ECChatManager;
 import com.yuntongxun.ecsdk.ECDevice;
 import com.yuntongxun.ecsdk.ECError;
@@ -24,13 +23,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.samton.IBenRobotSDK.data.Constants.ROBOT_APP_KEY;
-import static com.samton.IBenRobotSDK.data.Constants.YTX_APP_ID;
-import static com.samton.IBenRobotSDK.data.Constants.YTX_APP_TOKEN;
 
 /**
  * <pre>
@@ -43,7 +37,7 @@ import static com.samton.IBenRobotSDK.data.Constants.YTX_APP_TOKEN;
  * </pre>
  */
 
-final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatReceiveListener {
+public class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatReceiveListener {
     private static IBenIMHelper instance = null;
     /**
      * 人工信息回调
@@ -82,16 +76,15 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         if (ECDevice.isInitialized()) return;
         ECDevice.initial(context.getApplicationContext(), new ECDevice.InitListener() {
             @Override
-            public void onError(Exception e) {
-                LogUtils.e("容联初始化失败---" + e.getMessage());
-            }
-
-            @Override
             public void onInitialized() {
                 // 设置IM登录监听
                 ECDevice.setOnDeviceConnectListener(IBenIMHelper.this);
                 // 登录
                 login();
+            }
+
+            @Override
+            public void onError(Exception e) {
             }
         });
     }
@@ -132,7 +125,6 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         ecChatManager.sendMessage(ecMessage, new ECChatManager.OnSendMessageListener() {
             @Override
             public void onSendMessageComplete(ECError ecError, ECMessage ecMessage) {
-                LogUtils.d("onSendMessageComplete:" + ecError.errorCode + ",msg:" + ecError.errorMsg);
             }
 
             @Override
@@ -162,48 +154,39 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
 
     @Override
     public void onReceiveMessageNotify(ECMessageNotify ecMessageNotify) {
-        LogUtils.i("onReceiveMessageNotify", ":" + ecMessageNotify.getMsgId() + ecMessageNotify.describeContents());
     }
 
     @Override
     public void OnReceiveGroupNoticeMessage(ECGroupNoticeMessage ecGroupNoticeMessage) {
-        LogUtils.i("OnReceiveGroupNoticeMessage", "getGroupName:" + ecGroupNoticeMessage.getGroupName());
     }
 
     @Override
     public void onOfflineMessageCount(int i) {
-        LogUtils.i("onOfflineMessageCount", "count:" + i);
     }
 
     @Override
     public int onGetOfflineMessage() {
-        LogUtils.i("onGetOfflineMessage");
         return 0;
     }
 
     @Override
     public void onReceiveOfflineMessage(List<ECMessage> list) {
-        LogUtils.i("onReceiveOfflineMessage  list:" + list.size());
     }
 
     @Override
     public void onReceiveOfflineMessageCompletion() {
-        LogUtils.i("onReceiveOfflineMessageCompletion ");
     }
 
     @Override
     public void onServicePersonVersion(int i) {
-        LogUtils.i("onServicePersonVersion ");
     }
 
     @Override
     public void onReceiveDeskMessage(ECMessage ecMessage) {
-        LogUtils.i("onReceiveDeskMessage   ecMessage.getId():" + ecMessage.getId());
     }
 
     @Override
     public void onSoftVersion(String s, int i) {
-        LogUtils.i("onReceiveDeskMessage   s:" + s);
     }
 
     /**
@@ -213,9 +196,9 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         ECInitParams initParams = ECInitParams.createParams();
         initParams.reset();
         // 用户ID
-        initParams.setUserid(SPUtils.getInstance().getString(ROBOT_APP_KEY));
-        initParams.setAppKey(YTX_APP_ID);
-        initParams.setToken(YTX_APP_TOKEN);
+        initParams.setUserid(AppConfig.ROBOT_APPID);
+        initParams.setAppKey(AppConfig.YTX_APPID);
+        initParams.setToken(AppConfig.YTX_APPTOKEN);
         initParams.setAuthType(ECInitParams.LoginAuthType.NORMAL_AUTH);
         // LoginMode（强制上线：FORCE_LOGIN  默认登录：AUTO。使用方式详见注意事项）FORCE_LOGIN
         initParams.setMode(ECInitParams.LoginMode.FORCE_LOGIN);
@@ -236,10 +219,9 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
     @SuppressLint("CheckResult")
     @Override
     public void onConnectState(ECDevice.ECConnectState ecConnectState, ECError ecError) {
-        LogUtils.i("onConnectState   ecConnectState:" + ecConnectState.name() + ",errpr:" + ecError.errorMsg);
         // 如果登录失败的话进行重新登录
         if (ecConnectState == ECDevice.ECConnectState.CONNECT_FAILED) {
-            Log.e("登入容联账号", "失败重新登入");
+            LogUtils.e("登入容联账号----失败重新登入");
             // 登录
             if (mLoginSubscribe != null && !mLoginSubscribe.isDisposed()) return;
             mLoginSubscribe = Observable.timer(5, TimeUnit.SECONDS)
@@ -248,7 +230,7 @@ final class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatRe
         } else if (ecConnectState == ECDevice.ECConnectState.CONNECT_SUCCESS) {
             // 初始化人工消息回调函数
             initIMCallBack();//接收消息的后调
-            Log.e("登入容联账号", "成功");
+            LogUtils.e("登入容联账号----登陆成功");
         }
     }
 }

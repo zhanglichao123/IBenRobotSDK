@@ -1,7 +1,5 @@
 package com.samton.serialport;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -20,8 +18,6 @@ import java.io.OutputStream;
  */
 
 class SerialPort {
-    private static final String TAG = "SerialPort";
-
     /**
      * 串口波特率定义
      */
@@ -231,11 +227,9 @@ class SerialPort {
                 su.getOutputStream().write(cmd.getBytes());
                 if ((su.waitFor() != 0) || !device.canRead()
                         || !device.canWrite()) {
-                    Log.e(TAG, "native open device error!");
                     return false;
                 }
             } catch (Exception e) {
-                Log.e(TAG, "native open device cause exception: " + e.getLocalizedMessage());
                 return false;
             }
         }
@@ -247,7 +241,6 @@ class SerialPort {
                 parity.getParity(),
                 flowCon.getFlowCon());
         if (mFd == null) {
-            Log.e(TAG, "native open returns null fd");
             return false;
         }
 

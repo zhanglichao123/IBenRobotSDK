@@ -6,7 +6,7 @@ import android.graphics.Color;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
-import com.samton.IBenRobotSDK.data.Constants;
+import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.utils.FileIOUtils;
 import com.samton.IBenRobotSDK.utils.FileUtils;
 import com.samton.IBenRobotSDK.utils.ImageUtils;
@@ -60,7 +60,7 @@ import io.reactivex.schedulers.Schedulers;
  * </pre>
  */
 
-public final class IBenMoveSDK {
+public class IBenMoveSDK {
     // IBenMoveSDK单例
     private static IBenMoveSDK mInstance = null;
     // 底盘连接失败信息
@@ -819,13 +819,13 @@ public final class IBenMoveSDK {
             LogUtils.d("思岚底盘--保存地图");
             if (isConnect) {
                 // 生成保存路径
-                String path = Constants.MAP_PATH + "/" + mapName;
+                String path = AppConfig.MAP_PATH + "/" + mapName;
                 // 获取完全版地图并保存到指定路径中
                 CompositeMap compositeMap = mRobotPlatform.getCompositeMap();
                 CompositeMapHelper mapHelper = new CompositeMapHelper();
                 mapHelper.saveFile(path, compositeMap);
                 // 生成缩略图
-                FileUtils.createOrExistsFile(Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg");
+                FileUtils.createOrExistsFile(AppConfig.MAP_PATH_THUMB + "/" + mapName + ".jpg");
                 // 写入BMP图像
                 for (MapLayer layer : compositeMap.getMaps()) {
                     if (layer instanceof GridMap) {
@@ -835,7 +835,7 @@ public final class IBenMoveSDK {
                         Bitmap bitmap = createImage(map.getMapData(), width, height);
                         byte[] bytes = ImageUtils.bitmap2Bytes(bitmap, Bitmap.CompressFormat.JPEG);
                         FileIOUtils.writeFileFromBytesByStream(FileUtils.getFileByPath(
-                                Constants.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
+                                AppConfig.MAP_PATH_THUMB + "/" + mapName + ".jpg"), bytes);
                     }
                 }
                 e.onNext(true);

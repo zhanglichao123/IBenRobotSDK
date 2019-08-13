@@ -49,7 +49,7 @@ public final class SPUtils {
         return spUtils;
     }
 
-    private SPUtils(final String spName) {
+    private SPUtils(String spName) {
         sp = Utils.getApp().getSharedPreferences(spName, Context.MODE_PRIVATE);
     }
 
@@ -59,7 +59,7 @@ public final class SPUtils {
      * @param key   键
      * @param value 值
      */
-    public void put(@NonNull final String key, @NonNull final String value) {
+    public void put(@NonNull String key, @NonNull String value) {
         put(key, value, false);
     }
 
@@ -71,7 +71,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, @NonNull final String value, final boolean isCommit) {
+    public void put(@NonNull String key, @NonNull String value, boolean isCommit) {
         if (isCommit) {
             sp.edit().putString(key, value).commit();
         } else {
@@ -85,7 +85,7 @@ public final class SPUtils {
      * @param key 键
      * @return 存在返回对应值，不存在返回默认值{@code ""}
      */
-    public String getString(@NonNull final String key) {
+    public String getString(@NonNull String key) {
         return getString(key, "");
     }
 
@@ -96,7 +96,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public String getString(@NonNull final String key, @NonNull final String defaultValue) {
+    public String getString(@NonNull String key, @NonNull String defaultValue) {
         return sp.getString(key, defaultValue);
     }
 
@@ -106,7 +106,7 @@ public final class SPUtils {
      * @param key   键
      * @param value 值
      */
-    public void put(@NonNull final String key, final int value) {
+    public void put(@NonNull String key, int value) {
         put(key, value, false);
     }
 
@@ -118,7 +118,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, final int value, final boolean isCommit) {
+    public void put(@NonNull String key, int value, boolean isCommit) {
         if (isCommit) {
             sp.edit().putInt(key, value).commit();
         } else {
@@ -143,7 +143,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public int getInt(@NonNull final String key, final int defaultValue) {
+    public int getInt(@NonNull String key, int defaultValue) {
         return sp.getInt(key, defaultValue);
     }
 
@@ -153,7 +153,7 @@ public final class SPUtils {
      * @param key   键
      * @param value 值
      */
-    public void put(@NonNull final String key, final long value) {
+    public void put(@NonNull String key, long value) {
         put(key, value, false);
     }
 
@@ -165,7 +165,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, final long value, final boolean isCommit) {
+    public void put(@NonNull String key, long value, boolean isCommit) {
         if (isCommit) {
             sp.edit().putLong(key, value).commit();
         } else {
@@ -179,7 +179,7 @@ public final class SPUtils {
      * @param key 键
      * @return 存在返回对应值，不存在返回默认值-1
      */
-    public long getLong(@NonNull final String key) {
+    public long getLong(@NonNull String key) {
         return getLong(key, -1L);
     }
 
@@ -190,7 +190,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public long getLong(@NonNull final String key, final long defaultValue) {
+    public long getLong(@NonNull String key, long defaultValue) {
         return sp.getLong(key, defaultValue);
     }
 
@@ -200,7 +200,7 @@ public final class SPUtils {
      * @param key   键
      * @param value 值
      */
-    public void put(@NonNull final String key, final float value) {
+    public void put(@NonNull String key, float value) {
         put(key, value, false);
     }
 
@@ -212,7 +212,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, final float value, final boolean isCommit) {
+    public void put(@NonNull String key, float value, boolean isCommit) {
         if (isCommit) {
             sp.edit().putFloat(key, value).commit();
         } else {
@@ -226,7 +226,7 @@ public final class SPUtils {
      * @param key 键
      * @return 存在返回对应值，不存在返回默认值-1
      */
-    public float getFloat(@NonNull final String key) {
+    public float getFloat(@NonNull String key) {
         return getFloat(key, -1f);
     }
 
@@ -237,7 +237,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public float getFloat(@NonNull final String key, final float defaultValue) {
+    public float getFloat(@NonNull String key, float defaultValue) {
         return sp.getFloat(key, defaultValue);
     }
 
@@ -247,7 +247,7 @@ public final class SPUtils {
      * @param key   键
      * @param value 值
      */
-    public void put(@NonNull final String key, final boolean value) {
+    public void put(@NonNull String key, boolean value) {
         put(key, value, false);
     }
 
@@ -259,7 +259,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, final boolean value, final boolean isCommit) {
+    public void put(@NonNull String key, boolean value, boolean isCommit) {
         if (isCommit) {
             sp.edit().putBoolean(key, value).commit();
         } else {
@@ -273,7 +273,7 @@ public final class SPUtils {
      * @param key 键
      * @return 存在返回对应值，不存在返回默认值{@code false}
      */
-    public boolean getBoolean(@NonNull final String key) {
+    public boolean getBoolean(@NonNull String key) {
         return getBoolean(key, false);
     }
 
@@ -284,7 +284,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public boolean getBoolean(@NonNull final String key, final boolean defaultValue) {
+    public boolean getBoolean(@NonNull String key, boolean defaultValue) {
         return sp.getBoolean(key, defaultValue);
     }
 
@@ -294,7 +294,7 @@ public final class SPUtils {
      * @param key    键
      * @param values 值
      */
-    public void put(@NonNull final String key, @NonNull final Set<String> values) {
+    public void put(@NonNull String key, @NonNull Set<String> values) {
         put(key, values, false);
     }
 
@@ -306,7 +306,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void put(@NonNull final String key, @NonNull final Set<String> values, final boolean isCommit) {
+    public void put(@NonNull String key, @NonNull Set<String> values, boolean isCommit) {
         if (isCommit) {
             sp.edit().putStringSet(key, values).commit();
         } else {
@@ -320,7 +320,7 @@ public final class SPUtils {
      * @param key 键
      * @return 存在返回对应值，不存在返回默认值{@code Collections.<String>emptySet()}
      */
-    public Set<String> getStringSet(@NonNull final String key) {
+    public Set<String> getStringSet(@NonNull String key) {
         return getStringSet(key, Collections.<String>emptySet());
     }
 
@@ -331,7 +331,7 @@ public final class SPUtils {
      * @param defaultValue 默认值
      * @return 存在返回对应值，不存在返回默认值{@code defaultValue}
      */
-    public Set<String> getStringSet(@NonNull final String key, @NonNull final Set<String> defaultValue) {
+    public Set<String> getStringSet(@NonNull String key, @NonNull Set<String> defaultValue) {
         return sp.getStringSet(key, defaultValue);
     }
 
@@ -350,7 +350,7 @@ public final class SPUtils {
      * @param key 键
      * @return {@code true}: 存在<br>{@code false}: 不存在
      */
-    public boolean contains(@NonNull final String key) {
+    public boolean contains(@NonNull String key) {
         return sp.contains(key);
     }
 
@@ -359,7 +359,7 @@ public final class SPUtils {
      *
      * @param key 键
      */
-    public void remove(@NonNull final String key) {
+    public void remove(@NonNull String key) {
         remove(key, false);
     }
 
@@ -370,7 +370,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void remove(@NonNull final String key, final boolean isCommit) {
+    public void remove(@NonNull String key, boolean isCommit) {
         if (isCommit) {
             sp.edit().remove(key).commit();
         } else {
@@ -391,7 +391,7 @@ public final class SPUtils {
      * @param isCommit {@code true}: {@link SharedPreferences.Editor#commit()}<br>
      *                 {@code false}: {@link SharedPreferences.Editor#apply()}
      */
-    public void clear(final boolean isCommit) {
+    public void clear(boolean isCommit) {
         if (isCommit) {
             sp.edit().clear().commit();
         } else {
@@ -399,7 +399,7 @@ public final class SPUtils {
         }
     }
 
-    private static boolean isSpace(final String s) {
+    private static boolean isSpace(String s) {
         if (s == null) return true;
         for (int i = 0, len = s.length(); i < len; ++i) {
             if (!Character.isWhitespace(s.charAt(i))) {

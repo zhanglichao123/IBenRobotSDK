@@ -10,7 +10,7 @@ package com.samton.IBenRobotSDK.data;
  * </pre>
  */
 
-public final class ActiveBean {
+public class ActiveBean {
 
     /**
      * rs : -1

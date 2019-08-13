@@ -23,7 +23,7 @@ import java.util.List;
  *     desc  : 文件相关工具类
  * </pre>
  */
-public final class FileUtils {
+public class FileUtils {
 
     private FileUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");

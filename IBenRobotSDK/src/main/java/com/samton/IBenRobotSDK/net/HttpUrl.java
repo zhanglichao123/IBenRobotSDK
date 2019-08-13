@@ -10,7 +10,7 @@ package com.samton.IBenRobotSDK.net;
  * </pre>
  */
 
-public final class HttpUrl {
+public class HttpUrl {
     /**
      * 是否为测试环境
      */
@@ -40,9 +40,4 @@ public final class HttpUrl {
      * 获取开关状态接口
      */
     public static final String GET_ROBOT_CHAT_FLAG = isTest ? "XiaoBenManager/robotInfo/getRobotChatFlag" : "robotInfo/getRobotChatFlag";
-
-    /**
-     * 富文本连接头
-     */
-    public static final String RICH_HEADER = BASE_URL + (isTest ? "XiaoBenManager/resources/views/show.html?content=" : "resources/views/show.html?content=");
 }

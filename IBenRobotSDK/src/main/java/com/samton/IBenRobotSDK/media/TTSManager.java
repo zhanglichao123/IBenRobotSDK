@@ -20,7 +20,7 @@ import com.samton.IBenRobotSDK.utils.SPUtils;
  * </pre>
  */
 
-public final class TTSManager {
+public class TTSManager {
     /**
      * 上下文对象
      */
