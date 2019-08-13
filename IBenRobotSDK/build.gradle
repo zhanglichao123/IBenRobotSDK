@@ -13,7 +13,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
+            abiFilters 'armeabi-v7a'
         }
     }
     buildTypes {
@@ -44,8 +44,6 @@ dependencies {
     // Face++
     compileOnly(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
     compileOnly(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
-    // MYNTEYE
-    compileOnly(name: 'mynteye_d_android_sdk-release_1.2.4.5_20190426105744', ext: 'aar')
     // RxJava
     compileOnly 'io.reactivex.rxjava2:rxjava:2.1.0'
     compileOnly 'io.reactivex.rxjava2:rxandroid:2.0.1'
