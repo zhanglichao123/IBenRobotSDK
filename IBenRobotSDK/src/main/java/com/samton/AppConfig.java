@@ -28,6 +28,10 @@ import android.os.Environment;
  */
 public class AppConfig {
     /**
+     * 是否在debug模式
+     */
+    public static boolean DEBUG = true;
+    /**
      * 机器人AppID
      */
     public static String ROBOT_APPID = "";

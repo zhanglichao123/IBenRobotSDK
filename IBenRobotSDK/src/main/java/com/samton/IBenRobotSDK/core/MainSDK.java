@@ -10,13 +10,9 @@ import com.iflytek.cloud.SpeechUtility;
 import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
-import com.samton.IBenRobotSDK.net.HttpRequest;
-import com.samton.IBenRobotSDK.net.HttpUtil;
+import com.samton.IBenRobotSDK.net.HttpUtils;
 import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * author : syk
@@ -47,10 +43,11 @@ public class MainSDK {
      *
      * @param application Application对象
      */
-    public void init(Application application, String appkey, String type) {
+    public void init(Application application, String appKey, String type, boolean isDebug) {
         mApplication = application;
+        AppConfig.DEBUG = isDebug;
         // 设置AppKey
-        AppConfig.ROBOT_APPID = appkey;
+        AppConfig.ROBOT_APPID = appKey;
         // 当前主板类型
         AppConfig.PLANK_TYPE = type;
         // 初始化工具类
@@ -89,10 +86,6 @@ public class MainSDK {
         try {
             ApplicationInfo info = context.getPackageManager()
                     .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-//            // 获取AppKey
-//            AppConfig.ROBOT_APPID = info.metaData.getString("IBEN_APPKEY", "");
-//            // 获取当前主板类型
-//            AppConfig.PLANK_TYPE = info.metaData.getString("PLANK_TYPE", "rk3399l");
             // 获取科大讯飞的AppKey
             AppConfig.IFLYTEK_APPKEY = info.metaData.getString("IFLYTEK_APPKEY", "");
             // 容联云的AppID
@@ -114,10 +107,7 @@ public class MainSDK {
     @SuppressLint("CheckResult")
     public void activeRobot(IActiveCallBack callBack) {
         // 机器人执行激活操作
-        HttpUtil.getInstance().create(HttpRequest.class)
-                .activeRobot(AppConfig.ROBOT_APPID)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        HttpUtils.activeRobot()
                 .subscribe(initBean -> {
                     // 初始化成功
                     if (initBean.getRs() != -1) {

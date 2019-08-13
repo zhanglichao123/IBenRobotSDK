@@ -3,19 +3,14 @@ package com.samton.IBenRobotSDK.core;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.samton.AppConfig;
 import com.samton.IBenRobotSDK.data.MessageBean;
 import com.samton.IBenRobotSDK.interfaces.IBenMsgCallBack;
-import com.samton.IBenRobotSDK.net.HttpRequest;
-import com.samton.IBenRobotSDK.net.HttpUtil;
-import com.samton.IBenRobotSDK.utils.SPUtils;
+import com.samton.IBenRobotSDK.net.HttpUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * <pre>
@@ -143,10 +138,8 @@ public class IBenChatSDK {
         // 取消网络请求
         cancelHttp();
         // 向后台获取人工状态
-        mGetChatFlagSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
-                .getRobotChatFlag(AppConfig.ROBOT_APPID)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        mGetChatFlagSubscribe = HttpUtils
+                .getRobotChatFlag()
                 .subscribe(chatFlagBean -> {
                     String account = chatFlagBean.getAccout();
                     // 发送消息给小笨
@@ -173,10 +166,8 @@ public class IBenChatSDK {
         String time = String.valueOf(System.currentTimeMillis());
         // 取消网络请求
         cancelHttp();
-        mSendIBenSubscribe = HttpUtil.getInstance().create(HttpRequest.class)
-                .send2IBen(AppConfig.ROBOT_APPID, time, msg, reMsg, reIndex)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        mSendIBenSubscribe = HttpUtils
+                .getChat(time, msg, reMsg, reIndex)
                 .subscribe(msgBean -> {
                     if (mCallBack == null) return;
                     mCallBack.onSuccess(msgBean);

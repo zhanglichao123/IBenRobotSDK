@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/IBenRobotSDK.iml" filepath="$PROJECT_DIR$/.idea/IBenRobotSDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IBenRobotSDK.iml" filepath="$PROJECT_DIR$/IBenRobotSDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/IBenRobotSDK/IBenRobotSDK-IBenRobotSDK.iml" filepath="$PROJECT_DIR$/IBenRobotSDK/IBenRobotSDK-IBenRobotSDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

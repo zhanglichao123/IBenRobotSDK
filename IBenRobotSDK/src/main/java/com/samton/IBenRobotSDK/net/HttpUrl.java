@@ -1,5 +1,9 @@
 package com.samton.IBenRobotSDK.net;
 
+import com.samton.AppConfig;
+
+import rxhttp.wrapper.annotation.DefaultDomain;
+
 /**
  * <pre>
  *     author : syk
@@ -12,32 +16,28 @@ package com.samton.IBenRobotSDK.net;
 
 public class HttpUrl {
     /**
-     * 是否为测试环境
-     */
-    private static final boolean isTest = true;
-
-    /**
      * 服务器地址
      */
-    public static final String BASE_URL = isTest ? "http://47.99.179.135:7080/" : "http://kf.ibenrobot.com/";
-
-    /**
-     * 与小笨聊天的地址接口
-     */
-    public static final String CHAT = isTest ? "iben_qa/RobotQADispatcher" : "iben_qa/RobotQADispatcher";
+    @DefaultDomain() //设置为默认域名
+    public static final String BASE_URL = AppConfig.DEBUG ? "http://47.99.179.135:7080/" : "http://kf.ibenrobot.com/";
 
     /**
      * 激活机器人信息接口
      */
-    public static final String ADD_ROBOT_INFO = isTest ? "XiaoBenManager/robotInfo/activeRobot" : "robotInfo/activeRobot";
+    public static final String ACTIVE_ROBOT = AppConfig.DEBUG ? "XiaoBenManager/robotInfo/activeRobot" : "robotInfo/activeRobot";
 
     /**
      * 初始化机器人信息接口
      */
-    public static final String INIT_ROBOT_INFO = isTest ? "XiaoBenManager/robotInfo/robotInitNew" : "robotInfo/robotInitNew";
+    public static final String INIT_ROBOT_INFO = AppConfig.DEBUG ? "XiaoBenManager/robotInfo/robotInitNew" : "robotInfo/robotInitNew";
 
     /**
      * 获取开关状态接口
      */
-    public static final String GET_ROBOT_CHAT_FLAG = isTest ? "XiaoBenManager/robotInfo/getRobotChatFlag" : "robotInfo/getRobotChatFlag";
+    public static final String GET_ROBOT_CHAT_FLAG = AppConfig.DEBUG ? "XiaoBenManager/robotInfo/getRobotChatFlag" : "robotInfo/getRobotChatFlag";
+
+    /**
+     * 与小笨聊天的地址接口
+     */
+    public static final String CHAT = AppConfig.DEBUG ? "iben_qa/RobotQADispatcher" : "iben_qa/RobotQADispatcher";
 }
