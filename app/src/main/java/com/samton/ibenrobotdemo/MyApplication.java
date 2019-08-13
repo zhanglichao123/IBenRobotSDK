@@ -18,6 +18,6 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MainSDK.getInstance().init(this, "", "", true);
+        MainSDK.getInstance().init(this, "", "", BuildConfig.DEBUG);
     }
 }

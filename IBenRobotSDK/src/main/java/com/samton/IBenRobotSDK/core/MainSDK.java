@@ -14,6 +14,12 @@ import com.samton.IBenRobotSDK.net.HttpUtils;
 import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.plugins.RxJavaPlugins;
+import okhttp3.OkHttpClient;
+import rxhttp.HttpSender;
+
 /**
  * author : syk
  * e-mail : shenyukun1024@gmail.com
@@ -56,6 +62,33 @@ public class MainSDK {
         readMetaDataAndSave(mApplication);
         // 科大讯飞的语音系统
         SpeechUtility.createUtility(mApplication, AppConfig.IFLYTEK_APPKEY);
+        // 初始化网络请求
+        initHttp();
+    }
+
+    /**
+     * 初始化网络请求
+     */
+    private void initHttp() {
+        // 设置debug模式，此模式下有日志打印
+        HttpSender.setDebug(AppConfig.DEBUG);
+        // 自定义OkHttpClient
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                // 连接超时>>>10秒
+                .connectTimeout(10000L, TimeUnit.MILLISECONDS)
+                // 读取超时>>>10秒
+                .readTimeout(10000L, TimeUnit.MILLISECONDS)
+                .build();
+        // 非必须,只能初始化一次，第二次将抛出异常
+        HttpSender.init(okHttpClient);
+        // 设置RxJava全局异常处理
+        RxJavaPlugins.setErrorHandler(throwable -> {
+            /*
+              RxJava2的一个重要的设计理念是：不吃掉任何一个异常,即抛出的异常无人处理，便会导致程序崩溃
+              这就会导致一个问题，当RxJava2“downStream”取消订阅后，“upStream”仍有可能抛出异常，
+              这时由于已经取消订阅，“downStream”无法处理异常，此时的异常无人处理，便会导致程序崩溃
+             */
+        });
     }
 
     /**
