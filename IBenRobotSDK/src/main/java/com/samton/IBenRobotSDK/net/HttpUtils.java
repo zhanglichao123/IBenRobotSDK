@@ -36,6 +36,25 @@ import rxhttp.wrapper.param.RxHttp;
  * QQ:352391291
  */
 public class HttpUtils {
+    /**
+     * 激活机器人信息接口
+     */
+    private static final String ACTIVE_ROBOT = "robotInfo/activeRobot";
+
+    /**
+     * 初始化机器人信息接口
+     */
+    private static final String INIT_ROBOT_INFO = "robotInfo/robotInitNew";
+
+    /**
+     * 获取开关状态接口
+     */
+    private static final String GET_ROBOT_CHAT_FLAG = "robotInfo/getRobotChatFlag";
+
+    /**
+     * 与小笨聊天的地址接口(QA)
+     */
+    private static final String CHAT = "iben_qa/RobotQADispatcher";
 
     /**
      * 激活机器人信息接口
@@ -43,7 +62,7 @@ public class HttpUtils {
      * @return ActiveBean:激活实体类
      */
     public static Observable<ActiveBean> activeRobot() {
-        return RxHttp.get(HttpUrl.ACTIVE_ROBOT)
+        return RxHttp.get(ACTIVE_ROBOT)
                 .add("robUuid", AppConfig.ROBOT_APPID)
                 .asObject(ActiveBean.class)
                 .subscribeOn(Schedulers.io())
@@ -56,7 +75,7 @@ public class HttpUtils {
      * @return InitBean:机器人实体类
      */
     public static Observable<InitBean> robotInit() {
-        return RxHttp.get(HttpUrl.INIT_ROBOT_INFO)
+        return RxHttp.get(INIT_ROBOT_INFO)
                 .add("robotUUID", AppConfig.ROBOT_APPID)
                 .asObject(InitBean.class)
                 .subscribeOn(Schedulers.io())
@@ -70,7 +89,7 @@ public class HttpUtils {
      * @return InitBean:机器人实体类
      */
     public static Observable<InitBean> robotInit(String checkFlag) {
-        return RxHttp.get(HttpUrl.INIT_ROBOT_INFO)
+        return RxHttp.get(INIT_ROBOT_INFO)
                 .add("robotUUID", AppConfig.ROBOT_APPID)
                 .add("checkFlag", checkFlag)
                 .asObject(InitBean.class)
@@ -84,7 +103,7 @@ public class HttpUtils {
      * @return ChatFlagBean:实体类
      */
     public static Observable<ChatFlagBean> getRobotChatFlag() {
-        return RxHttp.get(HttpUrl.GET_ROBOT_CHAT_FLAG)
+        return RxHttp.get(GET_ROBOT_CHAT_FLAG)
                 .add("robUuid", AppConfig.ROBOT_APPID)
                 .asObject(ChatFlagBean.class)
                 .subscribeOn(Schedulers.io())
@@ -101,7 +120,8 @@ public class HttpUtils {
      * @return MessageBean:实体类
      */
     public static Observable<MessageBean> getChat(String time, String msg, String reMsg, String reIndex) {
-        return RxHttp.get(HttpUrl.CHAT)
+        return RxHttp.get(CHAT)
+                .setDomainToQAIfAbsent()
                 .add("appKey", AppConfig.ROBOT_APPID)
                 .add("time", time)
                 .add("message", msg)

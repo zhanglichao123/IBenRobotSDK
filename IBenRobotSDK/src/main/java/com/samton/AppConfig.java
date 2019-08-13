@@ -10,6 +10,9 @@ package com.samton;
 
 import android.os.Environment;
 
+import rxhttp.wrapper.annotation.DefaultDomain;
+import rxhttp.wrapper.annotation.Domain;
+
 /***
  *
  *   █████▒█    ██  ▄████▄   ██ ▄█▀       ██████╗ ██╗   ██╗ ██████╗
@@ -71,6 +74,16 @@ public class AppConfig {
      * Face++的验证接口(英文)
      */
     public static final String US_LICENSE_URL = "https://api-us.faceplusplus.com/sdk/v2/auth";
+    /**
+     * 服务器地址
+     */
+    @DefaultDomain() //设置为默认域名
+    public static final String BASE_URL = AppConfig.DEBUG ? "http://47.99.179.135:7080/XiaoBenManager/" : "http://kf.ibenrobot.com/";
+    /**
+     * QA的服务器地址
+     */
+    @Domain(name = "QA") //QA的域名
+    public static final String QA_URL = AppConfig.DEBUG ? "http://47.99.179.135:7080/" : "http://kf.ibenrobot.com/";
     /**
      * 地图图片预览位置
      */
