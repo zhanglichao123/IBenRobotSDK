@@ -12,11 +12,14 @@ import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpUtils;
 import com.samton.IBenRobotSDK.utils.LogUtils;
+import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import rxhttp.HttpSender;
 
@@ -96,27 +99,6 @@ public class MainSDK {
     }
 
     /**
-     * 单独初始化Fece++
-     */
-    public void initFacepp(int faceppRawId) {
-        FaceManager faceManager = FaceManager.getInstance();
-        // 检验人脸识别证书是否过期
-        faceManager.CheckFaceLicense(mApplication, faceppRawId, new FaceCheckLicenseCallBack() {
-            @Override
-            public void onCheckSuccess() {
-                LogUtils.e("加载证书成功");
-                // 初始化人脸识别
-                faceManager.initCheckFace(mApplication, faceppRawId);
-            }
-
-            @Override
-            public void onCheckFail(String errorMessage) {
-                LogUtils.e("加载证书失败" + errorMessage);
-            }
-        });
-    }
-
-    /**
      * 读取项目配置信息并保存到本地
      */
     private void readMetaDataAndSave(Context context) {
@@ -142,25 +124,36 @@ public class MainSDK {
      * 激活机器人
      */
     @SuppressLint("CheckResult")
-    public void activeRobot(IActiveCallBack callBack) {
-        // 机器人执行激活操作
-        HttpUtils.activeRobot()
-                .subscribe(initBean -> {
+    public void activeRobot(final int faceppRawId, final IActiveCallBack callBack) {
+        // 检验人脸识别证书是否过期
+        FaceManager.getInstance().CheckFaceLicense(mApplication, faceppRawId, new FaceCheckLicenseCallBack() {
+            @Override
+            public void onCheckSuccess() {
+                LogUtils.e("加载证书成功");
+                // 初始化人脸识别
+                FaceManager.getInstance().initCheckFace(mApplication, faceppRawId);
+                // 机器人执行激活操作
+                HttpUtils.activeRobot().subscribe(initBean -> {
                     // 初始化成功
                     if (initBean.getRs() != -1) {
                         // 成功回调
-                        if (callBack != null)
-                            callBack.onSuccess();
+                        if (callBack != null) callBack.onSuccess();
                     } else {
                         // 失败回调
-                        if (callBack != null)
-                            callBack.onFailed(initBean.getData().getErrorMsg());
+                        if (callBack != null) callBack.onFailed(initBean.getData().getErrorMsg());
                     }
                 }, throwable -> {
                     // 初始化失败
-                    if (callBack != null)
-                        callBack.onFailed(throwable.getMessage());
+                    if (callBack != null) callBack.onFailed(throwable.getMessage());
                 });
+            }
+
+            @Override
+            public void onCheckFail(String errorMessage) {
+                LogUtils.e("加载证书失败" + errorMessage);
+                if (callBack != null) callBack.onSuccess();
+            }
+        });
     }
 
     /**
