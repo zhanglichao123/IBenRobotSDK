@@ -70,8 +70,12 @@ public class MainSDK {
      * 初始化网络请求
      */
     private void initHttp() {
+        //设置baseUrl的地址
+        AppConfig.BASE_URL = AppConfig.DEBUG ? AppConfig.DEBUG_BASEURL : AppConfig.RELESE_URL;
+        //设置QAUrl的地址
+        AppConfig.QA_URL = AppConfig.DEBUG ? AppConfig.DEBUG_QAURL : AppConfig.RELESE_URL;
         // 设置debug模式，此模式下有日志打印
-        HttpSender.setDebug(AppConfig.DEBUG);
+        HttpSender.setDebug(true);
         // 自定义OkHttpClient
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 // 连接超时>>>10秒
