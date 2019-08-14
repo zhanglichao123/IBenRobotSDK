@@ -75,15 +75,27 @@ public class AppConfig {
      */
     public static final String US_LICENSE_URL = "https://api-us.faceplusplus.com/sdk/v2/auth";
     /**
+     * 测试环境baseUrl
+     */
+    public static final String DEBUG_BASEURL = "http://47.99.179.135:7080/XiaoBenManager/";
+    /**
+     * 测试环境的QAUrl
+     */
+    public static final String DEBUG_QAURL = "http://47.99.179.135:7080/";
+    /**
+     * 正式环境的url
+     */
+    public static final String RELESE_URL = "http://kf.ibenrobot.com/";
+    /**
      * 服务器地址
      */
     @DefaultDomain() //设置为默认域名
-    public static final String BASE_URL = AppConfig.DEBUG ? "http://47.99.179.135:7080/XiaoBenManager/" : "http://kf.ibenrobot.com/";
+    public static String BASE_URL = "";
     /**
      * QA的服务器地址
      */
     @Domain(name = "QA") //QA的域名
-    public static final String QA_URL = AppConfig.DEBUG ? "http://47.99.179.135:7080/" : "http://kf.ibenrobot.com/";
+    public static String QA_URL = "";
     /**
      * 地图图片预览位置
      */
