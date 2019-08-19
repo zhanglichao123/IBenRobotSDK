@@ -12,14 +12,10 @@ import com.samton.IBenRobotSDK.face.FaceCheckLicenseCallBack;
 import com.samton.IBenRobotSDK.face.FaceManager;
 import com.samton.IBenRobotSDK.net.HttpUtils;
 import com.samton.IBenRobotSDK.utils.LogUtils;
-import com.samton.IBenRobotSDK.utils.SPUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import rxhttp.HttpSender;
 

@@ -70,5 +70,22 @@ public class ActiveBean {
         public void setErrorMsg(String errorMsg) {
             this.errorMsg = errorMsg;
         }
+
+        @Override
+        public String toString() {
+            return "DataBean{" +
+                    "errorCode='" + errorCode + '\'' +
+                    ", errorMsg='" + errorMsg + '\'' +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ActiveBean{" +
+                "rs=" + rs +
+                ", _token_iben='" + _token_iben + '\'' +
+                ", data=" + data.toString() +
+                '}';
     }
 }

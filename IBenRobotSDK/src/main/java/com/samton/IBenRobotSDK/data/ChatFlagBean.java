@@ -55,4 +55,14 @@ public class ChatFlagBean {
     public void setArousalWord(String arousalWord) {
         this.arousalWord = arousalWord;
     }
+
+    @Override
+    public String toString() {
+        return "ChatFlagBean{" +
+                "rs=" + rs +
+                ", _token_iben='" + _token_iben + '\'' +
+                ", arousalWord='" + arousalWord + '\'' +
+                ", accout='" + accout + '\'' +
+                '}';
+    }
 }

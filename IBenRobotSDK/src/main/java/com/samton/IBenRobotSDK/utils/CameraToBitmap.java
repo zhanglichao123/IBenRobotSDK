@@ -54,12 +54,9 @@ public class CameraToBitmap {
      * @return 旋转过后的图片
      */
     public static Bitmap rotateMyBitmap(Bitmap bmp) {
-
         // 旋转一下 前置为-90 ，后置为90
         Matrix matrix = new Matrix();
         matrix.postRotate(180);
-//        Bitmap bitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), Bitmap.Config.ARGB_8888);
-        Bitmap bitmap = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-        return bitmap;
+        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
     }
 }
