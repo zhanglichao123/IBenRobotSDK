@@ -15,6 +15,7 @@ import com.samton.IBenRobotSDK.utils.LogUtils;
 import com.samton.IBenRobotSDK.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
+
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
 import rxhttp.HttpSender;
@@ -46,7 +47,10 @@ public class MainSDK {
     /**
      * 初始化SDK
      *
-     * @param application Application对象
+     * @param application 上下文
+     * @param appKey      机器人ID
+     * @param type        主板类型
+     * @param isDebug     是否是测试环境
      */
     public void init(Application application, String appKey, String type, boolean isDebug) {
         mApplication = application;

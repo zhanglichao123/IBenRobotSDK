@@ -43,6 +43,9 @@ public class IBenIMHelper implements ECDevice.OnECDeviceConnectListener, OnChatR
      * 人工信息回调
      */
     private IBenMsgCallBack mCallBack = null;
+    /**
+     * 登陆的网络请求
+     */
     private Disposable mLoginSubscribe;
 
     /**

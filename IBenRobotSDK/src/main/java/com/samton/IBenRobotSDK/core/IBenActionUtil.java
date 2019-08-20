@@ -27,8 +27,11 @@ package com.samton.IBenRobotSDK.core;
  */
 public class IBenActionUtil {
     private static IBenActionUtil mInstance = null;
+    // 头部旋转角度
     private int headAngle;
+    // 左臂抬起角度
     private int leftArmAngle;
+    // 幽闭抬起角度
     private int rightArmAngle;
 
     private IBenActionUtil() {
@@ -52,6 +55,7 @@ public class IBenActionUtil {
      * @param angle 转动角度:小于0度为左转,大于0度为右转,0为归位
      */
     public void headAction(int angle) {
+        //避免发送重复角度指令
         if (angle == headAngle) return;
         headAngle = angle;
         int realAngle = angle + 90;
@@ -66,6 +70,7 @@ public class IBenActionUtil {
      * @param angle 转动角度:0为放下
      */
     public void leftArm(int angle) {
+        //避免发送重复角度指令
         if (angle == leftArmAngle) return;
         leftArmAngle = angle;
         int realAngle = angle + 90;
@@ -80,6 +85,7 @@ public class IBenActionUtil {
      * @param angle 转动角度:0为放下
      */
     public void rightArm(int angle) {
+        //避免发送重复角度指令
         if (angle == rightArmAngle) return;
         rightArmAngle = angle;
         int realAngle = angle + 90;
@@ -139,7 +145,11 @@ public class IBenActionUtil {
         return angle > 0 && angle < 360;
     }
 
-
+    /**
+     * 发送串口指令
+     *
+     * @param msg 指令信息
+     */
     private void sendData(String msg) {
         IBenSerialUtil.getInstance().sendData(msg);
     }
