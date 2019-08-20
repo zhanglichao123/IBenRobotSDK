@@ -138,6 +138,7 @@ public class IBenTTSUtil {
      */
     public void startSpeaking(String msg, IBenTTSCallBack callBack) {
         this.mCallBack = callBack;
+        if (mTTSManager == null) return;
         mTTSManager.setParam();
         mTTSManager.startSpeaking(msg, mTtsListener);
     }
@@ -200,9 +201,7 @@ public class IBenTTSUtil {
      * @param ttsVolume 音量
      */
     public void setTTSParam(String ttsName, String ttsSpeed, String ttsPitch, String ttsVolume) {
-        if (mTTSManager != null) {
-            return;
-        }
+        if (mTTSManager == null) return;
         if (!TextUtils.isEmpty(ttsName)) {
             mTTSManager.setTtsName(ttsName);
         }

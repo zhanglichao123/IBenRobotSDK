@@ -122,6 +122,9 @@ public class MainSDK {
 
     /**
      * 激活机器人
+     *
+     * @param faceppRawId Face++的model
+     * @param callBack    激活回调接口
      */
     @SuppressLint("CheckResult")
     public void activeRobot(final int faceppRawId, final IActiveCallBack callBack) {

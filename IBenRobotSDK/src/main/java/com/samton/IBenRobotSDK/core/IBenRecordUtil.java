@@ -94,7 +94,7 @@ public class IBenRecordUtil {
             if (mStringBuilder != null) {
                 LogUtils.d("当前的拾音为:" + mStringBuilder.toString().trim());
             }
-            if (isLast && mStringBuilder != null) {
+            if (isLast && mStringBuilder != null && mCallBack != null) {
                 String result = mStringBuilder.toString().trim();
                 if (TextUtils.isEmpty(result)) {
                     mCallBack.onError("识别结果为空");
@@ -111,7 +111,9 @@ public class IBenRecordUtil {
 
         @Override
         public void onError(SpeechError speechError) {
-            mCallBack.onError(speechError.getErrorCode() + "");
+            if (mCallBack != null) {
+                mCallBack.onError(speechError.getErrorCode() + "");
+            }
         }
 
         @Override
@@ -142,16 +144,16 @@ public class IBenRecordUtil {
     /**
      * 设置语音回调接口
      */
-    public void setCallBack(IBenRecordCallBack mCallBack) {
-        this.mCallBack = mCallBack;
+    public void setCallBack(IBenRecordCallBack callBack) {
+        this.mCallBack = callBack;
     }
 
     /**
      * 初始化
      */
-    public void init(Context mContext) {
+    public void init(Context context) {
         if (mRecordManager == null) {
-            mRecordManager = new RecordManager(mContext);
+            mRecordManager = new RecordManager(context);
         }
     }
 
@@ -180,6 +182,7 @@ public class IBenRecordUtil {
         // 设置此次的标识
         // 清空之前的识别结果
         map = new LinkedHashMap<>();
+        if (mRecordManager == null) return;
         mRecordManager.setParam();
         mRecordManager.startListener(mRecognizerListener);
     }

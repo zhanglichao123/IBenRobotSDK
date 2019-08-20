@@ -31,7 +31,7 @@ public class IBenActionUtil {
     private int headAngle;
     // 左臂抬起角度
     private int leftArmAngle;
-    // 幽闭抬起角度
+    // 右臂抬起角度
     private int rightArmAngle;
 
     private IBenActionUtil() {
