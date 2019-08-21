@@ -4,7 +4,7 @@
 
 - 将以下`jar`/`aar`文件复制到工程的libs目录下;
 
-	- `IBenRobotSDK.jar`;
+	- `IBenRobotSDK.jar`机器人SDK库;
 	- `Msc.jar`科大讯飞;
 	- `slamware_sdk_android.jar`思岚底盘;
 	- `YTX_Android_Full_SDK.jar`容联云;
@@ -12,9 +12,9 @@
 	- `MGLicenseManagerSDK-0.3.0.aar`;
 
 - 项目`module`的`buid.gradle`配置;
-- 项目清单文件``配置;
+- 项目清单文件`AndroidManifest.xml`配置;
 
-	```
+	```xml
 	<?xml version="1.0" encoding="utf-8"?>
 	<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	          xmlns:tools="http://schemas.android.com/tools">
@@ -124,7 +124,7 @@
 
 在项目的自定义`Application`类的`onCreate()`方法中进行`SDK`的初始化.
 
-```
+```java
 /**
      * 初始化SDK
      *
@@ -139,7 +139,7 @@ MainSDK.getInstance().init(mApplication, mAppKey, mPlankType, false);
 
 在确保网络正常的前提下调用激活机器人方法.
 
-```
+```java
 /**
      * 激活机器人
      *
