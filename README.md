@@ -180,6 +180,67 @@ MainSDK.getInstance().init(mApplication, mAppKey, mPlankType, false);
 	- `removeCallBack()`移除消息回调监听;
 	- `sendMessage(String msg, String reMsg, String reIndex)`向后台发送聊天内容;
 
-3. **`IBenRecordUtil`**
+3. **`IBenRecordUtil`关于机器人语音听写工具类**
 
-	- `setCallBack(IBenRecordCallBack mCallBack)`
+	- `init(Context context)`初始化机器人语音听写工具类;
+	- `setCallBack(IBenRecordCallBack mCallBack)`设置语音听写结果回调接口;
+	- `setLanguage(boolean isChinese)`设置听写语言,`isChinese`是否为中文;
+	- `startRecognize()`开启语音识别;
+	- `isListening()`判断是否在语音识别状态;
+	- `stopRecognize()`结束语音识别;
+	- `recycle()`回收语音识别资源;
+
+4. **`IBenSerialUtil`关于机器人串口通信工具类**
+
+	- `sendData(String msg)`向串口写入数据信息;
+	- `setCallBack(ISerialCallBack callBack)`设置串口信息回写监听回调;
+	- `removeCallBack()`移除回调监听;
+
+5. **`IBenTTSUtil`关于机器人语音播报工具类**
+
+	- `init(Context context)`初始化机器人语音播报工具类;
+	- `startSpeaking(String msg, IBenTTSCallBack callBack)`开始语音播报;
+	- `isSpeaking()`判断是否在语音播报状态;
+	- `pauseSpeaking()`暂停语音播报;
+	- `resumeSpeaking()`继续语音播报;
+	- `stopSpeaking()`停止语音播报;
+	- `recycle()`回收语音播报资源;
+	- `setTTSParam(String ttsName, String ttsSpeed, String ttsPitch, String ttsVolume)`配置语音播报参数,`ttsName`音色对应名字,`ttsSpeed`语速,`ttsPitch`音调,`ttsVolume`音量;
+	
+6. **`IBenWakeUpUtil`关于机器人语音唤醒工具类**
+
+	- `setCallBack(IWakeUpCallBack callBack)`设置语音唤醒监听回调;
+	- `setBeam()`加强六麦中的正向一麦;
+	- `stopWakeUp()`停止语音唤醒监听;
+
+7. **`HttpUtils`关于机器人网络请求工具类**
+
+	- `robotInit()`初始化机器人信息接口;
+
+8. **`FaceManager`关于机器人人脸识别工具类**
+
+	- `CheckFace(byte[] imageData, int width, int height)`检测人脸数据,`imageData`需要检测的图像信息,`width`图像的宽度,`height`图像的高度;
+
+9. **`IBenMoveSDK`关于机器人底盘移动工具类**
+
+	- `connectRobot(String ip, int port, ConnectCallBack callBack)`连接机器人底盘;
+	- `isConnect()`获取机器人底盘连接状态;
+	- `disConnectRobot()`断开机器人底盘的连接;
+	- `setMapUpdate(boolean isUpdate)`设置是否开启地图更新;
+	- `removeMap(ResultCallBack<Boolean> callBack)`清除当前加载的地图;
+	- `getBatteryInfo(GetBatteryCallBack callBack)`获取电池信息;
+	- `getLocation(ResultCallBack<Location> callBack)`获取当前机器人所在位置的坐标点信息;
+	- `getPose(ResultCallBack<Pose> callBack)`获取当前机器人所在位置的姿态;
+	- `setPose(Pose pose, StopBtnState btnState)`设置当前机器人所在位置的姿态;
+	- `moveByDirection(MoveDirection direction, StopBtnState btnState)/moveByDirection(MoveDirection direction, long period, StopBtnState btnState)`根据方向进行移动和间隔持续移动,该方法不会避障;
+	- `rotate(double angle, StopBtnState btnState)`旋转机器人;
+	- `goHome(MoveCallBack callBack, StopBtnState btnState)`回充电桩;
+	- `goLocation(Location location, float yaw, MoveCallBack callBack, StopBtnState btnState)`机器人行走到指定点;
+	- `cancelAllActions()`停止所有动作;
+	- `clearAllWalls()`清除所有虚拟墙;
+	- `isHome(ResultCallBack<Boolean> callBack)`判断机器人是否是无线充电状态;
+	- `getPowerStatus(ResultCallBack<Integer> callBack)`查询机器人电池状态;
+	- `saveMap(String mapName, MapCallBack callBack)`保存地图;
+	- `loadMap(String mapNamePath, Pose cachePose, MapCallBack callBack)`根据地图名字加载地图;
+	- `hasSystemEmergencyStop(ResultCallBack<Boolean> callBack)`判断底盘急停按钮是否开启;
+	- `isMoveing(ResultCallBack<Boolean> callBack)`判断底盘是否正在运动;
