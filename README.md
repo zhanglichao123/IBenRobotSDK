@@ -1,6 +1,6 @@
 ## 关于IBenSDK使用说明文档
 
-## 库的引入(Android Studio工程)
+### 库的引入(Android Studio工程)
 
 - 将以下`jar`/`aar`文件复制到工程的`libs`目录下;
 
@@ -159,7 +159,7 @@
 	</manifest>
 	```
 
-## 项目初始化
+### 项目初始化
 
 在项目的自定义`Application`类的`onCreate()`方法中进行`SDK`的初始化.
 
@@ -201,7 +201,7 @@ MainSDK.getInstance().init(mApplication, mAppKey, mPlankType, false);
             });
 ```
 
-## API功能说明
+### API功能说明
 
 1. **`IBenActionUtil`关于机器人头部/左右手的动作操作类**
 
