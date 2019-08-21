@@ -2,16 +2,55 @@
 
 ## 库的引入(Android Studio工程)
 
-- 将以下`jar`/`aar`文件复制到工程的libs目录下;
+- 将以下`jar`/`aar`文件复制到工程的`libs`目录下;
 
 	- `IBenRobotSDK.jar`机器人SDK库;
 	- `Msc.jar`科大讯飞;
 	- `slamware_sdk_android.jar`思岚底盘;
 	- `YTX_Android_Full_SDK.jar`容联云;
-	- `MGFaceppSDK-0.5.2.aar`;
-	- `MGLicenseManagerSDK-0.3.0.aar`;
+	- `MGFaceppSDK-0.5.2.aar`Face++;
+	- `MGLicenseManagerSDK-0.3.0.aar`Face++;
+
+- 将以下`so`文件复制到工程的`libs`目录下的`armeabi/armeabi-v7a`目录下;
+
+	- `libmsc.so`科大讯飞;
+	- `librpsdk.so`思岚底盘;
+	- `libSerial_Port.so`串口通讯;
+	- `libserphone.so`容联云(`IM`消息和音视频以及音视频会议功能库,必须添加);
+	- `libvoicechange.so`容联云(**5.3.0**以及之后版本添加了语音变声接口库,用来将录制的语音文件进行音频数据处理转换成不同发声效果);
+	- `libECMedia.so`容联云(使用音视频功能,必须添加);
+	- `libyuntx_gl_disp.so`容联云(**5.3.0**以及之后版本添加了视频图像绘制库,使用`ECOpenGLView`控件需要添加);
 
 - 项目`module`的`buid.gradle`配置;
+
+	```
+	android {
+	    defaultConfig {
+	        ndk {
+	            abiFilters 'armeabi', 'armeabi-v7a'
+	        }
+	    }
+	
+	    //生成libs目录
+	    sourceSets {
+	        main {
+	            jniLibs.srcDirs = ['libs']
+	        }
+	    }
+	}
+	
+	repositories {
+	    flatDir {
+	        dirs 'libs'
+	    }
+	}
+	
+	dependencies {
+        implementation(name: 'MGLicenseManagerSDK-0.3.0', ext: 'aar')
+	    implementation(name: 'MGFaceppSDK-0.5.2', ext: 'aar')
+	}
+	```
+	
 - 项目清单文件`AndroidManifest.xml`配置;
 
 	```xml
