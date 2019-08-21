@@ -1,8 +1,10 @@
 ## 关于IBenSDK使用说明文档
 
+---
+
 ### 库的引入(Android Studio工程)
 
-- 将以下`jar`/`aar`文件复制到工程的`libs`目录下;
+- **将以下`jar`/`aar`文件复制到工程的`libs`目录下**
 
 	- `IBenRobotSDK.jar`机器人SDK库;
 	- `Msc.jar`科大讯飞;
@@ -11,7 +13,7 @@
 	- `MGFaceppSDK-0.5.2.aar`Face++;
 	- `MGLicenseManagerSDK-0.3.0.aar`Face++;
 
-- 将以下`so`文件复制到工程的`libs`目录下的`armeabi/armeabi-v7a`目录下;
+- **将以下`so`文件复制到工程的`libs`目录下的`armeabi/armeabi-v7a`目录下**
 
 	- `libmsc.so`科大讯飞;
 	- `librpsdk.so`思岚底盘;
@@ -21,7 +23,7 @@
 	- `libECMedia.so`容联云(使用音视频功能,必须添加);
 	- `libyuntx_gl_disp.so`容联云(**5.3.0**以及之后版本添加了视频图像绘制库,使用`ECOpenGLView`控件需要添加);
 
-- 项目`module`的`buid.gradle`配置;
+- **项目`module`的`buid.gradle`配置**
 
 	```
 	android {
@@ -51,7 +53,7 @@
 	}
 	```
 	
-- 项目清单文件`AndroidManifest.xml`配置;
+- **项目清单文件`AndroidManifest.xml`配置**
 
 	```xml
 	<?xml version="1.0" encoding="utf-8"?>
@@ -161,45 +163,45 @@
 
 ### 项目初始化
 
-在项目的自定义`Application`类的`onCreate()`方法中进行`SDK`的初始化.
+- **在项目的自定义`Application`类的`onCreate()`方法中进行`SDK`的初始化**
 
-```java
-/**
-     * 初始化SDK
-     *
-     * @param application 上下文
-     * @param appKey      机器人ID
-     * @param type        主板类型
-     * @param isDebug     是否是测试环境
-     */
-// 初始化小笨机器人SDK
-MainSDK.getInstance().init(mApplication, mAppKey, mPlankType, false);
-```
+	```java
+	/**
+	     * 初始化SDK
+	     *
+	     * @param application 上下文
+	     * @param appKey      机器人ID
+	     * @param type        主板类型
+	     * @param isDebug     是否是测试环境
+	     */
+	// 初始化小笨机器人SDK
+	MainSDK.getInstance().init(mApplication, mAppKey, mPlankType, false);
+	```
 
-在确保网络正常的前提下调用激活机器人方法.
+- **在确保网络正常的前提下调用激活机器人方法**
 
-```java
-/**
-     * 激活机器人
-     *
-     * @param faceppRawId Face++的model
-     * @param callBack    激活回调接口
-     */
-// 调用SDK方法激活机器人
- MainSDK.getInstance().activeRobot(R.raw.megviifacepp_0_5_2_model, new MainSDK.IActiveCallBack() {
-                @Override
-                public void onSuccess() {
-						//这里是激活成功的返回
-						...
-                }
-
-                @Override
-                public void onFailed(String msg) {
-						//这里是激活失败的返回
-						...
-                }
-            });
-```
+	```java
+	/**
+	     * 激活机器人
+	     *
+	     * @param faceppRawId Face++的model
+	     * @param callBack    激活回调接口
+	     */
+	// 调用SDK方法激活机器人
+	 MainSDK.getInstance().activeRobot(R.raw.megviifacepp_0_5_2_model, new MainSDK.IActiveCallBack() {
+	                @Override
+	                public void onSuccess() {
+							//这里是激活成功的返回
+							...
+	                }
+	
+	                @Override
+	                public void onFailed(String msg) {
+							//这里是激活失败的返回
+							...
+	                }
+	            });
+	```
 
 ### API功能说明
 
