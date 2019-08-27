@@ -263,12 +263,12 @@ MainSDK.getInstance().activeRobot(R.raw.megviifacepp_0_5_2_model, new MainSDK.IA
 
 	- `initIMSDK(Context context)`初始化IM模块,`context`上下文对象;
 
-	```java
+    ```java
 	/**
 	     * @param context上下文对象，建议传application的上下文
 	     */
 IBenChatSDK.getInstance().initIMSDK(context);
-	```
+    ```
 	
 	- `setCallBack(IBenMsgCallBack callBack)`设置消息回调监听,`callBack`消息回调;
 
