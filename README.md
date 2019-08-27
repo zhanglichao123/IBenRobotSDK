@@ -265,7 +265,7 @@
 
     - `initIMSDK(Context context)`初始化IM模块,`context`上下文对象;
     
-    ```
+    ```java
     /**
      * @param context上下文对象，建议传application的上下文
      */
@@ -274,7 +274,7 @@
     	
     - `setCallBack(IBenMsgCallBack callBack)`设置消息回调监听,`callBack`消息回调;
     
-    ```
+    ```java
     /**
      * @param callBack 发送消息成功后服务器返回信息监听上下文
      */
@@ -290,13 +290,13 @@
     
     - `removeCallBack()`移除消息回调监听;
     
-    ```
+    ```java
     IBenChatSDK.getInstance().removeCallBack();
     ```
     	
     - `sendMessage(String msg, String reMsg, String reIndex)`向后台发送聊天内容;
     
-    ```
+    ```java
     /**
      * @param msg 当前发送的消息
      * @param reMsg 关联问题
@@ -309,7 +309,7 @@
     
     - `init(Context context)`初始化机器人语音听写工具类;
     
-    ```
+    ```java
     /**
      * @param context 上下文对象
      */
@@ -318,7 +318,7 @@
     	
     - `setCallBack(IBenRecordCallBack mCallBack)`设置语音听写结果回调接口;
     
-    ```
+    ```java
     /**
      * @param callBack 录音回调监听
      */
@@ -365,7 +365,7 @@
     	
     - `setLanguage(boolean isChinese)`设置听写语言,`isChinese`是否为中文;
     
-    ```
+    ```java
     /**
      * @param isChinese 是否为中文
      */
@@ -374,13 +374,13 @@
     	
     - `startRecognize()`开启语音识别;
     
-    ```
+    ```java
     IBenRecordUtil.getInstance().startRecognize();
     ```
     	
     - `isListening()`判断是否在语音识别状态;
     
-    ```
+    ```java
     /**
      * @return 是否在录音状态
      */
@@ -389,13 +389,13 @@
     	
     - `stopRecognize()`结束语音识别;
     
-    ```
+    ```java
     IBenRecordUtil.getInstance().stopRecognize();
     ```
     	
     - `recycle()`回收语音识别资源;
     
-    ```
+    ```java
     IBenRecordUtil.getInstance().recycle();
     ```
 
@@ -403,7 +403,7 @@
 
 	- `sendData(String msg)`向串口写入数据信息;
 
-    ```
+    ```java
     /**
      * @param msg 要写的数据
      */
@@ -412,7 +412,7 @@
 	
 	- `setCallBack(ISerialCallBack callBack)`设置串口信息回写监听回调;
 
-    ```
+    ```java
     /**
      * @param callBack 串口通讯回调
      */
@@ -429,7 +429,7 @@
 	
 	- `removeCallBack()`移除回调监听;
 
-	```
+	```java
 	IBenSerialUtil.getInstance().removeCallBack();
 	```
 
@@ -437,7 +437,7 @@
 
     - `init(Context context)`初始化机器人语音播报工具类;
     
-    ```
+    ```java
     /**
      * @param context 上下文对象
      */
@@ -446,7 +446,7 @@
     	
     - `startSpeaking(String msg, IBenTTSCallBack callBack)`开始语音播报;
     
-    ```
+    ```java
     /**
      * @param msg 需要合成语音的文字
      * @param callBack 语音合成回调
@@ -493,7 +493,7 @@
     	
     - `isSpeaking()`判断是否在语音播报状态;
     
-    ```
+    ```java
     /**
      * @return 是否正在播报
      */
@@ -502,31 +502,31 @@
     	
     - `pauseSpeaking()`暂停语音播报;
     
-    ```
+    ```java
     IBenTTSUtil.getInstance().pauseSpeaking();
     ```
     	
     - `resumeSpeaking()`继续语音播报(与pauseSpeaking()成对使用);
     
-    ```
+    ```java
     IBenTTSUtil.getInstance().resumeSpeaking();
     ```
     	
     - `stopSpeaking()`停止语音播报;
     
-    ```
+    ```java
     IBenTTSUtil.getInstance().stopSpeaking();
     ```
     	
     - `recycle()`回收语音播报资源;
     
-    ```
+    ```java
     IBenTTSUtil.getInstance().recycle();
     ```
     	
     - `setTTSParam(String ttsName, String ttsSpeed, String ttsPitch, String ttsVolume)`配置语音播报参数,`ttsName`音色对应名字,`ttsSpeed`语速,`ttsPitch`音调,`ttsVolume`音量;
     
-    ```
+    ```java
     /**
      * @param ttsName   音色对应名字
      * @param ttsSpeed  语速
@@ -540,7 +540,7 @@
 
     - `setCallBack(IWakeUpCallBack callBack)`设置语音唤醒监听回调;
     
-    ```
+    ```java
     /**
      * @param callBack 语音唤醒回调
      */
@@ -558,13 +558,13 @@
     	
     - `setBeam()`加强六麦中的正向一麦;
     	
-    ```
+    ```java
     IBenWakeUpUtil.getInstance().setBeam();
     ```
     	
     - `stopWakeUp()`停止语音唤醒监听;
     
-    ```
+    ```java
     IBenWakeUpUtil.getInstance().stopWakeUp();
     ```
 
@@ -572,7 +572,7 @@
 
     - `robotInit()`初始化机器人信息接口;
         
-    ```
+    ```java
     IBenRobotSDK.net.HttpUtils.robotInit();
     ```
 
@@ -580,7 +580,7 @@
 
     - `connectRobot(String ip, int port, ConnectCallBack callBack)`连接机器人底盘;
     
-    ```
+    ```java
     /**
      * @param ip 底盘ip地址
      * @param port 底盘端口号
@@ -604,7 +604,7 @@
     	
     - `isConnect()`获取机器人底盘连接状态;
     
-    ```
+    ```java
     /**
      * @return 底盘是否已连接
      */
@@ -613,13 +613,13 @@
     	
     - `disConnectRobot()`断开机器人底盘的连接;
     
-    ```
+    ```java
     IBenMoveSDK.getInstance().disConnectRobot();
     ```
     	
     - `setMapUpdate(boolean isUpdate)`设置是否开启地图更新;
     
-    ```
+    ```java
     /**
      * @param isUpdate 是否开启地图更新
      */
@@ -628,7 +628,7 @@
     	
     - `removeMap(ResultCallBack<Boolean> callBack)`清除当前加载的地图;
     
-    ```
+    ```java
     /**
      * @param callBack 删除地图回调
      */
@@ -646,7 +646,7 @@
     	
     - `getBatteryInfo(GetBatteryCallBack callBack)`获取电池信息;
     
-    ```
+    ```java
     /**
      * @param callBack 获取电量回调
      */
@@ -671,7 +671,7 @@
     	
     - `getLocation(ResultCallBack<Location> callBack)`获取当前机器人所在位置的坐标点信息;
     
-    ```
+    ```java
     /**
      * @param callBack 获取当前位置信息回调
      */
@@ -687,7 +687,7 @@
     	
     - `getPose(ResultCallBack<Pose> callBack)`获取当前机器人所在位置的姿态;
     
-    ```
+    ```java
     /**
      * @param callBack 获取当前位置信息回调
      */
@@ -703,7 +703,7 @@
     	
     - `setPose(Pose pose, StopBtnState btnState)`设置当前机器人所在位置的姿态;
     
-    ```
+    ```java
     /**
      * @param pose 当前底盘的姿态信息
      * @param callBack 急停按钮回调
@@ -720,7 +720,7 @@
     	
     - `moveByDirection(MoveDirection direction, StopBtnState btnState)/moveByDirection(MoveDirection direction, long period, StopBtnState btnState)`根据方向进行移动和间隔持续移动,该方法不会避障;
     
-    ```
+    ```java
     /**
      * @param direction 移动方向
      * @param period 每次执行间隔时长，单位ms(推荐300)
@@ -738,7 +738,7 @@
     	
     - `rotate(double angle, StopBtnState btnState)`旋转机器人;
     
-    ```
+    ```java
     /**
      * @param angle 旋转角度(小于0度为左转,大于0度为右转)
      * @param callBack 急停按钮回调
@@ -755,7 +755,7 @@
     	
     - `goHome(MoveCallBack callBack, StopBtnState btnState)`回充电桩;
     
-    ```
+    ```java
     /**
      * @param callBack1 回充电桩回调
      * @param callBack2 急停按钮回调
@@ -778,7 +778,7 @@
     	
     - `goLocation(Location location, float yaw, MoveCallBack callBack, StopBtnState btnState)`机器人行走到指定点;
     
-    ```
+    ```java
     /**
      * @param location 要去的点位信息
      * @param yaw 到达点位需要旋转的角度
@@ -803,19 +803,19 @@
     	
     - `cancelAllActions()`停止所有动作;
     
-    ```
+    ```java
     IBenMoveSDK.getInstance().cancelAllActions();
     ```
     	
     - `clearAllWalls()`清除所有虚拟墙;
     
-    ```
+    ```java
     IBenMoveSDK.getInstance().clearAllWalls();
     ```
     	
     - `isHome(ResultCallBack<Boolean> callBack)`判断机器人是否是无线充电状态;
     
-    ```
+    ```java
     /**
      * @param callBack 是否在充电桩回调
      */
@@ -831,7 +831,7 @@
     	
     - `getPowerStatus(ResultCallBack<Integer> callBack)`查询机器人电池状态;
     
-    ```
+    ```java
     /**
      * @param callBack 获取电池状态回调
      */
@@ -847,7 +847,7 @@
     	
     - `saveMap(String mapName, MapCallBack callBack)`保存地图;
     
-    ```
+    ```java
     /**
      * @param mapName 地图名称
      * @param callBack 保存地图回调
@@ -870,7 +870,7 @@
     	
     - `loadMap(String mapNamePath, Pose cachePose, MapCallBack callBack)`根据地图名字加载地图;
     
-    ```
+    ```java
     /**
      * @param mapFilePath 地图文件路径
      * @param pose 保存地图是的姿态信息 
@@ -894,7 +894,7 @@
     	
     - `hasSystemEmergencyStop(ResultCallBack<Boolean> callBack)`判断底盘急停按钮是否开启;
     
-    ```
+    ```java
     /**
      * @param callBack 急停按钮状态回调
      */
@@ -910,7 +910,7 @@
     	
     - `isMoveing(ResultCallBack<Boolean> callBack)`判断底盘是否正在运动;
     
-    ```
+    ```java
     /**
      * @param callBack 获取底盘移动回调
      */
@@ -928,7 +928,7 @@
 
     - `initPrinter(Context context)`初始化打印机，开启连接;
     
-    ```
+    ```java
     /**
      * 初始化打印机，开启连接
      *
@@ -939,7 +939,7 @@
 
     - `closePrint()`关闭打印机连接;
 
-    ```
+    ```java
     /**
      * 关闭打印机连接
      */
@@ -948,7 +948,7 @@
     
     - `isConnect()`判断打印机是否已连接;
 
-    ```
+    ```java
     /**
      * 判断打印机是否已连接
      * 
@@ -959,7 +959,7 @@
     
     - `getCurrentStatus()`获取打印机当前状态;
 
-    ```
+    ```java
     /**
      * 获取打印机当前状态
      * 
@@ -971,7 +971,7 @@
     - `setFont(int size)`设置字体大小;     
     - `printText(String content)`设置打印文字内容;
     
-    ```
+    ```java
     /**
      * 设置打印文字字体大小和内容
      * 
@@ -986,7 +986,7 @@
     
     - `printColorImg2Gray(Bitmap bitmap, PrinterConstants.PAlign type)`设置打印灰度图片内容;
     
-    ```
+    ```java
     /**
      * 设置打印灰度图片内容
      * 
@@ -998,7 +998,7 @@
     
     - `cutPaper()`打印结束切纸;
 
-    ```
+    ```java
     /**
      * 打印结束切纸
      */
