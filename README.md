@@ -272,7 +272,7 @@ IBenChatSDK.getInstance().initIMSDK(context);
 	
 	- `setCallBack(IBenMsgCallBack callBack)`设置消息回调监听,`callBack`消息回调;
 
-  ```java
+    ```java
   /**
 	     * @param callBack 发送消息成功后服务器返回信息监听上下文
 	     */
