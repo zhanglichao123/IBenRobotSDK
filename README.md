@@ -261,48 +261,48 @@ MainSDK.getInstance().activeRobot(R.raw.megviifacepp_0_5_2_model, new MainSDK.IA
 	
 2. **`IBenChatSDK`关于机器人聊天的操作类**
 
-	- `initIMSDK(Context context)`初始化IM模块,`context`上下文对象;
+- `initIMSDK(Context context)`初始化IM模块,`context`上下文对象;
 
-    ```java
-	/**
-	     * @param context上下文对象，建议传application的上下文
-	     */
+```
+/**
+ * @param context上下文对象，建议传application的上下文
+ */
 IBenChatSDK.getInstance().initIMSDK(context);
-    ```
+```
 	
-	- `setCallBack(IBenMsgCallBack callBack)`设置消息回调监听,`callBack`消息回调;
+- `setCallBack(IBenMsgCallBack callBack)`设置消息回调监听,`callBack`消息回调;
 
-    ```java
-  /**
-	     * @param callBack 发送消息成功后服务器返回信息监听上下文
-	     */
+```
+/**
+ * @param callBack 发送消息成功后服务器返回信息监听上下文
+ */
 IBenChatSDK.getInstance().setCallBack(new IBenMsgCallBack() {
-    	    /**
-    	     * @param messageBean 服务器返回的消息体
-    	     */
-            @Override
-            public void onSuccess(MessageBean messageBean) {
+    /**
+     * @param messageBean 服务器返回的消息体
+     */
+    @Override
+    public void onSuccess(MessageBean messageBean) {
 
-            }
-        });
-	```
+    }
+});
+```
 
-	- `removeCallBack()`移除消息回调监听;
+- `removeCallBack()`移除消息回调监听;
 
-	```java
-	IBenChatSDK.getInstance().removeCallBack();
-	```
+```
+IBenChatSDK.getInstance().removeCallBack();
+```
 	
-	- `sendMessage(String msg, String reMsg, String reIndex)`向后台发送聊天内容;
+- `sendMessage(String msg, String reMsg, String reIndex)`向后台发送聊天内容;
 
-    ```java
-	/**
-	     * @param msg 当前发送的消息
-	     * @param reMsg 关联问题
-	     * @param reIndex 关联问题下标(本地标记，从0开始)
-	     */
-	IBenChatSDK.getInstance().sendMessage(msg, reMsg, reIndex);
-	```	
+```
+/**
+ * @param msg 当前发送的消息
+ * @param reMsg 关联问题
+ * @param reIndex 关联问题下标(本地标记，从0开始)
+ */
+IBenChatSDK.getInstance().sendMessage(msg, reMsg, reIndex);
+```	
 
 3. **`IBenRecordUtil`关于机器人语音听写工具类**
 
