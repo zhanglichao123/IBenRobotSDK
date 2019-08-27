@@ -284,7 +284,6 @@
          */
         @Override
         public void onSuccess(MessageBean messageBean) {
-    
         }
     });
     ```
@@ -406,8 +405,8 @@
 
     ```
     /**
-	     * @param msg 要写的数据
-	     */
+     * @param msg 要写的数据
+     */
 	IBenSerialUtil.getInstance().sendData(msg);
 	```
 	
@@ -415,10 +414,10 @@
 
     ```
     /**
-	     * @param callBack 串口通讯回调
-	     */
+     * @param callBack 串口通讯回调
+     */
 	IBenSerialUtil.getInstance().setCallBack(new ISerialCallBack() {
-        	/**
+            /**
              * 回写数据
              * @param result 数据
              */
