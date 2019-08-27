@@ -119,47 +119,6 @@ public class FaceManager {
         facepp.setFaceppConfig(faceppConfig);
     }
 
-    /**
-     * 检测人脸数据
-     *
-     * @param imageData
-     * @param width
-     * @param height
-     * @return
-     */
-    public Facepp.Face[] CheckFace(byte[] imageData, int width, int height) {
-        if (!isCheckFaceLicense) {
-            return null;
-        }
-        try {
-            if (null != facepp) {
-                return facepp.detect(imageData, width, height, Facepp.IMAGEMODE_NV21);
-            }
-        } catch (Exception e) {
-//            LogUtils.e(e.toString());
-            return null;
-        }
-
-        return null;
-    }
-
-    /**
-     * 比较两张图片
-     *
-     * @param imageData  第一张图片的字节数组
-     * @param imageData2 第二张图片的字节数组
-     * @return
-     */
-    public double FaceCommpare(byte[] imageData, byte[] imageData2) {
-        if (null != facepp) {
-            if (null != imageData && null != imageData2) {
-                return facepp.faceCompare(imageData, imageData2);
-            }
-            return -1;
-        }
-        return -1;
-    }
-
     public void release() {
         if (facepp != null) {
             facepp.release();

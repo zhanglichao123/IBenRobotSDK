@@ -576,10 +576,6 @@
     IBenRobotSDK.net.HttpUtils.robotInit();
     ```
 
-8. **`FaceManager`关于机器人人脸识别工具类**
-
-	- `CheckFace(byte[] imageData, int width, int height)`检测人脸数据,`imageData`需要检测的图像信息,`width`图像的宽度,`height`图像的高度;
-
 9. **`IBenMoveSDK`关于机器人底盘移动工具类**
 
     - `connectRobot(String ip, int port, ConnectCallBack callBack)`连接机器人底盘;
@@ -971,7 +967,7 @@
      */
     IBenPrintSDK.getInstance().getCurrentStatus();
 	```
-    - `setPrinter(int value)`TODO;
+    - `setPrinter(int value)`设置打印位置;
     - `setFont(int size)`设置字体大小;     
     - `printText(String content)`设置打印文字内容;
     
@@ -979,7 +975,7 @@
     /**
      * 设置打印文字字体大小和内容
      * 
-     * @param value TODO
+     * @param value 打印位置
      * @param size 字体大小
      * @param content 文本内容
      */

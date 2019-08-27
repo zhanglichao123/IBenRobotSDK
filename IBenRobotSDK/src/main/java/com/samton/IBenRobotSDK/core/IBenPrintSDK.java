@@ -97,7 +97,7 @@ public class IBenPrintSDK {
     }
 
     /**
-     * 这个我也不知道设置啥
+     * 设置打印位置
      */
     public IBenPrintSDK setPrinter(int value) {
         if (mPrinterInstance != null)
