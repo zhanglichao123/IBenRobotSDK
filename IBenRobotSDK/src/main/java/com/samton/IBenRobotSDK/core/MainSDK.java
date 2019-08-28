@@ -53,12 +53,27 @@ public class MainSDK {
      * @param isDebug     是否是测试环境
      */
     public void init(Application application, String appKey, String type, boolean isDebug) {
+        init(application, appKey, type, false, isDebug);
+    }
+
+    /**
+     * 初始化SDK
+     *
+     * @param application       上下文
+     * @param appKey            机器人ID
+     * @param type              主板类型
+     * @param isNetworkCardType   是否支持双网卡
+     * @param isDebug           是否是测试环境
+     */
+    public void init(Application application, String appKey, String type, boolean isNetworkCardType, boolean isDebug) {
         mApplication = application;
         AppConfig.DEBUG = isDebug;
         // 设置AppKey
         AppConfig.ROBOT_APPID = appKey;
         // 当前主板类型
         AppConfig.PLANK_TYPE = type;
+        // 当前主板类型
+        AppConfig.NetworkCard_Type = isNetworkCardType;
         // 初始化工具类
         Utils.init(mApplication);
         // 读取XML中的必须配置

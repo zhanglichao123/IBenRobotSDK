@@ -22,6 +22,7 @@ import com.slamtec.slamware.exceptions.ParseInvalidException;
 import com.slamtec.slamware.exceptions.RequestFailException;
 import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
 import com.slamtec.slamware.exceptions.UnsupportedCommandException;
+import com.slamtec.slamware.geometry.Line;
 import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.DockingStatus;
 import com.slamtec.slamware.robot.GridMap;
@@ -40,7 +41,9 @@ import com.slamtec.slamware.sdp.CompositeMapHelper;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -398,7 +401,7 @@ public class IBenMoveSDK {
                 e.onError(new Throwable(ERR_MSG));
             }
         }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(result -> {
                     LogUtils.d("思岚底盘--获取当前姿态成功:" + result.toString());
                     callBack.onResult(result);
@@ -718,8 +721,11 @@ public class IBenMoveSDK {
      * 清除所有虚拟墙
      */
     @SuppressLint("CheckResult")
-    public void clearAllWalls() {
-        if (mRobotPlatform == null) return;
+    public void clearAllWalls(ResultCallBack<Boolean> callBack) {
+        if (mRobotPlatform == null) {
+            callBack.onResult(false);
+            return;
+        }
         Observable.create((ObservableOnSubscribe<Boolean>) e -> {
             LogUtils.d("思岚底盘--清除所有虚拟墙");
             if (isConnect) {
@@ -729,13 +735,116 @@ public class IBenMoveSDK {
             } else {
                 e.onError(new Throwable(ERR_MSG));
             }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> LogUtils.d("思岚底盘--清除虚拟墙成功"),
+        }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(aBoolean -> {
+                            LogUtils.d("思岚底盘--清除虚拟墙成功");
+                            callBack.onResult(true);
+                        },
                         throwable -> {
                             throwable.printStackTrace();
                             LogUtils.d("思岚底盘--清除虚拟墙失败:" + throwable.getMessage());
+                            callBack.onResult(false);
+                            connectFail();
+                        });
+    }
+
+    /**
+     * 删除指定的虚拟墙
+     *
+     * @param id
+     * @param callBack
+     */
+    @SuppressLint("CheckResult")
+    public void clearWallById(int id, ResultCallBack<Boolean> callBack) {
+        if (mRobotPlatform == null) {
+            callBack.onResult(false);
+            return;
+        }
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            if (isConnect) {
+                mRobotPlatform.clearWallById(id);
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(aBoolean -> {
+                            callBack.onResult(true);
+                        },
+                        throwable -> {
+                            throwable.printStackTrace();
+                            callBack.onResult(false);
+                            connectFail();
+                        });
+    }
+
+    /**
+     * 获取Walls
+     * @param callBack
+     */
+    @SuppressLint("CheckResult")
+    public void getWalls(ResultCallBack<Vector<Line>> callBack) {
+        if (mRobotPlatform == null) {
+            callBack.onResult(null);
+            return;
+        }
+        AtomicReference<Vector<Line>> lineVector = new AtomicReference<>();
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            if (isConnect) {
+                lineVector.set(mRobotPlatform.getWalls());
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(aBoolean -> {
+                            if (null == lineVector.get()) {
+                                callBack.onResult(null);
+                                connectFail();
+                            } else {
+                                callBack.onResult(lineVector.get());
+                            }
+                        },
+                        throwable -> {
+                            throwable.printStackTrace();
+                            callBack.onResult(null);
+                            connectFail();
+                        });
+    }
+
+    /**
+     * 添加虚拟墙成功
+     * @param line
+     * @param callBack
+     */
+    @SuppressLint("CheckResult")
+    public void addWall(final Line line, ResultCallBack<Boolean> callBack) {
+        if (mRobotPlatform == null) {
+            callBack.onResult(false);
+            return;
+        }
+        AtomicReference<Vector<Line>> lineVector = new AtomicReference<>();
+        Observable.create((ObservableOnSubscribe<Boolean>) e -> {
+            if (isConnect) {
+                mRobotPlatform.addWall(line);
+                e.onNext(true);
+                e.onComplete();
+            } else {
+                e.onError(new Throwable(ERR_MSG));
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(aBoolean -> {
+                            callBack.onResult(true);
+                        },
+                        throwable -> {
+                            throwable.printStackTrace();
+                            callBack.onResult(false);
                             connectFail();
                         });
     }
@@ -919,7 +1028,7 @@ public class IBenMoveSDK {
      * @return 返回地图
      */
     @SuppressLint("CheckResult")
-    private void getMap(ResultCallBack<Map> callBack) {
+    public void getMap(ResultCallBack<Map> callBack) {
         if (callBack == null) return;
         Observable.create((ObservableOnSubscribe<Map>) e -> {
             LogUtils.d("思岚底盘--获取地图");
@@ -936,7 +1045,7 @@ public class IBenMoveSDK {
                 e.onError(new Throwable(ERR_MSG));
             }
         }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(callBack::onResult,
                         throwable -> {
                             throwable.printStackTrace();

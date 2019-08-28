@@ -9,6 +9,8 @@ import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 
 
+import com.samton.AppConfig;
+
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -299,28 +301,38 @@ public final class NetworkUtils {
      */
     public static String getIPAddress(final boolean useIPv4) {
         try {
-            for (Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces(); nis.hasMoreElements(); ) {
-                NetworkInterface ni = nis.nextElement();
-                // 防止小米手机返回10.0.2.15
-                if (!ni.isUp()) continue;
-                for (Enumeration<InetAddress> addresses = ni.getInetAddresses(); addresses.hasMoreElements(); ) {
-                    InetAddress inetAddress = addresses.nextElement();
+            Enumeration nis = NetworkInterface.getNetworkInterfaces();
+            NetworkInterface networkInterface;
+            while (true) {
+                do {
+                    if (!nis.hasMoreElements()) {
+                        return null;
+                    }
+                    networkInterface = (NetworkInterface) nis.nextElement();
+                } while (!networkInterface.isUp());
+                Enumeration addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress inetAddress = (InetAddress) addresses.nextElement();
                     if (!inetAddress.isLoopbackAddress()) {
-                        String hostAddress = inetAddress.getHostAddress();
-                        boolean isIPv4 = hostAddress.indexOf(':') < 0;
-                        if (useIPv4) {
-                            if (isIPv4) return hostAddress;
-                        } else {
-                            if (!isIPv4) {
-                                int index = hostAddress.indexOf('%');
+                        // 判断是否为有线连接，默认eth0为有线连接
+                        boolean isEth0 = networkInterface.getDisplayName().equalsIgnoreCase("eth0");
+                        if ((AppConfig.NetworkCard_Type && !isEth0) || (!AppConfig.NetworkCard_Type && isEth0)) {
+                            String hostAddress = inetAddress.getHostAddress();
+                            boolean isIPv4 = hostAddress.indexOf(58) < 0;
+                            if (useIPv4) {
+                                if (isIPv4) {
+                                    return hostAddress;
+                                }
+                            } else if (!isIPv4) {
+                                int index = hostAddress.indexOf(37);
                                 return index < 0 ? hostAddress.toUpperCase() : hostAddress.substring(0, index).toUpperCase();
                             }
                         }
                     }
                 }
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
+        } catch (SocketException var8) {
+            var8.printStackTrace();
         }
         return null;
     }

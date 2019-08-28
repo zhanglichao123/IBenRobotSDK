@@ -43,6 +43,10 @@ public class AppConfig {
      */
     public static String PLANK_TYPE = "";
     /**
+     * 机器人是否支持双网卡
+     */
+    public static boolean NetworkCard_Type = false;
+    /**
      * 科大讯飞的AppKey
      */
     public static String IFLYTEK_APPKEY = "";
