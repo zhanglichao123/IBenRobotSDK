@@ -1,59 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.samton.ibenrobotdemo">
-    <!--摄像头权限-->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <!--联网权限-->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <!--挂载文件系统权限-->
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-    <!--读取内部存储数据权限-->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!--写入内部存储数据权限-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <!--读取网络状态权限-->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!--读取WIFI状态权限-->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <!--变更WIFI状态权限-->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <!--云通讯SDK接收IM消息的自定义权限-->
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.samton.ibenrobotdemo">
+    <!-- 显示系统窗口权限 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- 在 屏幕最顶部显示addview-->
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+    <!-- 蓝牙权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- 相机权限 -->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!--使用闪光灯权限-->
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <!-- 联网权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- 挂载文件系统权限 -->
+    <uses-permission
+        android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 读取内部存储数据权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- 写入内部存储数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 读取电话状态权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--定位权限-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- 允许一个程序获取信息有关当前或最近运行的任务，一个缩略的任务状态，是否活动等等 -->
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <!-- 允许程序录制音频 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 允许应用程序修改全局声音设置的权限 -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- 允许使用PowerManager的WakeLocks在进程休眠时能够后台保持 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- 允许应用更改网络状态 -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- 允许应用获取震动权限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- 允许应用读取系统日志 -->
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 开机自启 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- USB权限 -->
+    <uses-permission android:name="com.android.example.USB_PERMISSION" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- 云通讯SDK接收IM消息的自定义权限 -->
     <permission
-        android:name="com.samton.ibenrobotdemo.permission.RECEIVE_MSG"
-        android:protectionLevel="signature"/>
-    <!--使用接收IM消息权限-->
-    <uses-permission android:name="com.samton.ibenrobotdemo.permission.RECEIVE_MSG"/>
-    <!--允许读取电话的状态-->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <!--允许一个程序获取信息有关当前或最近运行的任务，一个缩略的任务状态，是否活动等等-->
-    <uses-permission android:name="android.permission.GET_TASKS"/>
-    <!--允许程序录制音频-->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <!--允许应用程序修改全局声音设置的权限-->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <!--允许使用PowerManager的WakeLocks在进程休眠时能够后台保持-->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <!--允许使用蓝牙权限-->
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
-    <!--显示系统窗口权限-->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <!--在屏幕最顶部显示-->
-    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
-    <!--允许应用更改网络状态-->
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-    <!--允许应用获取震动权限-->
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <!--允许应用获取大概位置权限-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!--相机-->
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
-    <!--重启应用-->
-    <!--<uses-permission android:name="android.permission.RESTART_PACKAGES" />-->
-    <!--允许应用读取系统日志-->
-    <uses-permission android:name="android.permission.READ_LOGS"/>
+        android:name="com.samton.permission.RECEIVE_MSG"
+        android:protectionLevel="signature" />
+    <!-- //接收来电的自定义权限 -->
+    <permission
+        android:name="com.samton.permission.INCOMING_CALL"
+        android:protectionLevel="signature" />
+    <!--finish-->
 
     <application
         android:name=".MyApplication"
@@ -61,67 +73,42 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
-        <activity
-            android:name=".map.RobotAgentTest"
-            android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+        android:theme="@style/Theme.AppCompat.NoActionBar"
+        tools:ignore="GoogleAppIndexingWarning">
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+        <activity android:name=".ui.TestMainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--串口测试界面-->
-        <activity android:name=".ui.MainActivity"/>
-        <!--舵机等测试界面-->
-        <activity android:name=".ui.SerialTestActivity"/>
-        <!--视频测试界面-->
-        <activity android:name=".ui.VideoTestActivity"/>
-        <!--底盘测试界面-->
-        <activity android:name=".ui.RobotTestActivity"/>
-        <!--音频测试界面-->
-        <activity android:name=".ui.AudioTestActivity"/>
-        <!--动态地图测试-->
-        <activity
-            android:name=".ui.SplashActivity"
-            android:screenOrientation="landscape"/>
-        <!--小笨智能机器人SDK配置开始-->
-        <meta-data
-            android:name="IBEN_APPKEY"
-            android:value="9aabd5edb430460c9582769041bd2539"/>
-        <meta-data
-            android:name="IBEN_PRINT_ADDRESS"
-            android:value="DC:0D:30:22:C8:32"/>
-        <!--小笨智能机器人SDK配置结束-->
+        <activity android:name=".ui.TestActionActivity" />
+        <activity android:name=".ui.TestChatActivity" />
+        <activity android:name=".ui.TestMoveActivity" />
+        <activity android:name=".ui.TestPrintActivity" />
+        <activity android:name=".ui.TestTTSActivity" />
+        <activity android:name=".ui.TestWakeUpActivity" />
         <!-- 科大讯飞-->
         <meta-data
             android:name="IFLYTEK_APPKEY"
-            android:value="5962f56e"/>
+            android:value="5962f56e" />
         <!--荣联云通讯-->
         <service
             android:name="com.yuntongxun.ecsdk.ECClientService"
             android:enabled="true"
-            android:process=":push"/>
+            android:process=":push" />
         <service
             android:name="com.yuntongxun.ecsdk.ECClientService$InnerService"
             android:enabled="true"
-            android:process=":push"/>
+            android:process=":push" />
 
         <receiver
             android:name="com.yuntongxun.ecsdk.booter.CCPReceivers$AlarmReceiver"
-            android:process=":push"/>
+            android:process=":push" />
         <receiver
             android:name="com.yuntongxun.ecsdk.booter.Alarm"
             android:exported="false"
-            android:process=":push"/>
-        <!-- 自适应布局配置-->
-        <meta-data
-            android:name="design_width"
-            android:value="1024"/>
-        <meta-data
-            android:name="design_height"
-            android:value="768"/>
+            android:process=":push" />
     </application>
-
 </manifest>

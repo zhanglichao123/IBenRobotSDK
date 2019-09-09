@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/link_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="连接打印机"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/colorAccent" />
+
+    <Button
+        android:id="@+id/txt_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="打印文字"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/img_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="打印图片"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/qr_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="打印二维码"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/txt_img_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="打印文字+图片"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/txt_qr_print"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="打印文字+二维码"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+</LinearLayout>

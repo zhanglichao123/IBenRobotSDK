@@ -548,7 +548,7 @@
         /**
          * 回调已经唤醒
          *
-         * @param angle 唤醒类型
+         * @param angle 唤醒声源角度
          */
         @Override
         public void onWakeUp(int angle) {

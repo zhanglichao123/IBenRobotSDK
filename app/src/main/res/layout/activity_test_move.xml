@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--机器人电量-->
+    <TextView
+        android:id="@+id/power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
+        android:text="电量:???" />
+    <!--机器人连接状态-->
+    <TextView
+        android:id="@+id/state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="10dp"
+        android:text="未连接" />
+    <!--连接机器人-->
+    <Button
+        android:id="@+id/connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:text="连接底盘" />
+    <!--回充电桩-->
+    <Button
+        android:id="@+id/home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/connect"
+        android:layout_alignParentEnd="true"
+        android:text="回桩" />
+    <!--保存地图-->
+    <Button
+        android:id="@+id/save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/home"
+        android:layout_alignParentEnd="true"
+        android:text="保存地图" />
+
+    <!--加载地图-->
+    <Button
+        android:id="@+id/load"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/save"
+        android:layout_alignParentEnd="true"
+        android:text="加载地图" />
+    <!--清除地图-->
+    <Button
+        android:id="@+id/clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/load"
+        android:layout_alignParentEnd="true"
+        android:text="清除地图" />
+    <!--添加点-->
+    <Button
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/clear"
+        android:layout_alignParentEnd="true"
+        android:text="添加点" />
+    <!--控制器布局-->
+    <RelativeLayout
+        android:id="@+id/mControllerLay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <!--前进-->
+        <Button
+            android:id="@+id/forward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/stop"
+            android:text="前进" />
+        <!--左转-->
+        <Button
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/forward"
+            android:text="左转" />
+        <!--停止所有动作-->
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/forward"
+            android:layout_toEndOf="@id/left"
+            android:text="停止" />
+        <!--右转-->
+        <Button
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/forward"
+            android:layout_toEndOf="@id/stop"
+            android:text="右转" />
+        <!--后退-->
+        <Button
+            android:id="@+id/backward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/stop"
+            android:layout_alignStart="@id/stop"
+            android:text="后退" />
+    </RelativeLayout>
+</RelativeLayout>

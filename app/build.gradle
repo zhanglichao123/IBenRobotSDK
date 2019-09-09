@@ -11,6 +11,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
     }
     buildTypes {
         release {
@@ -32,10 +36,6 @@ repositories {
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testImplementation 'junit:junit:4.12'
     // 必要支持
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:support-v4:26.1.0'
@@ -46,17 +46,5 @@ dependencies {
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.1.5'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    // Retrofit通过GSON将结果转换为Bean对象
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    // 让Retrofit支持RxJava
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-    // 视频播放框架
-    implementation 'com.github.xiaoyanger0825:NiceVieoPlayer:v2.2'
-    // 自动测量
-    implementation 'com.zhy:autolayout:1.4.5'
-    // 时间总线
-    implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation project(':IBenRobotSDK')
+    implementation 'com.rxjava.rxhttp:rxhttp:1.1.5'
 }
