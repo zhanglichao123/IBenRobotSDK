@@ -45,7 +45,7 @@ public class AppConfig {
     /**
      * 机器人是否支持双网卡
      */
-    public static boolean NetworkCard_Type = false;
+    public static boolean IS_DOUBLE_NETCARD = false;
     /**
      * 科大讯飞的AppKey
      */

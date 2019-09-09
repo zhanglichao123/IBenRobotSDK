@@ -73,7 +73,7 @@ public class MainSDK {
         // 当前主板类型
         AppConfig.PLANK_TYPE = type;
         // 当前主板类型
-        AppConfig.NetworkCard_Type = isNetworkCardType;
+        AppConfig.IS_DOUBLE_NETCARD = isNetworkCardType;
         // 初始化工具类
         Utils.init(mApplication);
         // 读取XML中的必须配置

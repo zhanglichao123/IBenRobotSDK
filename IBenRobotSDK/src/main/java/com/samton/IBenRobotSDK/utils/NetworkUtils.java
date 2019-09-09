@@ -316,7 +316,7 @@ public final class NetworkUtils {
                     if (!inetAddress.isLoopbackAddress()) {
                         // 判断是否为有线连接，默认eth0为有线连接
                         boolean isEth0 = networkInterface.getDisplayName().equalsIgnoreCase("eth0");
-                        if ((AppConfig.NetworkCard_Type && !isEth0) || (!AppConfig.NetworkCard_Type && isEth0)) {
+                        if ((AppConfig.IS_DOUBLE_NETCARD && !isEth0) || (!AppConfig.IS_DOUBLE_NETCARD && isEth0)) {
                             String hostAddress = inetAddress.getHostAddress();
                             boolean isIPv4 = hostAddress.indexOf(58) < 0;
                             if (useIPv4) {
