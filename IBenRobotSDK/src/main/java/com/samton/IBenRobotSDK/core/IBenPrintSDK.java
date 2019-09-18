@@ -1,6 +1,9 @@
 package com.samton.IBenRobotSDK.core;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -17,6 +20,7 @@ import java.util.HashMap;
  * 打印机sdk
  */
 public class IBenPrintSDK {
+    private static final String ACTION_USB_PERMISSION = "com.android.usb.USB_PERMISSION";
     private static IBenPrintSDK mInstance = null;
     private boolean isConnect = false;
     private PrinterInstance mPrinterInstance;
@@ -51,6 +55,12 @@ public class IBenPrintSDK {
             if (USBPort.isUsbPrinter(device)) deviceList.add(device);
         }
         if (deviceList.isEmpty()) return;
+        //广播
+        PendingIntent intent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        manager.requestPermission(deviceList.get(0), intent);
         //打印机核心类
         mPrinterInstance = PrinterInstance.getPrinterInstance(context, deviceList.get(0), new Handler(msg -> {
             isConnect = msg.what == PrinterConstants.Connect.SUCCESS;

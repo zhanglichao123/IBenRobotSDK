@@ -13,6 +13,6 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         // 初始化小笨机器人SDK
-        MainSDK.getInstance().init(this, "", "rk3288l", false);
+        MainSDK.getInstance().init(this, "", "rk3288h", false);
     }
 }
