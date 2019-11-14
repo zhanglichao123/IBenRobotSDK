@@ -9,6 +9,7 @@ package com.samton.IBenRobotSDK.net;
  */
 
 import com.samton.AppConfig;
+import com.samton.IBenRobotSDK.core.IBenTTSUtil;
 import com.samton.IBenRobotSDK.data.ActiveBean;
 import com.samton.IBenRobotSDK.data.ChatFlagBean;
 import com.samton.IBenRobotSDK.data.InitBean;
@@ -127,8 +128,10 @@ public class HttpUtils {
                 .add("message", msg)
                 .add("relationQuestion", reMsg)
                 .add("relationIndex", reIndex)
+                .add("languageType", IBenTTSUtil.getInstance().getLanguage()?"en":"zh")
                 .asObject(MessageBean.class)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
+
 }

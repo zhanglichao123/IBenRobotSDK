@@ -146,7 +146,7 @@ public class IBenChatSDK {
                     if (chatFlagBean.getRs() != 1) send2IBen(msg, account, reMsg, reIndex);
                     // 发送给人工的消息
                     if (!TextUtils.isEmpty(account)) {
-                        IBenIMHelper.getInstance().sendTxtMsg(account, msg);
+                       // IBenIMHelper.getInstance().sendTxtMsg(account, msg);
                     }
                 }, throwable -> {
                     if (mCallBack == null) return;
@@ -172,7 +172,7 @@ public class IBenChatSDK {
                     if (mCallBack == null) return;
                     mCallBack.onSuccess(msgBean);
                     // 发送消息到容联云
-                    sendMsgToYtx(account, msgBean);
+                  //  sendMsgToYtx(account, msgBean);
                 }, throwable -> {
                     if (mCallBack == null) return;
                     // 失败返回默认的提示内容

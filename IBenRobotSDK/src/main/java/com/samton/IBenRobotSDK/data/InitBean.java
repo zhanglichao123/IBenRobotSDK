@@ -56,6 +56,15 @@ public class InitBean {
     private int workModeid;
     private CleverPreachBean cleverPreach;
     private String accout;//容联云账号
+    private String enterpriseId;
+
+    public String getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(String enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
 
     public String getAccout() {
         return accout;
@@ -242,10 +251,22 @@ public class InitBean {
         private String rightHeadImg;
         private String logoImg;
         private List<String> questionTip;
+        private List<String> engQuestionTip;
         private String fristMsg;
         private String repeatMsg;
         private String contentReply;
         private int subject;
+
+        public List<String> getEngQuestionTip() {
+            if (engQuestionTip == null) {
+                engQuestionTip = new ArrayList<>();
+            }
+            return engQuestionTip;
+        }
+
+        public void setEngQuestionTip(List<String> engQuestionTip) {
+            this.engQuestionTip = engQuestionTip;
+        }
 
         public String getRepeatMsg() {
             return repeatMsg;
@@ -1727,6 +1748,7 @@ public class InitBean {
          * warnPower : 30
          * nowakeContent : 真正的智能机器人#机器人名称#即将为你服务
          * arousalWords : 你好·小笨
+         *arousalEngwords："Hell,jinbao
          */
 
         private String robName;
@@ -1747,6 +1769,16 @@ public class InitBean {
         private int warnPower;
         private String nowakeContent;
         private String arousalWords;
+
+        public String getArousalEngwords() {
+            return arousalEngwords;
+        }
+
+        public void setArousalEngwords(String arousalEngwords) {
+            this.arousalEngwords = arousalEngwords;
+        }
+
+        private String arousalEngwords;
         private int version;
 
         public String getRobName() {

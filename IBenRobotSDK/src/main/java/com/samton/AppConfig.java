@@ -89,7 +89,7 @@ public class AppConfig {
     /**
      * 正式环境的url
      */
-    public static final String RELESE_URL = "http://kf.ibenrobot.com/";
+    public static final String RELESE_URL = false ? "http://121.40.170.177:10086/" : "http://kf.ibenrobot.com/";
     /**
      * 服务器地址
      */

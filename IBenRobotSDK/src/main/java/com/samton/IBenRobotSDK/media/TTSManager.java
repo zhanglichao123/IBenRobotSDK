@@ -45,6 +45,10 @@ public class TTSManager {
      * 音量
      */
     private String ttsVolume = "100";
+    /**
+     * 中英切换
+     */
+    public static boolean isVoiceSpeaker;
 
     /**
      * 构造函数
@@ -71,12 +75,21 @@ public class TTSManager {
         if (mTts.getParameter(SpeechConstant.ENGINE_TYPE).equals(SpeechConstant.TYPE_CLOUD)) {
             mTts.setParameter(SpeechConstant.VOICE_NAME, "vinn");
         } else { // 设置离线发音人
+
             // 目前IBenTTSUtil.setTTSParam()未启用，保留此行（修改音色）
-            ttsName = SPUtils.getInstance().getString("voiceSpeaker", "xiaoyan");
-            // 设置发音人
-            mTts.setParameter(SpeechConstant.VOICE_NAME, ttsName);
-            // 设置发音人资源路径
-            mTts.setParameter(ResourceUtil.TTS_RES_PATH, getResourcePath(ttsName));
+            //  ttsName = SPUtils.getInstance().getString("voiceSpeaker", "xiaoyan");
+            if (isVoiceSpeaker) {
+                mTts.setParameter(SpeechConstant.VOICE_NAME, "catherine");
+                mTts.setParameter(ResourceUtil.TTS_RES_PATH, getResourcePath("catherine"));
+
+            } else {
+                // 设置发音人
+                mTts.setParameter(SpeechConstant.VOICE_NAME, "nannan");
+                // 设置发音人资源路径
+                mTts.setParameter(ResourceUtil.TTS_RES_PATH, getResourcePath("nannan"));
+            }
+
+
         }
         // 设置合成语速
         mTts.setParameter(SpeechConstant.SPEED, ttsSpeed);

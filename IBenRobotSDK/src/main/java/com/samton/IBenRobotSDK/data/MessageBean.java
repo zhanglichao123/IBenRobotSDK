@@ -134,6 +134,15 @@ public class MessageBean {
             private ArmSportCommandBean armSportCommand;
             private HeadSportCommandBean headSportCommand;
             private BackSportCommandBean backSportCommand;
+            private String newMessage;
+
+            public String getNewMessage() {
+                return newMessage;
+            }
+
+            public void setNewMessage(String newMessage) {
+                this.newMessage = newMessage;
+            }
 
             public String getRelationIndex() {
                 return relationIndex;

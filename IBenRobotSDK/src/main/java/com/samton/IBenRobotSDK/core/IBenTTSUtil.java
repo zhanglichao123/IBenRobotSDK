@@ -215,4 +215,23 @@ public class IBenTTSUtil {
             mTTSManager.setTtsVolume(ttsVolume);
         }
     }
+
+    /**
+     * 切换中英文
+     *
+     * @param isCE
+     */
+    public void isCELanguage(boolean isCE) {
+        TTSManager.isVoiceSpeaker = isCE;
+    }
+
+    /**
+     * 获得当前语言模式
+     *
+     * @return
+     */
+    public boolean getLanguage() {
+        return TTSManager.isVoiceSpeaker;
+    }
+
 }
