@@ -81,15 +81,15 @@ public class AppConfig {
     /**
      * 测试环境baseUrl
      */
-    public static final String DEBUG_BASEURL = "http://47.99.179.135:7080/XiaoBenManager/";
+    public static final String DEBUG_BASEURL = "http://121.40.124.169:7080/XiaoBenManager/";
     /**
      * 测试环境的QAUrl
      */
-    public static final String DEBUG_QAURL = "http://47.99.179.135:7080/";
+    public static final String DEBUG_QAURL = "http://121.40.124.169:7080/";
     /**
-     * 正式环境的url
+     * 正式环境的url118.31.38.97:10086
      */
-    public static final String RELESE_URL = false ? "http://121.40.170.177:10086/" : "http://kf.ibenrobot.com/";
+    public static final String RELESE_URL = false ? "http://121.40.124.169:7080/" : "http://118.31.38.97:10086/";
     /**
      * 服务器地址
      */
